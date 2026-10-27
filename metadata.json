@@ -1,0 +1,6 @@
+{
+  "name": "MARKYT - Performance Marketing for SMBs",
+  "description": "Digital marketing agency designed for small and medium businesses with a ₹5,000 test-first model, full-funnel execution, and live daily Google Sheet tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

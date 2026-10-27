@@ -1,0 +1,51 @@
+{
+  "full_width": 712,
+  "full_height": 1024,
+  "lines": [
+    {
+      "id": "line_1",
+      "bbox": {
+        "x": 52,
+        "y": 265,
+        "width": 620,
+        "height": 214
+      },
+      "relative": {
+        "left_pct": 7.3,
+        "top_pct": 25.88,
+        "width_pct": 87.08,
+        "height_pct": 20.9
+      }
+    },
+    {
+      "id": "line_2",
+      "bbox": {
+        "x": 159,
+        "y": 471,
+        "width": 408,
+        "height": 121
+      },
+      "relative": {
+        "left_pct": 22.33,
+        "top_pct": 46.0,
+        "width_pct": 57.3,
+        "height_pct": 11.82
+      }
+    },
+    {
+      "id": "line_3",
+      "bbox": {
+        "x": 22,
+        "y": 613,
+        "width": 669,
+        "height": 170
+      },
+      "relative": {
+        "left_pct": 3.09,
+        "top_pct": 59.86,
+        "width_pct": 93.96,
+        "height_pct": 16.6
+      }
+    }
+  ]
+}
