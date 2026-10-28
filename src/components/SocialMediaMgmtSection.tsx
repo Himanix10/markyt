@@ -51,7 +51,7 @@ const TRANSFORMATION_SLIDES: SocialTransformationItem[] = [
     id: 'brew-theory',
     title: 'Brew Theory Coffee • Specialty Roaster',
     tag: 'Food & Beverage',
-    image: '/images/social-transform-brewtheory.jpg?v=2',
+    image: '/images/social-transform-brewtheory.jpg?v=3',
     headline: 'Less text. More story.',
     beforeLabel: 'BEFORE',
     beforeDesc: 'Long copy. Nothing to look at.',
@@ -65,7 +65,7 @@ export const SocialMediaMgmtSection: React.FC<SocialMediaMgmtSectionProps> = () 
   return (
     <section 
       id="social-media-mgmt" 
-      className="pt-10 pb-6 sm:pt-14 sm:pb-8 md:pt-16 md:pb-10 text-slate-900 relative overflow-hidden scroll-mt-[54px] bg-white"
+      className="pt-12 pb-16 sm:pt-16 sm:pb-24 md:pt-20 md:pb-28 text-slate-900 relative overflow-hidden scroll-mt-[54px] bg-gradient-to-b from-white via-[#FFF5ED] via-40% to-white"
     >
       <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
         
@@ -85,31 +85,22 @@ export const SocialMediaMgmtSection: React.FC<SocialMediaMgmtSectionProps> = () 
           </p>
 
           {/* Live Proof Managed Account */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-sm sm:text-base md:text-lg pt-3">
-            <div className="inline-flex items-center gap-2">
-              <span className="relative flex h-3 w-3 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
-              </span>
-              <span className="font-bold text-slate-900">See it for yourself: we manage</span>
-            </div>
+          <div className="flex flex-col items-center justify-center gap-3 pt-2">
+            <p className="text-center text-sm sm:text-base md:text-lg text-slate-800 max-w-xl mx-auto font-medium leading-relaxed">
+              We’ve helped grow their page to <strong className="font-bold text-slate-950 font-heading">50K+ followers</strong> organically, with reels getting thousands of views and some reaching millions.
+            </p>
 
             <a
               href="https://www.instagram.com/quintessentialsmumbai/?hl=en"
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-950 hover:bg-[#FF3B14] text-white font-heading font-black text-sm sm:text-base shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+              className="group inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-950 hover:bg-[#FF3B14] text-white font-heading font-black text-sm sm:text-base shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
               title="View @quintessentialsmumbai on Instagram"
             >
               <Instagram className="w-4 h-4 text-rose-400 group-hover:text-white transition-colors shrink-0" />
               <span className="tracking-tight">@quintessentialsmumbai</span>
               <ArrowUpRight className="w-4 h-4 text-white/70 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </a>
-
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-300 font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-              All Organic Growth
-            </span>
           </div>
         </div>
 
@@ -128,7 +119,7 @@ export const SocialMediaMgmtSection: React.FC<SocialMediaMgmtSectionProps> = () 
                 <img
                   src={slide.image}
                   alt={slide.title}
-                  className="w-full h-auto max-w-4xl mx-auto object-contain pointer-events-none select-none"
+                  className="w-full h-auto max-w-4xl mx-auto object-contain pointer-events-none select-none mix-blend-multiply"
                   draggable={false}
                   loading={idx === 0 ? 'eager' : 'lazy'}
                 />

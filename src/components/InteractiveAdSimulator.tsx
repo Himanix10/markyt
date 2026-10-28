@@ -210,7 +210,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
       {/* Main Bright Vibrant Luxury Card */}
       <div 
         ref={containerRef}
-        className="relative bg-gradient-to-br from-[#B8C1FA] via-[#C8D1FD] to-[#FFD8CF] rounded-3xl border-2 border-white/95 shadow-[0_25px_60px_-15px_rgba(79,70,229,0.22),0_10px_25px_-5px_rgba(255,59,20,0.12)] overflow-hidden p-4 sm:p-8 lg:p-12 z-0"
+        className="relative bg-gradient-to-br from-[#B8C1FA] via-[#C8D1FD] to-[#FFD8CF] rounded-3xl border-2 border-white/95 shadow-[0_25px_60px_-15px_rgba(79,70,229,0.22),0_10px_25px_-5px_rgba(255,59,20,0.12)] overflow-hidden p-2.5 sm:p-8 lg:p-12 z-0"
       >
         {/* Animated Aurora Gradient Blobs & Subtle Dot Matrix Texture */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
@@ -305,18 +305,24 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
             </h3>
 
             {/* Live Meta Ads Manager Proof Table */}
-            <div className="rounded-2xl border border-slate-900/10 bg-white/95 backdrop-blur-md overflow-hidden shadow-sm">
+            <div className="rounded-xl sm:rounded-2xl border border-slate-900/10 bg-white/95 backdrop-blur-md overflow-hidden shadow-sm">
 
-              {/* Table Element (Necessary columns only, no reach/impressions) */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs min-w-[320px] sm:min-w-0">
+              {/* Table Element (Full width on mobile, no horizontal slide/scroll) */}
+              <div className="w-full overflow-hidden">
+                <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-100/90 text-[10px] font-space font-bold uppercase tracking-wider text-slate-600">
-                      <th className="py-2.5 px-3 sm:px-3.5 min-w-[130px] sm:min-w-0">Campaign</th>
-                      <th className="hidden md:table-cell py-2.5 px-2 text-center min-w-[65px] md:min-w-0">Delivery</th>
-                      <th className="py-2.5 px-2.5 text-right min-w-[65px] sm:min-w-0">Results</th>
-                      <th className="py-2.5 px-2.5 text-right min-w-[75px] sm:min-w-0">Cost / Result</th>
-                      <th className="py-2.5 px-3 text-right min-w-[85px] sm:min-w-0">Amount Spent</th>
+                    <tr className="border-b border-slate-200 bg-slate-100/90 text-[9px] sm:text-[10px] font-space font-bold uppercase tracking-wider text-slate-600">
+                      <th className="py-2 sm:py-2.5 px-1.5 sm:px-3.5 text-left">Campaign</th>
+                      <th className="py-2 sm:py-2.5 px-1 sm:px-2 text-center">Delivery</th>
+                      <th className="py-2 sm:py-2.5 px-1 sm:px-2.5 text-right">Results</th>
+                      <th className="py-2 sm:py-2.5 px-1 sm:px-2.5 text-right">
+                        <span className="sm:hidden">Cost/Res</span>
+                        <span className="hidden sm:inline">Cost / Result</span>
+                      </th>
+                      <th className="py-2 sm:py-2.5 px-1.5 sm:px-3 text-right">
+                        <span className="sm:hidden">Spent</span>
+                        <span className="hidden sm:inline">Amount Spent</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200/80">
@@ -332,13 +338,13 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                         }`}
                       >
                         {/* Campaign Name & Details */}
-                        <td className="py-2.5 px-3 sm:px-3.5">
-                          <div className="font-space font-bold text-slate-950 text-xs sm:text-[13px] leading-tight">
+                        <td className="py-2 sm:py-2.5 px-1.5 sm:px-3.5 align-middle">
+                          <div className="font-space font-bold text-slate-950 text-[10px] sm:text-[13px] leading-tight">
                             {row.campaign}
                           </div>
                           {row.badge && (
-                            <div className="mt-1">
-                              <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${
+                            <div className="mt-0.5 sm:mt-1">
+                              <span className={`inline-block px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded text-[8px] sm:text-[9px] font-bold uppercase tracking-wider border ${
                                 row.badge.variant === 'emerald'
                                   ? 'bg-emerald-100/90 text-emerald-900 border-emerald-300/80 shadow-xs'
                                   : 'bg-amber-100 text-amber-800 border-amber-300/50'
@@ -349,53 +355,55 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                           )}
                         </td>
 
-                        {/* Status */}
-                        <td className="hidden md:table-cell py-2.5 px-2 text-center">
+                        {/* Delivery Status - Visible on mobile & desktop */}
+                        <td className="py-2 sm:py-2.5 px-1 sm:px-2 text-center align-middle">
                           {row.status === 'Active' ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200/60">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                              Active
+                            <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[8.5px] sm:text-[10px] font-semibold border border-emerald-200/60 whitespace-nowrap">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                              <span>Active</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[10px] font-semibold border border-amber-300/60" title="Completed • Sales (Ended recently)">
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                              Completed
+                            <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[8.5px] sm:text-[10px] font-semibold border border-amber-300/60 whitespace-nowrap" title="Completed • Sales (Ended recently)">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                              <span>Completed</span>
                             </span>
                           )}
                         </td>
 
                         {/* Results */}
-                        <td className="py-2.5 px-2.5 text-right">
-                          <div className="font-space font-bold text-slate-950 text-xs sm:text-sm">
+                        <td className="py-2 sm:py-2.5 px-1 sm:px-2.5 text-right align-middle">
+                          <div className="font-space font-bold text-slate-950 text-[11px] sm:text-sm leading-tight">
                             {row.results}
                           </div>
-                          <div className={`text-[9px] leading-tight ${row.isPurchase ? 'text-emerald-800 font-semibold' : 'text-slate-500'}`}>
-                            {row.resultsUnit}
+                          <div className={`text-[8px] sm:text-[9px] leading-tight ${row.isPurchase ? 'text-emerald-800 font-semibold' : 'text-slate-500'}`}>
+                            <span className="sm:hidden">{row.isPurchase ? 'purchases' : 'conv.'}</span>
+                            <span className="hidden sm:inline">{row.resultsUnit}</span>
                           </div>
                           {row.resultsSub && (
-                            <div className="text-[8px] text-emerald-600 font-mono leading-none mt-0.5">
+                            <div className="text-[7.5px] sm:text-[8px] text-emerald-600 font-mono leading-none mt-0.5 hidden xs:block">
                               {row.resultsSub}
                             </div>
                           )}
                         </td>
 
                         {/* Cost per Result */}
-                        <td className="py-2.5 px-2.5 text-right">
-                          <div className="font-mono font-bold text-emerald-700 text-xs sm:text-sm">
+                        <td className="py-2 sm:py-2.5 px-1 sm:px-2.5 text-right align-middle">
+                          <div className="font-mono font-bold text-emerald-700 text-[10.5px] sm:text-sm leading-tight">
                             {row.costPerResult}
                           </div>
-                          <div className="text-[9px] text-slate-400 leading-none">
-                            {row.costPerUnit}
+                          <div className="text-[8px] sm:text-[9px] text-slate-400 leading-none">
+                            <span className="sm:hidden">{row.isPurchase ? '/ purchase' : '/ conv.'}</span>
+                            <span className="hidden sm:inline">{row.costPerUnit}</span>
                           </div>
                         </td>
 
                         {/* Amount Spent */}
-                        <td className="py-2.5 px-3 text-right">
-                          <div className="font-mono font-bold text-slate-900 text-xs sm:text-sm">
+                        <td className="py-2 sm:py-2.5 px-1.5 sm:px-3 text-right align-middle">
+                          <div className="font-mono font-bold text-slate-900 text-[10.5px] sm:text-sm leading-tight">
                             {row.amountSpent}
                           </div>
                           {row.budgetNote && (
-                            <div className="text-[9px] text-slate-500 leading-none mt-0.5">
+                            <div className="text-[8px] sm:text-[9px] text-slate-500 leading-none mt-0.5 hidden sm:block">
                               {row.budgetNote}
                             </div>
                           )}
@@ -407,7 +415,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
               </div>
 
               {/* Table Footer */}
-              <div className="px-3.5 py-2 bg-slate-100/70 border-t border-slate-200/80 text-[10px] text-slate-500">
+              <div className="px-2.5 sm:px-3.5 py-2 bg-slate-100/70 border-t border-slate-200/80 text-[9px] sm:text-[10px] text-slate-500">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <BarChart2 className="w-3 h-3 text-slate-400 shrink-0" />
@@ -417,7 +425,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                     Direct Purchases & Inquiries
                   </span>
                 </div>
-                <p className="mt-1.5 pt-1.5 border-t border-slate-200/60 text-[9px] text-slate-400 leading-tight">
+                <p className="mt-1.5 pt-1.5 border-t border-slate-200/60 text-[8.5px] sm:text-[9px] text-slate-400 leading-tight">
                   *Active live campaigns: conversation counts &amp; cost/convo fluctuate in real time and do not portray final end-of-campaign numbers.
                 </p>
               </div>

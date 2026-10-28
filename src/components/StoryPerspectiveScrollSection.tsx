@@ -7,7 +7,7 @@ if (typeof window !== 'undefined') {
 }
 
 const TOTAL_FRAMES = 74;
-const SECTION_BG = '#FAFBF8'; // Sampled from video frame 1
+const SECTION_BG = '#ffffff'; // Sampled from video frame 1
 
 export const StoryPerspectiveScrollSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -15,7 +15,6 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
   const fullCanvasRef = useRef<HTMLCanvasElement>(null);
   const peopleCanvasRef = useRef<HTMLCanvasElement>(null);
   const taglineBoxRef = useRef<HTMLDivElement>(null);
-  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   const line1Ref = useRef<HTMLDivElement>(null);
   const line2Ref = useRef<HTMLDivElement>(null);
@@ -41,11 +40,11 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     stageH: 0,
     navH: 64,
     topZoneH: 240,
-    taglineTop: 70,
-    taglineBottom: 310,
-    taglineW: 360,
-    taglineH: 260,
-    scale: 0.9,
+    taglineTop: 40,
+    taglineBottom: 360,
+    taglineW: 600,
+    taglineH: 340,
+    scale: 0.85,
     dx: 0,
     dy: 0,
   });
@@ -129,33 +128,63 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     const stageW = rect.width;
     const stageH = rect.height;
 
-    // Account for fixed nav (56px mobile, 68px desktop)
-    const navH = stageW < 640 ? 56 : 68;
+    const isMobile = stageW < 640;
+    const isTablet = stageW >= 640 && stageW < 1024;
 
-    // Tagline size: expanded slightly as requested (~15% larger)
-    // 305px-310px on mobile, 470px-480px on desktop
-    // Height ratio based on tight 3-line layout: 590 / 915 = 0.645
-    const taglineW = stageW < 640 ? Math.min(310, stageW * 0.84) : Math.min(480, stageW * 0.50);
-    const taglineH = Math.round(taglineW * (590 / 915));
+    // 1. Full 1280x720 artwork sizing:
+    // User requirement: "n is cutting the img, i need full img"
+    // The entire artwork must be 100% visible — NO CROPPING / NO CUTTING anywhere.
+    let scale: number;
+    let dy: number;
 
-    // Position tagline in the upper clear white part
-    const taglineTop = stageW < 640 ? 46 : 58;
-    const taglineBottom = taglineTop + taglineH;
+    if (isMobile) {
+      // Fit mobile width with clean margin, leaving top half for large legible tagline
+      scale = Math.min((stageW - 20) / 1280, (stageH * 0.44) / 720);
+      const dw = 1280 * scale;
+      const dh = 720 * scale;
+      dy = Math.round(stageH - dh - 24);
+    } else {
+      // Desktop & Tablet:
+      // Leave upper ~32% of stage for prominent tagline, rest for full artwork
+      const maxArtworkH = Math.min(stageH * 0.68, stageH - 240);
+      const scaleH = maxArtworkH / 720;
+      const scaleW = (stageW * 0.90) / 1280;
+      scale = Math.min(scaleH, scaleW);
 
-    // Full-screen edge-to-edge object-fit: cover scaling
-    const scale = Math.max(stageW / 1280, stageH / 720);
+      const dw = 1280 * scale;
+      const dh = 720 * scale;
+      // Anchor artwork near bottom so sneakers and grid floor sit naturally
+      dy = Math.round(stageH - dh - 16);
+    }
+
     const dw = 1280 * scale;
     const dh = 720 * scale;
+    const dx = Math.round((stageW - dw) / 2);
 
-    // Horizontally centered
-    const dx = (stageW - dw) / 2;
+    // 2. Tagline Sizing & Positioning:
+    // User requirement: "text is still not visible n is too small"
+    // Make tagline significantly larger, bold, readable, and well-spaced in the upper white space.
+    let taglineW: number;
+    let taglineH: number;
+    let taglineTop: number;
 
-    // Vertical positioning:
-    // Extend white part from top by shifting video canvas down:
-    // On landscape desktop: (stageH - dh) * 0.15 + 90
-    // On portrait mobile: (stageH - dh) * 0.55 + 80
-    const isPortrait = stageH > stageW;
-    const dy = isPortrait ? Math.round((stageH - dh) * 0.55 + 80) : Math.round((stageH - dh) * 0.15 + 90);
+    if (isMobile) {
+      taglineW = Math.min(stageW * 0.88, 340);
+      taglineH = Math.round(taglineW * 0.58);
+      taglineTop = Math.max(48, Math.round((dy - taglineH) * 0.45));
+    } else if (isTablet) {
+      taglineW = Math.min(stageW * 0.65, 520);
+      taglineH = Math.round(taglineW * 0.58);
+      taglineTop = Math.max(36, Math.round((dy - taglineH) * 0.38));
+    } else {
+      // Desktop: bold and prominent (up to 640px wide)
+      taglineW = Math.min(stageW * 0.52, 640);
+      taglineH = Math.round(taglineW * 0.58);
+      taglineTop = Math.max(32, Math.round((dy - taglineH) * 0.35));
+    }
+
+    const taglineBottom = taglineTop + taglineH;
+    const navH = isMobile ? 56 : 68;
 
     layoutRef.current = {
       stageW,
@@ -217,6 +246,16 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     // 1. Draw Layer 1 (Full Frame: background, grid lines, and figures)
     if (fullImg && fullImg.complete && fullImg.naturalWidth > 0) {
       fullCtx.drawImage(fullImg, dx, dy, dw, dh);
+
+      // Flawlessly feather top edge of fullImg into SECTION_BG so zero cut or seam is ever visible
+      if (dy > 0) {
+        const featherH = Math.min(60, dh * 0.12);
+        const topGrad = fullCtx.createLinearGradient(0, dy - 1, 0, dy + featherH);
+        topGrad.addColorStop(0, SECTION_BG);
+        topGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        fullCtx.fillStyle = topGrad;
+        fullCtx.fillRect(0, dy - 2, stageW, featherH + 2);
+      }
     }
 
     // 2. Draw Layer 3 (Decontaminated People-Only Frame: exact pixel-for-pixel alignment above text)
@@ -233,9 +272,6 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
 
     computeLayout();
 
-    // Pinning via GSAP ScrollTrigger
-    // Trigger is the unpinned parent section; stage is pinned inside it
-    // scrub: true provides 1:1 responsive synchronization so the pin holds firmly without lag
     const pinTrigger = ScrollTrigger.create({
       trigger: section,
       start: 'top top',
@@ -254,9 +290,6 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
   }, [computeLayout, prefersReducedMotion]);
 
   // Animation Loop with Cushioned Buffers and Silky-Smooth Lerp (0.10)
-  // Entry cushion: p in [0.00, 0.06] -> rest at frame 0 with tagline fully readable
-  // Active push-in: p in (0.06, 0.86) -> maps smoothly to frames 0..73, tagline moves down & recedes
-  // Exit cushion:  p in [0.86, 1.00] -> rest at frame 73 with tagline fully faded away
   useEffect(() => {
     const animate = () => {
       if (prefersReducedMotion) {
@@ -288,7 +321,7 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         targetFrame = animP * (TOTAL_FRAMES - 1);
       }
 
-      // Smooth lerp (0.10 factor: silky-smooth deceleration, avoids lagging behind user scroll)
+      // Smooth lerp (0.10 factor)
       const diff = targetFrame - currentFrameFloatRef.current;
       if (Math.abs(diff) > 0.001) {
         currentFrameFloatRef.current += diff * 0.10;
@@ -306,22 +339,19 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         drawCanvases(newFrameIdx);
       }
 
-      // Update Tagline 3D recession & disappearance:
-      // While scrolling down: text keeps moving down behind faces (+140px / +100px) and scales down
-      // Towards the end of the push-in: disappears smoothly between animP = 0.55 and 0.80
-      // When scrolling up: seamlessly returns to normal position and full opacity
+      // Update Tagline 3D recession & soft fade (does not disappear completely):
       if (taglineBoxRef.current) {
         const stageW = layoutRef.current.stageW || window.innerWidth;
-        const downDistance = stageW < 640 ? 100 : 140;
+        const downDistance = stageW < 640 ? 20 : 30;
         const depthTranslateY = animP * downDistance;
-        const depthScale = 1 - animP * 0.32; // 1.00 down to 0.68
+        const depthScale = 1 - animP * 0.16;
 
-        // Disappearance curve: smooth Hermite fade between animP = 0.55 and 0.80
-        // By animP = 0.80, text is completely gone (opacity 0)
+        // Fades smoothly from 1.0 down to ~0.35 (persists as part of background wall, never vanishes to 0)
         let depthOpacity = 1;
-        if (animP > 0.55) {
-          const t = Math.min(1, Math.max(0, (animP - 0.55) / 0.25));
-          depthOpacity = Math.max(0, 1 - (t * t * (3 - 2 * t)));
+        if (animP > 0.05) {
+          const t = Math.min(1, Math.max(0, (animP - 0.05) / 0.70));
+          const easeT = t * t * (3 - 2 * t);
+          depthOpacity = 1 - easeT * 0.65;
         }
 
         taglineBoxRef.current.style.transform = `translateX(-50%) translateY(${depthTranslateY.toFixed(2)}px) scale(${depthScale.toFixed(4)})`;
@@ -369,12 +399,12 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     <section
       id="our-creative-story"
       ref={sectionRef}
-      className="relative w-full bg-[#FAFBF8] select-none p-0 m-0"
+      className="relative w-full bg-white select-none p-0 m-0"
       style={{ backgroundColor: SECTION_BG }}
     >
       {/* 
         The Pin Stage: Exactly 100svh tall (100vh fallback) and 100% wide.
-        Pinned by GSAP ScrollTrigger with end: '+=350%' and pinSpacing: true.
+        Pinned by GSAP ScrollTrigger with end: '+=420%' and pinSpacing: true.
       */}
       <div
         ref={stageRef}
@@ -382,8 +412,7 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         style={{ backgroundColor: SECTION_BG }}
       >
         {/* =================================================================
-            LAYER 1 (z-index 1): Full-Frame Canvas (background, grid lines, figures)
-            Features soft gradient feather on left/right edges so no hard lines show.
+            LAYER 1 (z-index 10): Full-Frame Canvas (background, grid lines, figures)
            ================================================================= */}
         <div className="absolute inset-0 z-10 pointer-events-none w-full h-full">
           <canvas
@@ -393,9 +422,25 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         </div>
 
         {/* =================================================================
+            Seamless Top Blend Overlay: Fades top of stage into SECTION_BG
+           ================================================================= */}
+        <div
+          className="pointer-events-none absolute top-0 left-0 right-0 h-16 sm:h-20 z-[15] bg-gradient-to-b from-white via-white/50 to-transparent"
+          aria-hidden="true"
+        />
+
+        {/* =================================================================
+            Seamless Bottom Blend Overlay: Fades bottom of stage into SECTION_BG
+           ================================================================= */}
+        <div
+          className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 sm:h-20 z-[15] bg-gradient-to-t from-white via-white/50 to-transparent"
+          aria-hidden="true"
+        />
+
+        {/* =================================================================
             LAYER 2 (z-index 20): Tagline (3 Line Images)
-            Sits in the extended top white part, BEHIND the faces (Layer 3 at z-30).
-            Recedes into 3D depth and disappears towards end of scroll.
+            Sits in the upper clear white space above the figures.
+            Recedes softly into 3D depth and persists as part of the background wall.
            ================================================================= */}
         <div
           ref={taglineBoxRef}
@@ -404,9 +449,9 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
             top: `${taglineTop}px`,
             left: '50%',
             transform: 'translateX(-50%) translateY(0px) scale(1)',
-            transformOrigin: '50% 40%',
+            transformOrigin: '50% 30%',
             width: `${taglineW || 340}px`,
-            height: `${taglineH || 220}px`,
+            height: `${taglineH || 200}px`,
             willChange: 'transform, opacity',
             zIndex: 20,
           }}
@@ -416,10 +461,10 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
             ref={line1Ref}
             className="absolute"
             style={{
-              left: '4.48%',
+              left: '4%',
               top: '0%',
-              width: '92.68%',
-              height: '49.49%',
+              width: '92%',
+              height: '38%',
             }}
           >
             <picture>
@@ -440,10 +485,10 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
             ref={line2Ref}
             className="absolute"
             style={{
-              left: '20.48%',
-              top: '38.98%',
-              width: '60.99%',
-              height: '27.97%',
+              left: '20%',
+              top: '35%',
+              width: '60%',
+              height: '28%',
             }}
           >
             <picture>
@@ -465,9 +510,9 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
             className="absolute"
             style={{
               left: '0%',
-              top: '62.71%',
+              top: '64%',
               width: '100%',
-              height: '39.32%',
+              height: '36%',
             }}
           >
             <picture>
@@ -485,10 +530,8 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         </div>
 
         {/* =================================================================
-            LAYER 3 (z-index 3): Decontaminated People-Only Frame Canvas
+            LAYER 3 (z-index 30): Decontaminated People-Only Frame Canvas
             Pixel-for-pixel aligned with Layer 1 canvas.
-            Edges eroded by 1px, feathered, and decontaminated.
-            At frame 74, character heads sit just below the tagline words.
            ================================================================= */}
         <div className="absolute inset-0 z-30 pointer-events-none w-full h-full">
           <canvas

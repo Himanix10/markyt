@@ -85,16 +85,15 @@ export default function App() {
           onOpenQuestionnaire={scrollToContact}
         />
 
-        {/* 9.5 Story Perspective Scroll: Been my thing since 2016. Now we are a team */}
-        <StoryPerspectiveScrollSection />
-
-
         {/* 10. Social Media Management & Organic Growth Engine */}
         <SocialMediaMgmtSection
           onOpenQuestionnaire={scrollToContact}
         />
 
-        {/* 10.5 If You're Just Here for the Creative - Art Styles Lookbook */}
+        {/* 10.5 Story Perspective Scroll: Been my thing since 2016. Now we are a team */}
+        <StoryPerspectiveScrollSection />
+
+        {/* 11. If You're Just Here for the Creative - Art Styles Lookbook */}
         <CreativeArtStylesSection
           onOpenQuestionnaire={scrollToContact}
         />
