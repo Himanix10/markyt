@@ -4,8 +4,6 @@ import {
   X, 
   Play, 
   Pause, 
-  Volume2, 
-  VolumeX, 
   Sparkles, 
   CheckCircle2, 
   TrendingUp, 
@@ -30,7 +28,6 @@ export const VideoShowcaseModal: React.FC<VideoShowcaseModalProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
@@ -40,10 +37,13 @@ export const VideoShowcaseModal: React.FC<VideoShowcaseModalProps> = ({
       setCurrentTime(0);
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
+        videoRef.current.muted = false;
         videoRef.current.play().catch(() => {
           // Fallback if browser blocks unmuted autoplay
-          setIsMuted(true);
-          videoRef.current?.play().catch(() => {});
+          if (videoRef.current) {
+            videoRef.current.muted = true;
+            videoRef.current.play().catch(() => {});
+          }
         });
       }
     }
@@ -89,15 +89,10 @@ export const VideoShowcaseModal: React.FC<VideoShowcaseModalProps> = ({
       videoRef.current.pause();
       setIsPlaying(false);
     } else {
+      videoRef.current.muted = false;
       videoRef.current.play();
       setIsPlaying(true);
     }
-  };
-
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    videoRef.current.muted = !isMuted;
-    setIsMuted(!isMuted);
   };
 
   const handleTimeUpdate = () => {
@@ -159,7 +154,7 @@ export const VideoShowcaseModal: React.FC<VideoShowcaseModalProps> = ({
               style={{ objectFit: 'contain' }}
               loop
               playsInline
-              muted={isMuted}
+              preload="metadata"
               onTimeUpdate={handleTimeUpdate}
               onClick={togglePlay}
             />
@@ -208,14 +203,6 @@ export const VideoShowcaseModal: React.FC<VideoShowcaseModalProps> = ({
                     aria-label={isPlaying ? 'Pause' : 'Play'}
                   >
                     {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white" />}
-                  </button>
-
-                  <button
-                    onClick={toggleMute}
-                    className="hover:text-[#FF3B14] transition-colors cursor-pointer"
-                    aria-label={isMuted ? 'Unmute' : 'Mute'}
-                  >
-                    {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4" />}
                   </button>
 
                   <span>

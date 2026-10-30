@@ -3,9 +3,7 @@ import {
   Play,
   Pause,
   ChevronLeft,
-  ChevronRight,
-  Volume2,
-  VolumeX
+  ChevronRight
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { VIDEO_PORTFOLIO_WORKS } from '../data/content';
@@ -18,7 +16,6 @@ interface CreativeProductionPageProps {
 export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () => {
   const [activeStudioIndex, setActiveStudioIndex] = useState<number>(0);
   const [isStudioPlaying, setIsStudioPlaying] = useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
 
   // Responsive window width tracking for 3D stage calculations
   const [windowWidth, setWindowWidth] = useState<number>(
@@ -26,8 +23,14 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
   );
 
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
+    let lastW = typeof window !== 'undefined' ? window.innerWidth : 0;
+    const handleResize = () => {
+      if (typeof window !== 'undefined' && window.innerWidth !== lastW) {
+        lastW = window.innerWidth;
+        setWindowWidth(window.innerWidth);
+      }
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -86,8 +89,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     if (!video) return;
 
     video.currentTime = 0;
-    // Always attempt unmuted first unless explicitly muted by user
-    video.muted = isMuted;
+    video.muted = false;
 
     const playPromise = video.play();
     if (playPromise !== undefined) {
@@ -98,13 +100,12 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
         .catch(() => {
           // Fallback if browser policy blocks unmuted autoplay
           video.muted = true;
-          setIsMuted(true);
           video.play()
             .then(() => setIsStudioPlaying(true))
             .catch(() => setIsStudioPlaying(false));
         });
     }
-  }, [isMuted]);
+  }, []);
 
   // Handle switching active work
   const handleSelectWork = useCallback((newIndex: number) => {
@@ -153,7 +154,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     handleSelectWork(nextIndex);
   }, [activeStudioIndex, totalWorks, handleSelectWork]);
 
-  // Toggle Play / Pause for the active focused video
+  // Toggle Play / Pause (Stop) for the active focused video
   const toggleStudioPlay = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     hasUserInteracted.current = true;
@@ -161,47 +162,26 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     const activeVideo = videoRefs.current[activeStudioIndex];
     if (!activeVideo) return;
 
-    // If video is currently playing muted, clicking/tapping it unmutes it immediately!
-    if (isStudioPlaying && activeVideo.muted) {
-      activeVideo.muted = false;
-      setIsMuted(false);
-      return;
-    }
-
     if (isStudioPlaying && !activeVideo.paused) {
       activeVideo.pause();
       setIsStudioPlaying(false);
     } else {
-      // User directly clicked play: explicitly UNMUTE to play with audio from the very start
       activeVideo.muted = false;
-      setIsMuted(false);
       const playPromise = activeVideo.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             setIsStudioPlaying(true);
-            setIsMuted(false);
           })
           .catch((err) => {
             console.warn('Playback with audio blocked, falling back to muted', err);
             activeVideo.muted = true;
-            setIsMuted(true);
             activeVideo.play()
               .then(() => setIsStudioPlaying(true))
               .catch(() => setIsStudioPlaying(false));
           });
       }
     }
-  };
-
-  // Toggle Mute / Unmute
-  const toggleMute = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    const activeVideo = videoRefs.current[activeStudioIndex];
-    if (!activeVideo) return;
-    const nextMuted = !activeVideo.muted;
-    activeVideo.muted = nextMuted;
-    setIsMuted(nextMuted);
   };
 
   // Touchpad / Trackpad horizontal scroll support (left to right & right to left)
@@ -509,10 +489,16 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
               <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
-            {/* Render All Cards (Clean Glass Finish, No Phone Borders, No Captions) */}
+            {/* Render Active & Adjacent Cards (Capped on mobile to conserve GPU memory) */}
             {VIDEO_PORTFOLIO_WORKS.map((work, idx) => {
               const offset = getOffset(idx);
               const isCenter = offset === 0;
+              const absOffset = Math.abs(offset);
+              const isMobile = windowWidth < 640;
+
+              // On mobile screens, skip mounting cards that are completely offscreen
+              if (isMobile && absOffset > 1) return null;
+
               const cardStyle = getCardStyle(offset);
 
               return (
@@ -536,7 +522,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                     playsInline
                     loop
                     preload="metadata"
-                    muted={!isCenter || isMuted}
+                    muted={!isCenter}
                     onEnded={isCenter ? handleNextWork : undefined}
                     onClick={isCenter ? toggleStudioPlay : () => handleSelectWork(idx)}
                   />
@@ -545,22 +531,9 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/25 z-10" />
                   <div className="pointer-events-none absolute inset-0 rounded-2xl sm:rounded-3xl ring-1 ring-inset ring-white/20 z-10" />
 
-                  {/* Active Center Video: Controls */}
+                  {/* Active Center Video: Controls (Play & Stop only) */}
                   {isCenter ? (
                     <>
-                      {/* Top Right Quick Audio Mute/Unmute Pill */}
-                      {isStudioPlaying && (
-                        <button
-                          type="button"
-                          onClick={toggleMute}
-                          className="absolute top-3 right-3 z-30 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-md"
-                          title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
-                          aria-label={isMuted ? 'Unmute Audio' : 'Mute Audio'}
-                        >
-                          {isMuted ? <VolumeX className="w-3.5 h-3.5 text-amber-300" /> : <Volume2 className="w-3.5 h-3.5" />}
-                        </button>
-                      )}
-
                       {/* Center Play / Pause Option (No Captions) */}
                       <div 
                         onClick={toggleStudioPlay}

@@ -266,7 +266,7 @@ export const Header: React.FC<HeaderProps> = ({
           <a 
             href="#" 
             onClick={handleLogoClick}
-            className="flex items-center gap-1.5 group shrink-0 select-none py-1"
+            className="flex items-center group shrink-0 select-none py-1"
             aria-label="MARKYT Home"
           >
             <img
@@ -278,9 +278,6 @@ export const Header: React.FC<HeaderProps> = ({
               referrerPolicy="no-referrer"
               className="h-7 sm:h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
-            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold bg-[#FF3B14] text-white tracking-wider shadow-xs hidden 2xl:inline-flex">
-              AGENCY
-            </span>
           </a>
 
           {/* iPhone Liquid Glass Pill Bar: Floating dynamic island with optical gray-to-white sheen */}

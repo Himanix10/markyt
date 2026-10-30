@@ -42,6 +42,8 @@ export const WhoWeAre: React.FC<WhoWeAreProps> = ({
                   e.currentTarget.src = CLIENT_STRATEGY_URL;
                 }}
                 alt="Client Strategy Session"
+                loading="lazy"
+                decoding="async"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 transition-all duration-300"
               />
@@ -100,6 +102,8 @@ export const WhoWeAre: React.FC<WhoWeAreProps> = ({
                     e.currentTarget.src = FOUNDER_PHOTO_URL;
                   }}
                   alt="MARKYT Founder & Performance Strategist"
+                  loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer"
                   className="w-full aspect-[940/1464] object-cover object-center hover:scale-105 transition-transform duration-500"
                 />

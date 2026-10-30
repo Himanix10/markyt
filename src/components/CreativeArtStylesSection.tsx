@@ -39,33 +39,29 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
   const sectionRef = useRef<HTMLElement>(null);
   const [activeModalStyle, setActiveModalStyle] = useState<ArtStyleItem | null>(null);
 
-  // Ensure all videos play continuously on loop
-  useEffect(() => {
-    videoRefs.current.forEach((video) => {
-      if (video) {
-        video.muted = true;
-        video.play().catch(() => {});
-      }
-    });
-  }, []);
-
-  // Intersection observer to resume playback when scrolling into view
+  // Optimized IntersectionObserver: Only play when section is in view, pause when offscreen
   useEffect(() => {
     const target = sectionRef.current;
     if (!target) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          videoRefs.current.forEach((video) => {
-            if (video && video.paused) {
+        const isVisible = entries[0].isIntersecting;
+        videoRefs.current.forEach((video) => {
+          if (!video) return;
+          if (isVisible) {
+            if (video.paused) {
               video.muted = true;
               video.play().catch(() => {});
             }
-          });
-        }
+          } else {
+            if (!video.paused) {
+              video.pause();
+            }
+          }
+        });
       },
-      { rootMargin: '400px 0px 400px 0px' }
+      { rootMargin: '200px 0px 200px 0px' }
     );
 
     observer.observe(target);
@@ -76,8 +72,8 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
     <section
       ref={sectionRef}
       id="creative-styles"
-      className="relative pt-10 sm:pt-14 md:pt-16 pb-16 sm:pb-24 bg-white text-slate-900 border-b border-slate-200/80 overflow-hidden select-none"
-      style={{ backgroundColor: '#ffffff' }}
+      className="relative pt-10 sm:pt-14 md:pt-16 pb-16 sm:pb-24 bg-[#FAFBF6] text-slate-900 border-b border-slate-200/80 overflow-hidden select-none"
+      style={{ backgroundColor: '#FAFBF6' }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
@@ -112,16 +108,12 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                     videoRefs.current[idx] = el;
                   }}
                   src={style.src}
-                  autoPlay
                   loop
                   muted
                   playsInline
-                  preload="auto"
+                  preload="metadata"
                   className="w-full h-full object-cover select-none pointer-events-none"
                   aria-label={style.name}
-                  onPause={(e) => {
-                    e.currentTarget.play().catch(() => {});
-                  }}
                 />
               </div>
 

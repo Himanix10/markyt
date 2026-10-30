@@ -7,44 +7,40 @@ if (typeof window !== 'undefined') {
 }
 
 const TOTAL_FRAMES = 74;
-const SECTION_BG = '#ffffff'; // Sampled from video frame 1
+const SECTION_BG = '#FAFBF8'; // Sampled from video frame 1: rgb(250, 251, 248)
 
 export const StoryPerspectiveScrollSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const fullCanvasRef = useRef<HTMLCanvasElement>(null);
-  const peopleCanvasRef = useRef<HTMLCanvasElement>(null);
   const taglineBoxRef = useRef<HTMLDivElement>(null);
 
-  const line1Ref = useRef<HTMLDivElement>(null);
-  const line2Ref = useRef<HTMLDivElement>(null);
-  const line3Ref = useRef<HTMLDivElement>(null);
-
   const fullImagesRef = useRef<HTMLImageElement[]>([]);
-  const peopleImagesRef = useRef<HTMLImageElement[]>([]);
 
   const [fullLoadedCount, setFullLoadedCount] = useState(0);
-  const [peopleLoadedCount, setPeopleLoadedCount] = useState(0);
   const [isPreloading, setIsPreloading] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [taglineLayout, setTaglineLayout] = useState({ top: 26, width: 440 });
 
   // Layout & frame state
   const scrollProgressRef = useRef(0);
   const currentFrameFloatRef = useRef(0);
   const currentFrameIdxRef = useRef(0);
   const rafIdRef = useRef<number | null>(null);
+  const isInViewRef = useRef<boolean>(false);
+  const isAnimatingRef = useRef<boolean>(false);
 
   // Cached layout dimensions
   const layoutRef = useRef({
     stageW: 0,
     stageH: 0,
     navH: 64,
-    topZoneH: 240,
-    taglineTop: 40,
-    taglineBottom: 360,
-    taglineW: 600,
-    taglineH: 340,
-    scale: 0.85,
+    taglineTop: 26,
+    taglineBottom: 170,
+    taglineW: 440,
+    scale: 1,
+    dw: 1280,
+    dh: 720,
     dx: 0,
     dy: 0,
   });
@@ -76,19 +72,15 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     return () => observer.disconnect();
   }, [isPreloading]);
 
-  // Load all 74 full frames and 74 decontaminated people frames
+  // Load all 74 full animation frames
   useEffect(() => {
     if (!isPreloading) return;
 
     const fullImgs: HTMLImageElement[] = [];
-    const peopleImgs: HTMLImageElement[] = [];
     let fCount = 0;
-    let pCount = 0;
 
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
       const frameNum = String(i).padStart(3, '0');
-
-      // 1. Full Frame
       const fullImg = new Image();
       fullImg.src = `/scroll-frames/full/frame_${frameNum}.webp`;
       fullImg.onload = () => {
@@ -100,23 +92,9 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         setFullLoadedCount(fCount);
       };
       fullImgs.push(fullImg);
-
-      // 2. People Frame
-      const peopleImg = new Image();
-      peopleImg.src = `/scroll-frames/people/frame_${frameNum}.webp`;
-      peopleImg.onload = () => {
-        pCount++;
-        setPeopleLoadedCount(pCount);
-      };
-      peopleImg.onerror = () => {
-        pCount++;
-        setPeopleLoadedCount(pCount);
-      };
-      peopleImgs.push(peopleImg);
     }
 
     fullImagesRef.current = fullImgs;
-    peopleImagesRef.current = peopleImgs;
   }, [isPreloading]);
 
   // Compute Layout Geometry (Zones, Anchors, and Scales)
@@ -130,141 +108,109 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
 
     const isMobile = stageW < 640;
     const isTablet = stageW >= 640 && stageW < 1024;
+    const navH = isMobile ? 56 : 68;
 
-    // 1. Full 1280x720 artwork sizing:
-    // User requirement: "n is cutting the img, i need full img"
-    // The entire artwork must be 100% visible — NO CROPPING / NO CUTTING anywhere.
-    let scale: number;
-    let dy: number;
-
-    if (isMobile) {
-      // Fit mobile width with clean margin, leaving top half for large legible tagline
-      scale = Math.min((stageW - 20) / 1280, (stageH * 0.44) / 720);
-      const dw = 1280 * scale;
-      const dh = 720 * scale;
-      dy = Math.round(stageH - dh - 24);
-    } else {
-      // Desktop & Tablet:
-      // Leave upper ~32% of stage for prominent tagline, rest for full artwork
-      const maxArtworkH = Math.min(stageH * 0.68, stageH - 240);
-      const scaleH = maxArtworkH / 720;
-      const scaleW = (stageW * 0.90) / 1280;
-      scale = Math.min(scaleH, scaleW);
-
-      const dw = 1280 * scale;
-      const dh = 720 * scale;
-      // Anchor artwork near bottom so sneakers and grid floor sit naturally
-      dy = Math.round(stageH - dh - 16);
-    }
-
-    const dw = 1280 * scale;
-    const dh = 720 * scale;
-    const dx = Math.round((stageW - dw) / 2);
+    // 1. Full-Screen Creative:
+    // Image spans 100% full screen (edge-to-edge & top-to-bottom, zero cut).
+    const dw = stageW;
+    const dh = stageH;
+    const dx = 0;
+    const dy = 0;
+    const scale = stageW / 1280;
 
     // 2. Tagline Sizing & Positioning:
-    // User requirement: "text is still not visible n is too small"
-    // Make tagline significantly larger, bold, readable, and well-spaced in the upper white space.
-    let taglineW: number;
-    let taglineH: number;
-    let taglineTop: number;
+    // Uses horizontal desktop spread layout (3.13:1 aspect ratio) for wide, neat presentation
+    // Guarantees zero top cutoff for Line 1 and zero collision with the center figure
+    const turbanY = Math.round(stageH * 0.272);
+    const minTop = isMobile ? 18 : 26;
+    const minBottomClearance = isMobile ? 8 : 12;
 
+    // Available vertical headroom strictly between minTop and turban
+    const availableH = turbanY - minTop - minBottomClearance;
+    const maxH = Math.max(availableH, 50);
+
+    // Tagline desktop spread aspect ratio (551 / 176 = 3.1307)
+    const TAGLINE_ASPECT = 551.0 / 176.0;
+
+    let desiredW: number;
     if (isMobile) {
-      taglineW = Math.min(stageW * 0.88, 340);
-      taglineH = Math.round(taglineW * 0.58);
-      taglineTop = Math.max(48, Math.round((dy - taglineH) * 0.45));
+      desiredW = Math.min(320, Math.round(stageW * 0.85));
     } else if (isTablet) {
-      taglineW = Math.min(stageW * 0.65, 520);
-      taglineH = Math.round(taglineW * 0.58);
-      taglineTop = Math.max(36, Math.round((dy - taglineH) * 0.38));
+      desiredW = Math.min(420, Math.round(stageW * 0.55));
     } else {
-      // Desktop: bold and prominent (up to 640px wide)
-      taglineW = Math.min(stageW * 0.52, 640);
-      taglineH = Math.round(taglineW * 0.58);
-      taglineTop = Math.max(32, Math.round((dy - taglineH) * 0.35));
+      desiredW = Math.min(540, Math.round(stageW * 0.42));
     }
 
+    const desiredH = desiredW / TAGLINE_ASPECT;
+    const actualH = Math.min(desiredH, maxH);
+    const taglineW = Math.round(actualH * TAGLINE_ASPECT);
+    const taglineH = Math.round(taglineW / TAGLINE_ASPECT);
+
+    const freeSpace = turbanY - taglineH;
+    const taglineTop = Math.max(minTop, Math.round(freeSpace * 0.44));
     const taglineBottom = taglineTop + taglineH;
-    const navH = isMobile ? 56 : 68;
+
+    // Directly synchronize DOM element if already mounted
+    if (taglineBoxRef.current) {
+      taglineBoxRef.current.style.top = `${taglineTop}px`;
+      taglineBoxRef.current.style.width = `${taglineW}px`;
+    }
+    setTaglineLayout({ top: taglineTop, width: taglineW });
 
     layoutRef.current = {
       stageW,
       stageH,
       navH,
-      topZoneH: taglineBottom - navH,
       taglineTop,
       taglineBottom,
       taglineW,
-      taglineH,
       scale,
+      dw,
+      dh,
       dx,
       dy,
     };
 
-    // Update canvases resolution with devicePixelRatio
+    // Update canvas resolution with devicePixelRatio
     const fullCanvas = fullCanvasRef.current;
-    const peopleCanvas = peopleCanvasRef.current;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
 
-    if (fullCanvas && peopleCanvas) {
+    if (fullCanvas) {
       fullCanvas.width = Math.round(stageW * dpr);
       fullCanvas.height = Math.round(stageH * dpr);
-      peopleCanvas.width = Math.round(stageW * dpr);
-      peopleCanvas.height = Math.round(stageH * dpr);
     }
   }, []);
 
-  // Draw full frame (Layer 1) and people frame (Layer 3)
+  // Draw full frame with high-fidelity image smoothing
   const drawCanvases = useCallback((frameIdx: number) => {
     const fullCanvas = fullCanvasRef.current;
-    const peopleCanvas = peopleCanvasRef.current;
-    if (!fullCanvas || !peopleCanvas) return;
+    if (!fullCanvas) return;
 
     const fullCtx = fullCanvas.getContext('2d', { alpha: false });
-    const peopleCtx = peopleCanvas.getContext('2d', { alpha: true });
-    if (!fullCtx || !peopleCtx) return;
+    if (!fullCtx) return;
 
-    const { stageW, stageH, scale, dx, dy } = layoutRef.current;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const { stageW, stageH, dw, dh, dx, dy } = layoutRef.current;
+    const isMobile = stageW < 640;
+    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
 
-    // Scale contexts so we draw in CSS pixels
+    // Scale context so we draw in CSS pixels with high quality smoothing
     fullCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    peopleCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fullCtx.imageSmoothingEnabled = true;
+    fullCtx.imageSmoothingQuality = 'high';
 
-    // Layer 1 Background Fill
+    // Solid Background Fill
     fullCtx.fillStyle = SECTION_BG;
     fullCtx.fillRect(0, 0, stageW, stageH);
 
-    // Layer 3 Clear for clean transparency
-    peopleCtx.clearRect(0, 0, stageW, stageH);
-
     const fullImg = fullImagesRef.current[frameIdx];
-    const peopleImg = peopleImagesRef.current[frameIdx];
 
-    const dw = 1280 * scale;
-    const dh = 720 * scale;
-
-    // 1. Draw Layer 1 (Full Frame: background, grid lines, and figures)
+    // Draw full frame: clean, sharp, natural linework with zero dark artifacts or halos
     if (fullImg && fullImg.complete && fullImg.naturalWidth > 0) {
       fullCtx.drawImage(fullImg, dx, dy, dw, dh);
-
-      // Flawlessly feather top edge of fullImg into SECTION_BG so zero cut or seam is ever visible
-      if (dy > 0) {
-        const featherH = Math.min(60, dh * 0.12);
-        const topGrad = fullCtx.createLinearGradient(0, dy - 1, 0, dy + featherH);
-        topGrad.addColorStop(0, SECTION_BG);
-        topGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        fullCtx.fillStyle = topGrad;
-        fullCtx.fillRect(0, dy - 2, stageW, featherH + 2);
-      }
-    }
-
-    // 2. Draw Layer 3 (Decontaminated People-Only Frame: exact pixel-for-pixel alignment above text)
-    if (peopleImg && peopleImg.complete && peopleImg.naturalWidth > 0) {
-      peopleCtx.drawImage(peopleImg, dx, dy, dw, dh);
     }
   }, []);
 
-  // GSAP Pinning Setup
+  // Optimized event-driven RAF & GSAP Pinning
   useEffect(() => {
     const stage = stageRef.current;
     const section = sectionRef.current;
@@ -272,40 +218,21 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
 
     computeLayout();
 
-    const pinTrigger = ScrollTrigger.create({
-      trigger: section,
-      start: 'top top',
-      end: '+=420%',
-      pin: stage,
-      pinSpacing: true,
-      scrub: true,
-      onUpdate: (self) => {
-        scrollProgressRef.current = self.progress;
-      },
-    });
-
-    return () => {
-      pinTrigger.kill();
-    };
-  }, [computeLayout, prefersReducedMotion]);
-
-  // Animation Loop with Cushioned Buffers and Silky-Smooth Lerp (0.10)
-  useEffect(() => {
-    const animate = () => {
+    const renderFrame = () => {
       if (prefersReducedMotion) {
         drawCanvases(TOTAL_FRAMES - 1);
         if (taglineBoxRef.current) {
           taglineBoxRef.current.style.transform = 'translateX(-50%) translateY(0px) scale(1)';
           taglineBoxRef.current.style.opacity = '1';
         }
+        isAnimatingRef.current = false;
+        rafIdRef.current = null;
         return;
       }
 
       const p = scrollProgressRef.current;
-
-      // Cushion thresholds:
-      const START_P = 0.06;
-      const END_P = 0.86;
+      const START_P = 0.05;
+      const END_P = 0.88;
 
       let targetFrame = 0;
       let animP = 0;
@@ -321,10 +248,12 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         targetFrame = animP * (TOTAL_FRAMES - 1);
       }
 
-      // Smooth lerp (0.10 factor)
       const diff = targetFrame - currentFrameFloatRef.current;
-      if (Math.abs(diff) > 0.001) {
-        currentFrameFloatRef.current += diff * 0.10;
+      const needsMoreFrames = Math.abs(diff) > 0.005;
+
+      // Silky responsive damping without sluggish lag or hitching
+      if (needsMoreFrames) {
+        currentFrameFloatRef.current += diff * 0.25;
       } else {
         currentFrameFloatRef.current = targetFrame;
       }
@@ -339,48 +268,95 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         drawCanvases(newFrameIdx);
       }
 
-      // Update Tagline 3D recession & soft fade (does not disappear completely):
+      // Smooth 3D depth recession for tagline
       if (taglineBoxRef.current) {
         const stageW = layoutRef.current.stageW || window.innerWidth;
-        const downDistance = stageW < 640 ? 20 : 30;
+        const downDistance = stageW < 640 ? 14 : 20;
         const depthTranslateY = animP * downDistance;
-        const depthScale = 1 - animP * 0.16;
+        const depthScale = 1 - animP * 0.14;
 
-        // Fades smoothly from 1.0 down to ~0.35 (persists as part of background wall, never vanishes to 0)
         let depthOpacity = 1;
         if (animP > 0.05) {
-          const t = Math.min(1, Math.max(0, (animP - 0.05) / 0.70));
+          const t = Math.min(1, Math.max(0, (animP - 0.05) / 0.65));
           const easeT = t * t * (3 - 2 * t);
-          depthOpacity = 1 - easeT * 0.65;
+          depthOpacity = 1 - easeT * 0.70;
         }
 
         taglineBoxRef.current.style.transform = `translateX(-50%) translateY(${depthTranslateY.toFixed(2)}px) scale(${depthScale.toFixed(4)})`;
         taglineBoxRef.current.style.opacity = depthOpacity.toFixed(3);
       }
 
-      rafIdRef.current = requestAnimationFrame(animate);
+      if (needsMoreFrames && isInViewRef.current) {
+        rafIdRef.current = requestAnimationFrame(renderFrame);
+      } else {
+        isAnimatingRef.current = false;
+        rafIdRef.current = null;
+      }
     };
 
-    rafIdRef.current = requestAnimationFrame(animate);
+    const triggerRender = () => {
+      if (!isInViewRef.current || isAnimatingRef.current) return;
+      isAnimatingRef.current = true;
+      rafIdRef.current = requestAnimationFrame(renderFrame);
+    };
+
+    // Intersection observer to pause loop when offscreen
+    const viewObserver = new IntersectionObserver(
+      (entries) => {
+        const isIntersecting = entries[0].isIntersecting;
+        isInViewRef.current = isIntersecting;
+        if (isIntersecting) {
+          triggerRender();
+        } else if (rafIdRef.current !== null) {
+          cancelAnimationFrame(rafIdRef.current);
+          rafIdRef.current = null;
+          isAnimatingRef.current = false;
+        }
+      },
+      { rootMargin: '100px 0px 100px 0px' }
+    );
+    viewObserver.observe(section);
+
+    // Buttery smooth GSAP ScrollTrigger with momentum scrub
+    const pinTrigger = ScrollTrigger.create({
+      trigger: section,
+      start: 'top top',
+      end: '+=400%',
+      pin: stage,
+      pinSpacing: true,
+      scrub: 0.8,
+      onUpdate: (self) => {
+        scrollProgressRef.current = self.progress;
+        triggerRender();
+      },
+    });
+
+    // Window resize handling: tracks both width and height to adapt to laptop viewports
+    let lastW = typeof window !== 'undefined' ? window.innerWidth : 0;
+    let lastH = typeof window !== 'undefined' ? window.innerHeight : 0;
+    const handleResize = () => {
+      if (
+        typeof window !== 'undefined' &&
+        (window.innerWidth !== lastW || window.innerHeight !== lastH)
+      ) {
+        lastW = window.innerWidth;
+        lastH = window.innerHeight;
+        computeLayout();
+        ScrollTrigger.refresh();
+        drawCanvases(currentFrameIdxRef.current);
+      }
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
+      pinTrigger.kill();
+      viewObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
       }
     };
-  }, [drawCanvases, prefersReducedMotion]);
-
-  // Window resize handling
-  useEffect(() => {
-    const handleResize = () => {
-      computeLayout();
-      ScrollTrigger.refresh();
-      drawCanvases(currentFrameIdxRef.current);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [computeLayout, drawCanvases]);
+  }, [computeLayout, drawCanvases, prefersReducedMotion]);
 
   // Initial draw once first frame loads
   useEffect(() => {
@@ -392,19 +368,19 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     }
   }, [fullLoadedCount, computeLayout, drawCanvases, prefersReducedMotion]);
 
-  const { taglineTop, taglineW, taglineH } = layoutRef.current;
+  const { taglineTop, taglineW } = layoutRef.current;
   const isInitialReady = fullLoadedCount >= 1;
 
   return (
     <section
       id="our-creative-story"
       ref={sectionRef}
-      className="relative w-full bg-white select-none p-0 m-0"
+      className="relative w-full select-none p-0 m-0"
       style={{ backgroundColor: SECTION_BG }}
     >
       {/* 
         The Pin Stage: Exactly 100svh tall (100vh fallback) and 100% wide.
-        Pinned by GSAP ScrollTrigger with end: '+=420%' and pinSpacing: true.
+        Pinned by GSAP ScrollTrigger with end: '+=400%' and pinSpacing: true.
       */}
       <div
         ref={stageRef}
@@ -412,7 +388,8 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         style={{ backgroundColor: SECTION_BG }}
       >
         {/* =================================================================
-            LAYER 1 (z-index 10): Full-Frame Canvas (background, grid lines, figures)
+            Clean Canvas: 100% full-screen perspective artwork
+            Pristine linework with zero halos, zero edge shadows, zero jitter
            ================================================================= */}
         <div className="absolute inset-0 z-10 pointer-events-none w-full h-full">
           <canvas
@@ -422,130 +399,41 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         </div>
 
         {/* =================================================================
-            Seamless Top Blend Overlay: Fades top of stage into SECTION_BG
-           ================================================================= */}
-        <div
-          className="pointer-events-none absolute top-0 left-0 right-0 h-16 sm:h-20 z-[15] bg-gradient-to-b from-white via-white/50 to-transparent"
-          aria-hidden="true"
-        />
-
-        {/* =================================================================
-            Seamless Bottom Blend Overlay: Fades bottom of stage into SECTION_BG
-           ================================================================= */}
-        <div
-          className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 sm:h-20 z-[15] bg-gradient-to-t from-white via-white/50 to-transparent"
-          aria-hidden="true"
-        />
-
-        {/* =================================================================
-            LAYER 2 (z-index 20): Tagline (3 Line Images)
-            Sits in the upper clear white space above the figures.
-            Recedes softly into 3D depth and persists as part of the background wall.
+            Tagline (Unified Calligraphy)
+            Positioned with comfortable headroom and zero turban overlap
            ================================================================= */}
         <div
           ref={taglineBoxRef}
-          className="absolute z-20 pointer-events-none"
+          className="absolute z-20 pointer-events-none flex items-center justify-center"
           style={{
-            top: `${taglineTop}px`,
+            top: `${taglineLayout.top}px`,
             left: '50%',
             transform: 'translateX(-50%) translateY(0px) scale(1)',
-            transformOrigin: '50% 30%',
-            width: `${taglineW || 340}px`,
-            height: `${taglineH || 200}px`,
+            transformOrigin: '50% 20%',
+            width: `${taglineLayout.width}px`,
             willChange: 'transform, opacity',
             zIndex: 20,
           }}
         >
-          {/* Line 1: "Been my thing" */}
-          <div
-            ref={line1Ref}
-            className="absolute"
-            style={{
-              left: '4%',
-              top: '0%',
-              width: '92%',
-              height: '38%',
-            }}
-          >
-            <picture>
-              <source 
-                srcSet="/scroll-frames/tagline/line_1@2x.png 2x, /scroll-frames/tagline/line_1.png 1x" 
-              />
-              <img
-                src="/scroll-frames/tagline/line_1.png"
-                alt="Been my thing"
-                className="w-full h-full object-contain pointer-events-none select-none block"
-                draggable={false}
-              />
-            </picture>
-          </div>
-
-          {/* Line 2: "since 2016." */}
-          <div
-            ref={line2Ref}
-            className="absolute"
-            style={{
-              left: '20%',
-              top: '35%',
-              width: '60%',
-              height: '28%',
-            }}
-          >
-            <picture>
-              <source 
-                srcSet="/scroll-frames/tagline/line_2@2x.png 2x, /scroll-frames/tagline/line_2.png 1x" 
-              />
-              <img
-                src="/scroll-frames/tagline/line_2.png"
-                alt="since 2016."
-                className="w-full h-full object-contain pointer-events-none select-none block"
-                draggable={false}
-              />
-            </picture>
-          </div>
-
-          {/* Line 3: "Now we are a team" */}
-          <div
-            ref={line3Ref}
-            className="absolute"
-            style={{
-              left: '0%',
-              top: '64%',
-              width: '100%',
-              height: '36%',
-            }}
-          >
-            <picture>
-              <source 
-                srcSet="/scroll-frames/tagline/line_3@2x.png 2x, /scroll-frames/tagline/line_3.png 1x" 
-              />
-              <img
-                src="/scroll-frames/tagline/line_3.png"
-                alt="Now we are a team"
-                className="w-full h-full object-contain pointer-events-none select-none block"
-                draggable={false}
-              />
-            </picture>
-          </div>
-        </div>
-
-        {/* =================================================================
-            LAYER 3 (z-index 30): Decontaminated People-Only Frame Canvas
-            Pixel-for-pixel aligned with Layer 1 canvas.
-           ================================================================= */}
-        <div className="absolute inset-0 z-30 pointer-events-none w-full h-full">
-          <canvas
-            ref={peopleCanvasRef}
-            className="w-full h-full block"
-          />
+          <picture className="w-full block">
+            <source 
+              srcSet="/scroll-frames/tagline/tagline_desktop_spread@2x.png 2x, /scroll-frames/tagline/tagline_desktop_spread.png 1x" 
+            />
+            <img
+              src="/scroll-frames/tagline/tagline_desktop_spread.png"
+              alt="Been my thing since 2016. Now we are a team"
+              className="w-full h-auto object-contain pointer-events-none select-none block"
+              draggable={false}
+            />
+          </picture>
         </div>
 
         {/* Loading Indicator */}
-        {(!isInitialReady || (peopleLoadedCount < 10 && !prefersReducedMotion)) && (
+        {!isInitialReady && (
           <div className="absolute bottom-8 right-8 z-40 pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-slate-900/10 text-[11px] font-mono text-slate-600 shadow-xs">
             <span className="w-2 h-2 rounded-full bg-[#FF3B14] animate-ping" />
             <span>
-              Loading experience... {Math.round(((fullLoadedCount + peopleLoadedCount) / (TOTAL_FRAMES * 2)) * 100)}%
+              Loading experience... {Math.round((fullLoadedCount / TOTAL_FRAMES) * 100)}%
             </span>
           </div>
         )}

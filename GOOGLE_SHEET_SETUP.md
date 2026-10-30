@@ -1,135 +1,93 @@
-# MARKYT — Real-Time Google Sheet Telemetry Setup Guide
+# MARKYT — Real-Time Google Sheet Live Sync Setup Guide
 
-This guide walks you through setting up **Option 1 (Google Apps Script Web App)**.
-- **Cost**: ₹0 (Runs on Google's free infrastructure)
-- **Time to Setup**: ~2 to 5 minutes
-- **How it works**: Whenever you edit or add rows in your Google Sheet (from your phone, laptop, or automated Zapier/Make flow), your landing page live data table updates automatically.
+Your landing page has **two dynamic tables** that can be powered live by Google Sheets:
+1. **Meta Ads Manager Table (Know About Us section)** — shows your active client campaigns, delivery status, results, cost per result, and amount spent.
+2. **Daily Sprint Telemetry Table (Who We Are section)** — shows daily spend, impressions, clicks, CTR, leads, CPL, and notes.
 
----
-
-## Step 1: Prepare Your Google Sheet
-
-1. Create a new Google Sheet (or use your existing campaign tracker).
-2. Set the sheet name to `Campaign_Tracker` (or keep default `Sheet1`).
-3. Set the columns in **Row 1**:
-   | A | B | C | D | E | F | G | H | I | J | K | L |
-   |---|---|---|---|---|---|---|---|---|---|---|---|
-   | **Day** | **Creative / Channel** | **Spend** | **Impressions** | **CPM** | **Clicks** | **CTR** | **CPC** | **Leads** | **Conv %** | **Cost per Lead** | **Strategic Learning Note** |
-
-4. Add sample rows starting from **Row 2**:
-   - `Day 1` | `Testimonial Ad` | `117.86` | `1734` | `67.97` | `17` | `0.98%` | `6.93` | `2` | `12%` | `58.93` | `Learning phase`
+Whenever you edit rows in your Google Sheet (from your phone, laptop, or automated Zapier/Make workflow), the website updates live automatically!
 
 ---
 
-## Step 2: Add Google Apps Script
+# SECTION A: Meta Ads Manager Proof Table ("Know About Us")
 
-1. In your Google Sheet, click **Extensions** → **Apps Script**.
-2. Replace any code in the editor with this:
+This is the table with **Campaign | Delivery | Results | Cost/Result | Amount Spent**.
 
+### Step 1: Create or Add a Tab in Your Google Sheet
+Name the tab: `Meta_Ads` (or use any sheet).
+
+Set **Row 1** headers:
+| A | B | C | D | E | F | G | H | I |
+|---|---|---|---|---|---|---|---|---|
+| **Campaign** | **Delivery** | **Badge** | **Results** | **Results Unit** | **Cost / Result** | **Cost Unit** | **Amount Spent** | **Budget Note** |
+
+### Step 2: Add Sample Rows (Starting from Row 2)
+Copy and paste these exact rows into your sheet:
+- `Clothing Brand` | `Completed` | `` | `57` | `website purchases` | `₹175.44` | `per purchase` | `₹10,000.00` | `₹10.00K spent`
+- `Premium Wooden Slabs (Carousel)` | `Active` | `` | `132` | `conversations` | `₹27.94` | `per conv.` | `₹3,688.08` | `₹3.69K spent`
+- `Premium Wooden Slabs (Video)` | `Active` | `` | `101` | `conversations` | `₹46.12` | `per conv.` | `₹4,658.17` | `₹5,000 budget`
+- `Skin Clinic` | `Active` | `` | `60` | `conversations` | `₹62.98` | `per conv.` | `₹3,778.80` | `₹3.78K spent`
+- `Fitness Coach` | `Active` | `` | `15` | `conversations` | `₹62.62` | `per conv.` | `₹939.27` | `Ad set budget`
+- `Therapist` | `Active` | `Day 2 Data` | `6` | `conversations` | `₹71.82` | `per conv.` | `₹430.92` | `Ad set budget`
+
+---
+
+### Step 3: Connect to the Website
+
+You have **two ways** to connect:
+
+#### METHOD 1: 30-Second Google Sheets CSV Publish (Recommended — 0 Code!)
+1. In your Google Sheet, click **File** → **Share** → **Publish to web**.
+2. Select your `Meta_Ads` sheet tab (instead of "Entire Document").
+3. In the second dropdown, choose **Comma-separated values (.csv)** (instead of "Web page").
+4. Click **Publish**.
+5. Copy the generated link (starts with `https://docs.google.com/spreadsheets/d/e/.../pub?output=csv`).
+6. On your website, click **"Connect Google Sheet"** (or **"Sheet Settings"**) right above the table.
+7. Paste the link and click **Save & Sync**.
+8. Done! The table turns into **LIVE SHEET ACTIVE** immediately!
+
+#### METHOD 2: Google Apps Script Web App
+If you prefer a JSON Web App endpoint:
+1. In Google Sheets, click **Extensions** → **Apps Script**.
+2. Paste this code:
 ```javascript
 function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName("Campaign_Tracker") || ss.getSheets()[0];
+    var sheet = ss.getSheetByName("Meta_Ads") || ss.getSheets()[0];
     var data = sheet.getDataRange().getValues();
     
-    if (!data || data.length <= 1) {
-      return ContentService.createTextOutput(JSON.stringify({
-        status: "empty",
-        clientName: sheet.getName(),
-        updatedAt: new Date().toISOString(),
-        budgetCap: 5000,
-        rows: []
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    // Header row is index 0
     var rows = [];
     for (var i = 1; i < data.length; i++) {
       var r = data[i];
-      // Skip empty rows
-      if (r[0] === "" && r[1] === "" && r[2] === "") continue;
-      
-      var day = String(r[0] || ("Day " + i)).trim();
-      var channel = String(r[1] || "Meta Ads").trim();
-      var amountSpent = parseFloat(String(r[2]).replace(/[^0-9.]/g, '')) || 0;
-      var impressions = parseInt(String(r[3]).replace(/[^0-9]/g, ''), 10) || 0;
-      var cpm = parseFloat(String(r[4]).replace(/[^0-9.]/g, '')) || (impressions > 0 ? (amountSpent / impressions) * 1000 : 0);
-      var linkClicks = parseInt(String(r[5]).replace(/[^0-9]/g, ''), 10) || 0;
-      var ctr = String(r[6] || (impressions > 0 ? ((linkClicks / impressions) * 100).toFixed(2) + "%" : "0%")).trim();
-      var cpc = parseFloat(String(r[7]).replace(/[^0-9.]/g, '')) || (linkClicks > 0 ? amountSpent / linkClicks : 0);
-      var leads = parseInt(String(r[8]).replace(/[^0-9]/g, ''), 10) || 0;
-      var conversionRate = String(r[9] || (linkClicks > 0 ? ((leads / linkClicks) * 100).toFixed(1) + "%" : "0%")).trim();
-      var costPerLead = parseFloat(String(r[10]).replace(/[^0-9.]/g, '')) || (leads > 0 ? amountSpent / leads : 0);
-      var strategicNote = String(r[11] || "").trim();
-
+      if (!r[0]) continue;
       rows.push({
-        day: day,
-        channel: channel,
-        amountSpent: amountSpent,
-        impressions: impressions,
-        cpm: cpm,
-        linkClicks: linkClicks,
-        ctr: ctr.includes('%') ? ctr : ctr + '%',
-        cpc: cpc,
-        leads: leads,
-        conversionRate: conversionRate.includes('%') ? conversionRate : conversionRate + '%',
-        costPerLead: costPerLead,
-        strategicNote: strategicNote
+        campaign: String(r[0]).trim(),
+        status: String(r[1] || "Active").trim(),
+        badge: r[2] ? { text: String(r[2]).trim(), variant: "amber" } : null,
+        results: parseInt(String(r[3]).replace(/[^0-9]/g, ''), 10) || 0,
+        resultsUnit: String(r[4] || "conversations").trim(),
+        costPerResult: String(r[5] || "₹0.00").trim(),
+        costPerUnit: String(r[6] || "per conv.").trim(),
+        amountSpent: String(r[7] || "₹0.00").trim(),
+        budgetNote: String(r[8] || "").trim()
       });
     }
-
-    var response = {
-      status: "success",
-      clientName: sheet.getName(),
-      updatedAt: new Date().toISOString(),
-      budgetCap: 5000,
-      rows: rows
-    };
-
-    return ContentService.createTextOutput(JSON.stringify(response))
+    
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", rows: rows }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({
-      status: "error",
-      message: err.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 ```
-
-3. Click the **Save** (💾) icon.
-
----
-
-## Step 3: Deploy as Web App
-
-1. In Apps Script, click the blue **Deploy** button at the top right → **New deployment**.
-2. Click the **gear icon** next to "Select type" and choose **Web app**.
-3. Fill in settings:
-   - **Description**: `Markyt Live Campaign Tracker`
-   - **Execute as**: `Me (your email)`
-   - **Who has access**: `Anyone` *(Crucial: allows visitors on your website to read the telemetry)*
-4. Click **Deploy**.
-5. Grant permissions if Google asks ("Advanced" → "Go to Untitled project (unsafe)").
-6. Copy the **Web app URL** (looks like `https://script.google.com/macros/s/AKfycb.../exec`).
+3. Click **Deploy** → **New deployment** → **Web app** → Set access to **Anyone** → Copy Web App URL.
+4. Paste the URL into the website modal or in `.env` as `VITE_CAMPAIGN_PROOF_SHEET_URL`.
 
 ---
 
-## Step 4: Connect to Your Website
+# SECTION B: Daily Sprint Campaign Tracker ("Who We Are")
 
-You can connect in two easy ways:
-
-### Option A: Directly from the Website UI (Instant)
-1. Open your website (`http://localhost:3000/`).
-2. Scroll to the **Live Data** section.
-3. Click the green **"Connect Sheet"** button on the sheet toolbar.
-4. Paste your Web App URL and click **"Save & Sync Sheet"**.
-5. The table will immediately sync and turn into `LIVE SYNC ACTIVE`!
-
-### Option B: Via `.env` file (Permanent for Production Deployment)
-1. Create a `.env` file in the project root:
-   ```env
-   VITE_GOOGLE_SHEET_API_URL=https://script.google.com/macros/s/AKfycb.../exec
-   ```
-2. Restart or build your Vite app.
+Follow the same steps using `Campaign_Tracker` tab with columns:
+`Day | Creative / Channel | Spend | Impressions | CPM | Clicks | CTR | CPC | Leads | Conv % | Cost per Lead | Strategic Learning Note`
+And configure `VITE_GOOGLE_SHEET_API_URL`.

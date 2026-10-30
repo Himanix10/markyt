@@ -2,98 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   Play, 
-  Pause,
   BarChart2
 } from 'lucide-react';
+import { 
+  CampaignProofData, 
+  CAMPAIGN_PROOF_ROWS 
+} from '../data/campaignProofData';
+import { 
+  fetchCampaignProofRows 
+} from '../services/campaignProofSheetService';
 
 export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4';
-
-interface CampaignProofData {
-  campaign: string;
-  isDayOne?: boolean;
-  isPurchase?: boolean;
-  badge?: {
-    text: string;
-    variant: 'emerald' | 'amber';
-  };
-  status: 'Active' | 'Completed';
-  results: number;
-  resultsUnit: string;
-  resultsSub?: string;
-  costPerResult: string;
-  costPerUnit: string;
-  amountSpent: string;
-  budgetNote?: string;
-}
-
-const CAMPAIGN_PROOF_ROWS: CampaignProofData[] = [
-  {
-    campaign: 'Clothing Brand',
-    isPurchase: true,
-    status: 'Completed',
-    results: 57,
-    resultsUnit: 'website purchases',
-    costPerResult: '₹175.44',
-    costPerUnit: 'per purchase',
-    amountSpent: '₹10,000.00',
-    budgetNote: '₹10.00K spent'
-  },
-  {
-    campaign: 'Premium Wooden Slabs (Carousel)',
-    status: 'Active',
-    results: 132,
-    resultsUnit: 'conversations',
-    costPerResult: '₹27.94',
-    costPerUnit: 'per conv.',
-    amountSpent: '₹3,688.08',
-    budgetNote: '₹3.69K spent'
-  },
-  {
-    campaign: 'Premium Wooden Slabs (Video)',
-    status: 'Active',
-    results: 101,
-    resultsUnit: 'conversations',
-    costPerResult: '₹46.12',
-    costPerUnit: 'per conv.',
-    amountSpent: '₹4,658.17',
-    budgetNote: '₹5,000 budget'
-  },
-  {
-    campaign: 'Skin Clinic',
-    status: 'Active',
-    results: 60,
-    resultsUnit: 'conversations',
-    costPerResult: '₹62.98',
-    costPerUnit: 'per conv.',
-    amountSpent: '₹3,778.80',
-    budgetNote: '₹3.78K spent'
-  },
-  {
-    campaign: 'Fitness Coach',
-    status: 'Active',
-    results: 15,
-    resultsUnit: 'conversations',
-    costPerResult: '₹62.62',
-    costPerUnit: 'per conv.',
-    amountSpent: '₹939.27',
-    budgetNote: 'Ad set budget'
-  },
-  {
-    campaign: 'Therapist',
-    isDayOne: true,
-    badge: {
-      text: 'Day 2 Data',
-      variant: 'amber'
-    },
-    status: 'Active',
-    results: 6,
-    resultsUnit: 'conversations',
-    costPerResult: '₹71.82',
-    costPerUnit: 'per conv.',
-    amountSpent: '₹430.92',
-    budgetNote: 'Ad set budget'
-  }
-];
 
 interface InteractiveAdSimulatorProps {
   onOpenQuestionnaire?: () => void;
@@ -108,8 +27,33 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+
+  // Live Google Sheet sync state (automatically synced from sheet in background)
+  const [proofRows, setProofRows] = useState<CampaignProofData[]>(CAMPAIGN_PROOF_ROWS);
+
+  // Load and sync data from Google Sheet in background
+  const loadSheetData = async () => {
+    try {
+      const result = await fetchCampaignProofRows();
+      if (result.rows && result.rows.length > 0) {
+        setProofRows(result.rows);
+      }
+    } catch (e: any) {
+      console.warn('Sync failed:', e);
+    }
+  };
+
+  useEffect(() => {
+    loadSheetData();
+
+    // Auto-poll for live updates every 60 seconds
+    const interval = setInterval(() => {
+      loadSheetData();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto-pause video if user scrolls section out of viewport
   useEffect(() => {
@@ -146,7 +90,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
   // Play with audio; fallback to muted if browser blocks unmuted audio
   const handlePlay = () => {
     if (!videoRef.current) return;
-    videoRef.current.muted = isMuted;
+    videoRef.current.muted = false;
     videoRef.current.play()
       .then(() => {
         setIsPlaying(true);
@@ -154,7 +98,6 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
       .catch(() => {
         if (videoRef.current) {
           videoRef.current.muted = true;
-          setIsMuted(true);
           videoRef.current.play()
             .then(() => setIsPlaying(true))
             .catch(() => setIsPlaying(false));
@@ -190,7 +133,6 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
     videoRef.current.currentTime = pos * videoRef.current.duration;
   };
 
-
   return (
     <div className="relative max-w-5xl mx-auto group/walkthrough">
       {/* Outer Animated Multi-Color Glow Aura */}
@@ -223,7 +165,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
             }}
           />
 
-          {/* Orb 1: Coral Sunset Glow (Drifting from Top-Left) */}
+          {/* Orb 1: Coral Sunset Glow */}
           <motion.div
             animate={{
               x: [0, 45, -30, 0],
@@ -239,7 +181,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
             className="absolute -top-16 -left-16 w-[440px] h-[440px] rounded-full bg-gradient-to-tr from-[#FF3B14]/45 via-[#F97316]/40 to-[#FBBF24]/35 blur-3xl"
           />
 
-          {/* Orb 2: Electric Periwinkle / Violet (Floating at Bottom-Right) */}
+          {/* Orb 2: Electric Periwinkle / Violet */}
           <motion.div
             animate={{
               x: [0, -40, 30, 0],
@@ -255,7 +197,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
             className="absolute -bottom-16 -right-16 w-[480px] h-[480px] rounded-full bg-gradient-to-bl from-[#818CF8]/50 via-[#6366F1]/40 to-[#38BDF8]/35 blur-3xl"
           />
 
-          {/* Orb 3: Golden Sunshine Breathing Center Accent */}
+          {/* Orb 3: Golden Sunshine */}
           <motion.div
             animate={{
               opacity: [0.35, 0.7, 0.35],
@@ -271,38 +213,31 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
         </div>
 
         {/* Animated Floating Performance Accents */}
-        <motion.div 
-          animate={{
-            y: [0, -6, 0],
-            rotate: [-1, 1, -1]
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-5 left-5 pointer-events-none hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/75 backdrop-blur-md border border-slate-900/10 shadow-xs z-10 select-none"
-        >
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-          </span>
-          <span className="text-[10px] font-mono font-bold tracking-tight text-slate-800 uppercase">
-            Meta Ads Manager
-          </span>
-        </motion.div>
+        <div className="absolute top-5 left-5 pointer-events-auto hidden sm:flex items-center gap-2 z-10 select-none">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-slate-900/10 shadow-xs">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+            </span>
+            <span className="text-[10px] font-mono font-bold tracking-tight text-slate-800 uppercase">
+              Meta Ads Manager
+            </span>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
           
           {/* Left Column: Context, Hook & Real Proof Table */}
           <div className="lg:col-span-7 flex flex-col justify-center text-left">
             {/* Headline */}
-            <h3 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-slate-950 tracking-tight leading-[1.08] mb-5">
-              Know{' '}
-              <span className="font-editorial-italic font-normal text-[#FF3B14] underline decoration-slate-950/20 underline-offset-8">
-                About Us
-              </span>
-            </h3>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-slate-950 tracking-tight leading-[1.08]">
+                Know{' '}
+                <span className="font-editorial-italic font-normal text-[#FF3B14] underline decoration-slate-950/20 underline-offset-8">
+                  About Us
+                </span>
+              </h3>
+            </div>
 
             {/* Live Meta Ads Manager Proof Table */}
             <div className="rounded-xl sm:rounded-2xl border border-slate-900/10 bg-white/95 backdrop-blur-md overflow-hidden shadow-sm">
@@ -326,7 +261,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200/80">
-                    {CAMPAIGN_PROOF_ROWS.map((row, idx) => (
+                    {proofRows.map((row, idx) => (
                       <tr 
                         key={idx} 
                         className={`transition-colors duration-150 ${
@@ -399,11 +334,11 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
 
                         {/* Amount Spent */}
                         <td className="py-2 sm:py-2.5 px-1.5 sm:px-3 text-right align-middle">
-                          <div className="font-mono font-bold text-slate-900 text-[10.5px] sm:text-sm leading-tight">
+                          <div className="font-space font-bold text-slate-950 text-[11px] sm:text-sm leading-tight">
                             {row.amountSpent}
                           </div>
                           {row.budgetNote && (
-                            <div className="text-[8px] sm:text-[9px] text-slate-500 leading-none mt-0.5 hidden sm:block">
+                            <div className="text-[7.5px] sm:text-[8.5px] text-slate-400 leading-none mt-0.5">
                               {row.budgetNote}
                             </div>
                           )}
@@ -417,14 +352,16 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
               {/* Table Footer */}
               <div className="px-2.5 sm:px-3.5 py-2 bg-slate-100/70 border-t border-slate-200/80 text-[9px] sm:text-[10px] text-slate-500">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     <BarChart2 className="w-3 h-3 text-slate-400 shrink-0" />
                     <span>Real client sprint data from active Meta Ads Manager</span>
-                  </span>
+                  </div>
+
                   <span className="font-mono font-semibold text-slate-700 hidden sm:inline">
-                    Direct Purchases & Inquiries
+                    Direct Purchases &amp; Inquiries
                   </span>
                 </div>
+
                 <p className="mt-1.5 pt-1.5 border-t border-slate-200/60 text-[8.5px] sm:text-[9px] text-slate-400 leading-tight">
                   *Active live campaigns: conversation counts &amp; cost/convo fluctuate in real time and do not portray final end-of-campaign numbers.
                 </p>
@@ -438,79 +375,55 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
             <div className="relative group/heroplayer w-full max-w-[280px] sm:max-w-[310px] md:max-w-[330px]">
               
               {/* Subtle Warm Accent Backdrop */}
-              <div className="absolute -inset-2 bg-gradient-to-tr from-[#FF3B14]/20 via-slate-950/5 to-[#FF3B14]/15 rounded-[32px] blur-xl opacity-75 group-hover/heroplayer:opacity-100 transition-opacity -z-10" />
-
-              {/* Frameless Glass Video Card */}
               <div 
-                className="relative w-full aspect-[9/16] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-900/10 bg-slate-950 flex flex-col justify-between cursor-pointer select-none transition-all duration-300"
+                className="absolute -inset-1.5 rounded-2xl bg-gradient-to-tr from-[#FF3B14]/20 via-[#F97316]/15 to-[#818CF8]/25 blur-md pointer-events-none -z-10" 
+              />
+
+              {/* Video Shell */}
+              <div 
                 onClick={togglePlay}
+                className="relative cursor-pointer rounded-2xl overflow-hidden bg-slate-950/90 aspect-[9/16] shadow-xl hover:shadow-2xl transition-all duration-300 select-none"
               >
-                {/* Native Video */}
                 <video
                   ref={videoRef}
-                  src={`${encodeURI(videoSrc)}#t=0.1`}
-                  className="absolute inset-0 w-full h-full object-cover bg-black"
+                  src={videoSrc}
+                  className="w-full h-full object-cover block"
                   playsInline
                   loop
                   preload="metadata"
-                  muted={isMuted}
                   onTimeUpdate={handleTimeUpdate}
+                  onEnded={() => setIsPlaying(false)}
                 />
 
-                {/* Top Subtle Overlay Ribbon */}
-                <div className="relative z-20 w-full p-3 sm:p-3.5 flex items-center justify-between pointer-events-none">
-                  {/* Status Indicator Pill */}
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono font-medium text-white shadow-xs">
-                    <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-                    <span>{isPlaying ? 'Playing' : 'Paused'}</span>
-                  </div>
-
-                </div>
-
-                {/* Center Floating Glass Play/Pause Action Button */}
-                <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                {/* Minimalist Floating Controls */}
+                <div className="absolute bottom-3 left-3 right-3 z-30 flex flex-col gap-1.5">
+                  {/* Subtle Scrubber */}
                   <div 
-                    className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#FF3B14]/90 hover:bg-[#FF3B14] backdrop-blur-md border border-white/30 text-white flex items-center justify-center shadow-2xl transition-all duration-300 pointer-events-auto cursor-pointer ${
-                      isPlaying 
-                        ? 'opacity-0 scale-75 group-hover/heroplayer:opacity-90 group-hover/heroplayer:scale-100' 
-                        : 'opacity-100 scale-100'
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      togglePlay();
-                    }}
+                    onClick={handleSeek}
+                    className="w-full h-1 bg-white/20 hover:h-1.5 rounded-full cursor-pointer transition-all overflow-hidden"
                   >
-                    {isPlaying ? (
-                      <Pause className="w-6 h-6 sm:w-7 sm:h-7 fill-white" />
-                    ) : (
-                      <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-white translate-x-0.5" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Bottom Scrubber Progress Bar */}
-                <div 
-                  className="relative z-20 w-full p-3 pt-0"
-                  onClick={handleSeek}
-                  title="Click to seek"
-                >
-                  <div className="w-full h-1 bg-white/30 rounded-full overflow-hidden backdrop-blur-xs">
                     <div 
-                      className="h-full bg-[#FF3B14] transition-all duration-100 rounded-full"
+                      className="h-full bg-[#FF3B14] rounded-full transition-all"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
                 </div>
 
+                {/* Centered Play Button when paused */}
+                {!isPlaying && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-slate-950/20 backdrop-blur-[1px]">
+                    <div className="w-12 h-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-slate-900 group-hover/heroplayer:scale-110 transition-transform">
+                      <Play className="w-5 h-5 fill-slate-900 ml-0.5" />
+                    </div>
+                  </div>
+                )}
               </div>
-
             </div>
           </div>
 
         </div>
 
       </div>
-
     </div>
   );
 };
