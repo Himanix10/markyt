@@ -55,18 +55,18 @@ const TRANSFORMATION_SLIDES: SocialTransformationItem[] = [
     style: 'Vector Illustration',
   },
   {
-    id: 'brew-theory',
-    title: 'Brew Theory Coffee • Specialty Roaster',
-    tag: 'Food & Beverage',
-    image: '/images/social-transform-brewtheory.jpg?v=3',
-    beforeImage: '/images/social-transform-brewtheory-before.jpg',
-    afterImage: '/images/social-transform-brewtheory-after.jpg',
+    id: 'brand-strategy',
+    title: 'Brand Strategy • Tech & Corporate Identity',
+    tag: 'Branding & Corporate Identity',
+    image: '/images/social-transform-brandstrategy.png?v=1',
+    beforeImage: '/images/social-transform-brandstrategy-before.jpg',
+    afterImage: '/images/social-transform-brandstrategy-after.jpg',
     headline: 'Less text. More story.',
     beforeLabel: 'BEFORE',
     beforeDesc: 'Long copy. Nothing to look at.',
     afterLabel: 'AFTER',
     afterDesc: 'Visual first. Words only where they matter.',
-    style: 'Flat Art Style',
+    style: 'Big Tech Art Style',
   },
 ];
 
@@ -75,7 +75,7 @@ export const SocialMediaMgmtSection: React.FC<SocialMediaMgmtSectionProps> = () 
   const [mobileViews, setMobileViews] = useState<Record<string, 'after' | 'before' | 'side-by-side'>>({
     fitness: 'after',
     'rainbow-marshmallow': 'after',
-    'brew-theory': 'after',
+    'brand-strategy': 'after',
   });
 
   const scrollContainersRef = useRef<Record<string, HTMLDivElement | null>>({});
