@@ -83,6 +83,7 @@ export interface VideoShowcaseItem {
   category: string;
   businessType: string;
   videoSrc: string;
+  poster?: string;
   duration: string;
   hookText: string;
   roas: string;

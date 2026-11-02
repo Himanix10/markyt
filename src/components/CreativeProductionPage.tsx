@@ -88,7 +88,10 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     const video = videoRefs.current[targetIndex];
     if (!video) return;
 
-    video.currentTime = 0;
+    // Only reset if video ended
+    if (video.currentTime > 0 && video.ended) {
+      video.currentTime = 0;
+    }
     video.muted = false;
 
     const playPromise = video.play();
@@ -162,7 +165,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     const activeVideo = videoRefs.current[activeStudioIndex];
     if (!activeVideo) return;
 
-    if (isStudioPlaying && !activeVideo.paused) {
+    if (!activeVideo.paused) {
       activeVideo.pause();
       setIsStudioPlaying(false);
     } else {
@@ -517,12 +520,19 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                   {/* Clean Edge-to-Edge Video */}
                   <video
                     ref={(el) => { videoRefs.current[idx] = el; }}
-                    src={`${encodeURI(work.videoSrc)}#t=0.1`}
+                    src={work.poster ? encodeURI(work.videoSrc) : `${encodeURI(work.videoSrc)}#t=0.1`}
+                    poster={work.poster}
                     className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
                     playsInline
                     loop
-                    preload="metadata"
+                    preload="auto"
                     muted={!isCenter}
+                    onPlay={() => {
+                      if (isCenter) setIsStudioPlaying(true);
+                    }}
+                    onPause={() => {
+                      if (isCenter) setIsStudioPlaying(false);
+                    }}
                     onEnded={isCenter ? handleNextWork : undefined}
                     onClick={isCenter ? toggleStudioPlay : () => handleSelectWork(idx)}
                   />

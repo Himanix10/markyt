@@ -604,6 +604,7 @@ export const VIDEO_PORTFOLIO_WORKS: VideoShowcaseItem[] = [
     category: 'D2C Food & Beverage',
     businessType: '',
     videoSrc: '/videos/coffee-veo.mp4',
+    poster: '/videos/coffee-veo-poster.jpg',
     duration: '0:32',
     hookText: '“When standard beverage ads get scrolled past, cinematic craft stops the feed.”',
     roas: '4.9x Blended ROAS',
