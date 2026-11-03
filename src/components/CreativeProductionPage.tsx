@@ -3,7 +3,8 @@ import {
   Play,
   Pause,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { VIDEO_PORTFOLIO_WORKS } from '../data/content';
@@ -16,6 +17,7 @@ interface CreativeProductionPageProps {
 export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () => {
   const [activeStudioIndex, setActiveStudioIndex] = useState<number>(0);
   const [isStudioPlaying, setIsStudioPlaying] = useState<boolean>(false);
+  const [isBuffering, setIsBuffering] = useState<boolean>(false);
 
   // Responsive window width tracking for 3D stage calculations
   const [windowWidth, setWindowWidth] = useState<number>(
@@ -83,29 +85,55 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     };
   }, [activeStudioIndex]);
 
-  // Auto-play the target video with sound (fallback to muted only if browser blocks it)
+  // Ensure all non-active videos are paused to save GPU and battery
+  useEffect(() => {
+    Object.entries(videoRefs.current).forEach(([k, vid]) => {
+      if (vid && Number(k) !== activeStudioIndex && !vid.paused) {
+        vid.pause();
+        vid.muted = true;
+      }
+    });
+  }, [activeStudioIndex]);
+
+  
+
+  // Auto-play the target video reliably on all desktop & mobile browsers
   const playActiveVideo = useCallback((targetIndex: number) => {
+    // Pause all other videos
+    Object.entries(videoRefs.current).forEach(([k, vid]) => {
+      if (vid && Number(k) !== targetIndex && !vid.paused) {
+        vid.pause();
+        vid.currentTime = 0;
+      }
+    });
+
     const video = videoRefs.current[targetIndex];
     if (!video) return;
 
-    // Only reset if video ended
     if (video.currentTime > 0 && video.ended) {
       video.currentTime = 0;
     }
-    video.muted = false;
 
+    video.muted = false;
     const playPromise = video.play();
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
           setIsStudioPlaying(true);
+          setIsBuffering(false);
         })
         .catch(() => {
-          // Fallback if browser policy blocks unmuted autoplay
+          // Fallback to muted only if browser autoplay policy blocks unmuted playback
           video.muted = true;
           video.play()
-            .then(() => setIsStudioPlaying(true))
-            .catch(() => setIsStudioPlaying(false));
+            .then(() => {
+              setIsStudioPlaying(true);
+              setIsBuffering(false);
+            })
+            .catch(() => {
+              setIsStudioPlaying(false);
+              setIsBuffering(false);
+            });
         });
     }
   }, []);
@@ -115,33 +143,8 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     if (newIndex === activeStudioIndex) return;
 
     hasUserInteracted.current = true;
-
-    // Pause previous video and reset
-    const prevVideo = videoRefs.current[activeStudioIndex];
-    if (prevVideo) {
-      prevVideo.pause();
-      prevVideo.currentTime = 0;
-      prevVideo.muted = true;
-    }
-
     setActiveStudioIndex(newIndex);
-  }, [activeStudioIndex]);
-
-  // When user navigates to a video, play the new active video
-  useEffect(() => {
-    // Avoid autoplaying on initial mount before user has touched/interacted with the section
-    if (!hasUserInteracted.current) {
-      return;
-    }
-
-    playActiveVideo(activeStudioIndex);
-
-    return () => {
-      const current = videoRefs.current[activeStudioIndex];
-      if (current && !current.paused) {
-        current.pause();
-      }
-    };
+    playActiveVideo(newIndex);
   }, [activeStudioIndex, playActiveVideo]);
 
   // Seamless Infinite Loop Navigation (Prev / Next)
@@ -157,7 +160,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     handleSelectWork(nextIndex);
   }, [activeStudioIndex, totalWorks, handleSelectWork]);
 
-  // Toggle Play / Pause (Stop) for the active focused video
+  // Toggle Play / Pause for the active focused video
   const toggleStudioPlay = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     hasUserInteracted.current = true;
@@ -165,25 +168,13 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     const activeVideo = videoRefs.current[activeStudioIndex];
     if (!activeVideo) return;
 
-    if (!activeVideo.paused) {
+    if (!activeVideo.paused && isStudioPlaying) {
       activeVideo.pause();
       setIsStudioPlaying(false);
+      setIsBuffering(false);
     } else {
-      activeVideo.muted = false;
-      const playPromise = activeVideo.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsStudioPlaying(true);
-          })
-          .catch((err) => {
-            console.warn('Playback with audio blocked, falling back to muted', err);
-            activeVideo.muted = true;
-            activeVideo.play()
-              .then(() => setIsStudioPlaying(true))
-              .catch(() => setIsStudioPlaying(false));
-          });
-      }
+      setIsBuffering(true);
+      playActiveVideo(activeStudioIndex);
     }
   };
 
@@ -270,9 +261,10 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     const isSmallMobile = windowWidth < 640;
 
     // On mobile phones (<640px), hide cards beyond +/- 1 to prevent lateral overflow or arrow collision
+    // Use visibility: hidden instead of display: none to keep video memory buffered and prevent decoder teardown
     if ((isSmallMobile && absOffset > 1) || absOffset > 2) {
       return {
-        display: 'none',
+        visibility: 'hidden' as const,
         opacity: 0,
         pointerEvents: 'none' as const,
       };
@@ -499,9 +491,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
               const absOffset = Math.abs(offset);
               const isMobile = windowWidth < 640;
 
-              // On mobile screens, skip mounting cards that are completely offscreen
-              if (isMobile && absOffset > 1) return null;
-
+              const shouldMountVideo = isMobile ? absOffset <= 1 : absOffset <= 2;
               const cardStyle = getCardStyle(offset);
 
               return (
@@ -517,39 +507,73 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       : 'shadow-xl hover:ring-1 hover:ring-white/40'
                   }`}
                 >
-                  {/* Clean Edge-to-Edge Video */}
-                  <video
-                    ref={(el) => { videoRefs.current[idx] = el; }}
-                    src={work.poster ? encodeURI(work.videoSrc) : `${encodeURI(work.videoSrc)}#t=0.1`}
-                    poster={work.poster}
-                    className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
-                    playsInline
-                    loop
-                    preload="auto"
-                    muted={!isCenter}
-                    onPlay={() => {
-                      if (isCenter) setIsStudioPlaying(true);
-                    }}
-                    onPause={() => {
-                      if (isCenter) setIsStudioPlaying(false);
-                    }}
-                    onEnded={isCenter ? handleNextWork : undefined}
-                    onClick={isCenter ? toggleStudioPlay : () => handleSelectWork(idx)}
-                  />
+                  {/* Clean Edge-to-Edge Video (Mount only active & adjacent cards to conserve mobile GPU decoders) */}
+                  {shouldMountVideo ? (
+                    <video
+                      ref={(el) => {
+                        videoRefs.current[idx] = el;
+                      }}
+                      src={encodeURI(work.videoSrc)}
+                      poster={work.poster ? encodeURI(work.poster) : undefined}
+                      className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
+                      loop
+                      preload={absOffset <= 1 ? 'auto' : 'metadata'}
+                      playsInline
+                      onPlay={() => {
+                        if (isCenter) {
+                          setIsStudioPlaying(true);
+                          setIsBuffering(false);
+                        }
+                      }}
+                      onPlaying={() => {
+                        if (isCenter) {
+                          setIsStudioPlaying(true);
+                          setIsBuffering(false);
+                        }
+                      }}
+                      onWaiting={() => {
+                        if (isCenter) setIsBuffering(true);
+                      }}
+                      onPause={() => {
+                        if (isCenter) {
+                          setIsStudioPlaying(false);
+                          setIsBuffering(false);
+                        }
+                      }}
+                      onEnded={isCenter ? handleNextWork : undefined}
+                    >
+                      <source src={encodeURI(work.videoSrc)} type="video/mp4" />
+                    </video>
+                  ) : null}
+
+                  {/* Guaranteed HD Poster Image Overlay (visible when paused, inactive, or for off-screen cards) */}
+                  {(!isStudioPlaying || !isCenter || !shouldMountVideo) && work.poster && (
+                    <img
+                      src={encodeURI(work.poster)}
+                      alt={work.title}
+                      className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[5] transition-opacity duration-300"
+                      loading="eager"
+                      decoding="async"
+                    />
+                  )}
 
                   {/* Frosted Glass Sheen Overlay */}
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/25 z-10" />
                   <div className="pointer-events-none absolute inset-0 rounded-2xl sm:rounded-3xl ring-1 ring-inset ring-white/20 z-10" />
 
-                  {/* Active Center Video: Controls (Play & Stop only) */}
+                  {/* Active Center Video: Controls */}
                   {isCenter ? (
                     <>
-                      {/* Center Play / Pause Option (No Captions) */}
+                      {/* Center Play / Pause / Buffering Option */}
                       <div 
                         onClick={toggleStudioPlay}
                         className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer group/centerplay"
                       >
-                        {!isStudioPlaying ? (
+                        {isBuffering ? (
+                          <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-xl border border-white/30">
+                            <div className="w-6 h-6 sm:w-7 sm:h-7 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                          </div>
+                        ) : !isStudioPlaying ? (
                           <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-[#FF3B14]/90 hover:bg-[#FF3B14] backdrop-blur-md text-white flex items-center justify-center shadow-[0_0_35px_rgba(255,59,20,0.6)] hover:scale-110 active:scale-95 transition-all border border-white/30">
                             <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-white ml-1 text-white" />
                           </div>

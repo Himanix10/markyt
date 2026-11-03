@@ -30,10 +30,12 @@ export const VideoShowcaseModal: React.FC<VideoShowcaseModalProps> = ({
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isModalFrameReady, setIsModalFrameReady] = useState(false);
 
   useEffect(() => {
     if (video) {
       setIsPlaying(true);
+      setIsModalFrameReady(false);
       setCurrentTime(0);
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
@@ -150,14 +152,32 @@ export const VideoShowcaseModal: React.FC<VideoShowcaseModalProps> = ({
             <video
               ref={videoRef}
               src={encodeURI(video.videoSrc)}
+              poster={video.poster ? encodeURI(video.poster) : undefined}
               className="w-full h-full object-contain bg-black max-h-[60vh] lg:max-h-none"
               style={{ objectFit: 'contain' }}
               loop
               playsInline
-              preload="metadata"
+              preload="auto"
+              defaultMuted={true}
               onTimeUpdate={handleTimeUpdate}
+              onPlay={() => setIsPlaying(true)}
+              onPlaying={() => setIsModalFrameReady(true)}
+              onPause={() => setIsPlaying(false)}
               onClick={togglePlay}
-            />
+            >
+              <source src={encodeURI(video.videoSrc)} type="video/mp4" />
+            </video>
+
+            {video.poster && (
+              <img
+                src={encodeURI(video.poster)}
+                alt={video.title}
+                className={`absolute inset-0 w-full h-full object-contain pointer-events-none z-[5] transition-opacity duration-300 ${
+                  isModalFrameReady && isPlaying ? 'opacity-0' : 'opacity-100'
+                }`}
+                loading="eager"
+              />
+            )}
 
             {/* In-Video 9:16 Overlays */}
             {/* Top Brand & Vertical Badge */}

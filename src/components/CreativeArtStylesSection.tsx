@@ -5,6 +5,7 @@ interface ArtStyleItem {
   id: string;
   name: string;
   src: string;
+  poster: string;
 }
 
 const ART_STYLES: ArtStyleItem[] = [
@@ -12,21 +13,25 @@ const ART_STYLES: ArtStyleItem[] = [
     id: 'electric-2d-doodle',
     name: 'Electric 2D Doodle',
     src: '/showcase-gifs/showcase_1.mp4',
+    poster: '/showcase-gifs/showcase_1.jpg',
   },
   {
     id: 'mixed-media-sketch',
     name: 'Mixed-Media Sketch',
     src: '/showcase-gifs/showcase_2.mp4',
+    poster: '/showcase-gifs/showcase_2.jpg',
   },
   {
     id: 'die-cut-paper-sticker',
     name: 'Die-Cut Paper Sticker',
     src: '/showcase-gifs/showcase_3.mp4',
+    poster: '/showcase-gifs/showcase_3.jpg',
   },
   {
     id: 'meadow-storybook-cel',
     name: 'Meadow Storybook Cel',
     src: '/showcase-gifs/showcase_4.mp4',
+    poster: '/showcase-gifs/showcase_4.jpg',
   },
 ];
 
@@ -38,34 +43,80 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
   const [activeModalStyle, setActiveModalStyle] = useState<ArtStyleItem | null>(null);
+  const [videoLoaded, setVideoLoaded] = useState<{ [key: number]: boolean }>({});
 
-  // Optimized IntersectionObserver: Only play when section is in view, pause when offscreen
+  // Play immediately when user enters the section, keep playing continuously, pause when user leaves
   useEffect(() => {
     const target = sectionRef.current;
     if (!target) return;
 
+    const startAllVideos = () => {
+      videoRefs.current.forEach((video) => {
+        if (!video) return;
+        video.defaultMuted = true;
+        video.muted = true;
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Autoplay silently handled with muted
+          });
+        }
+      });
+    };
+
+    const pauseAllVideos = () => {
+      videoRefs.current.forEach((video) => {
+        if (video && !video.paused) {
+          video.pause();
+        }
+      });
+    };
+
+    // 1. IntersectionObserver for instant response
     const observer = new IntersectionObserver(
       (entries) => {
-        const isVisible = entries[0].isIntersecting;
-        videoRefs.current.forEach((video) => {
-          if (!video) return;
-          if (isVisible) {
-            if (video.paused) {
-              video.muted = true;
-              video.play().catch(() => {});
-            }
-          } else {
-            if (!video.paused) {
-              video.pause();
-            }
-          }
-        });
+        const isVisible = entries[0]?.isIntersecting ?? false;
+        if (isVisible) {
+          startAllVideos();
+        } else {
+          pauseAllVideos();
+        }
       },
-      { rootMargin: '200px 0px 200px 0px' }
+      { threshold: 0.05, rootMargin: '100px 0px 100px 0px' }
     );
 
     observer.observe(target);
-    return () => observer.disconnect();
+
+    // 2. Direct viewport check on scroll & touch to overcome strict mobile power-savers
+    let ticking = false;
+    const handleViewportCheck = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        if (target) {
+          const rect = target.getBoundingClientRect();
+          const inView = rect.top < window.innerHeight + 100 && rect.bottom > -100;
+          if (inView) {
+            startAllVideos();
+          } else {
+            pauseAllVideos();
+          }
+        }
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', handleViewportCheck, { passive: true });
+    window.addEventListener('touchmove', handleViewportCheck, { passive: true });
+
+    // Initial check on mount
+    handleViewportCheck();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleViewportCheck);
+      window.removeEventListener('touchmove', handleViewportCheck);
+    };
   }, []);
 
   return (
@@ -105,16 +156,27 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
               >
                 <video
                   ref={(el) => {
+                    if (el) {
+                      el.defaultMuted = true;
+                      el.muted = true;
+                    }
                     videoRefs.current[idx] = el;
                   }}
                   src={style.src}
+                  poster={style.poster}
+                  autoPlay
                   loop
                   muted
                   playsInline
-                  preload="metadata"
+                  preload="auto"
+                  onPlaying={() => setVideoLoaded((prev) => ({ ...prev, [idx]: true }))}
                   className="w-full h-full object-cover select-none pointer-events-none"
                   aria-label={style.name}
-                />
+                >
+                  <source src={style.src} type="video/mp4" />
+                </video>
+
+
               </div>
 
               {/* Only Caption: Art-style name */}
@@ -151,6 +213,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
               <video
                 key={activeModalStyle.src}
                 src={activeModalStyle.src}
+                poster={activeModalStyle.poster}
                 autoPlay
                 loop
                 muted

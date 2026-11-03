@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  ArrowUpRight, 
-  Menu, 
-  X, 
-  Sparkles, 
-  Flame, 
-  Compass, 
-  Layers, 
-  FileSpreadsheet, 
-  HelpCircle, 
+import {
+  ArrowUpRight,
+  Menu,
+  X,
+  Sparkles,
+  Flame,
+  Compass,
+  Layers,
+  FileSpreadsheet,
+  HelpCircle,
   PhoneCall,
   Zap,
   Video,
@@ -32,7 +32,7 @@ interface HeaderProps {
   onToggleMenu?: (isOpen?: boolean) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
+export const Header: React.FC<HeaderProps> = ({
   onOpenQuestionnaire,
   isMenuOpen,
   onToggleMenu,
@@ -52,50 +52,50 @@ export const Header: React.FC<HeaderProps> = ({
 
   // Nav items: Who We Are, Our Creatives, Social Media Mgmt, Websites, Contact Us, and FAQ
   const navLinks = [
-    { 
-      name: 'Who We Are', 
-      href: '#who-we-are', 
-      id: 'who-we-are', 
+    {
+      name: 'Who We Are',
+      href: '#who-we-are',
+      id: 'who-we-are',
       icon: Users,
       badge: null,
       desc: 'Our story, live data telemetry & full service capabilities',
     },
-    { 
-      name: 'Our Creatives', 
-      href: '#creatives', 
-      id: 'creatives', 
-      icon: Video, 
+    {
+      name: 'Our Creatives',
+      href: '#creatives',
+      id: 'creatives',
+      icon: Video,
       badge: null,
       desc: 'In-site creative showcase & verified campaigns',
     },
-    { 
-      name: 'Social Media Mgmt', 
-      href: '#social-media-mgmt', 
-      id: 'social-media-mgmt', 
-      icon: Instagram, 
+    {
+      name: 'Social Media Mgmt',
+      href: '#social-media-mgmt',
+      id: 'social-media-mgmt',
+      icon: Instagram,
       badge: null,
       desc: 'Organic Reels, aesthetic feeds, content calendars & community growth',
     },
-    { 
-      name: 'Websites', 
-      href: '#website-services', 
-      id: 'website-services', 
-      icon: Globe, 
+    {
+      name: 'Websites',
+      href: '#website-services',
+      id: 'website-services',
+      icon: Globe,
       badge: null,
       desc: 'Bespoke high-converting websites, fast load speeds & seamless mobile experiences',
     },
-    { 
-      name: 'Contact Us', 
-      href: '#get-in-touch', 
-      id: 'get-in-touch', 
-      icon: PhoneCall, 
+    {
+      name: 'Contact Us',
+      href: '#get-in-touch',
+      id: 'get-in-touch',
+      icon: PhoneCall,
       badge: null,
       desc: 'Direct strategy line, WhatsApp intake & validation sprint',
     },
-    { 
-      name: 'FAQ', 
-      href: '#faq', 
-      id: 'faq', 
+    {
+      name: 'FAQ',
+      href: '#faq',
+      id: 'faq',
       icon: HelpCircle,
       badge: null,
       desc: 'Straight answers on ₹5,000 budget cap, asset ownership & zero lock-in',
@@ -243,28 +243,27 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300">
-      
+
 
 
       {/* Main Modernized Navbar with iPhone Liquid Glass Aesthetic */}
       <nav
-        className={`relative w-full transition-all duration-300 ${
-          isScrolled
+        className={`relative w-full transition-all duration-300 ${isScrolled
             ? 'bg-gradient-to-b from-white/95 via-[#FBF9F5]/90 to-slate-200/40 backdrop-blur-2xl backdrop-saturate-150 border-b border-black/[0.08] shadow-[0_6px_28px_rgba(0,0,0,0.06)] py-2 sm:py-2.5'
             : 'bg-gradient-to-b from-white/90 via-[#FBF9F5]/80 to-slate-200/30 backdrop-blur-xl backdrop-saturate-150 border-b border-black/[0.04] py-2.5 sm:py-3'
-        }`}
+          }`}
       >
         {/* Optical Gray-to-White Gradient Beam below navigation for liquid glass refraction & shine */}
-        <div 
+        <div
           aria-hidden="true"
           className="absolute -bottom-5 left-0 right-0 h-5 bg-gradient-to-b from-slate-300/25 via-slate-200/10 to-transparent pointer-events-none"
         />
 
         <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 xl:gap-3">
-          
+
           {/* Bold Brand Identity with Transparent PNG Logo */}
-          <a 
-            href="#" 
+          <a
+            href="#"
             onClick={handleLogoClick}
             className="flex items-center group shrink-0 select-none py-1"
             aria-label="MARKYT Home"
@@ -283,11 +282,11 @@ export const Header: React.FC<HeaderProps> = ({
           {/* iPhone Liquid Glass Pill Bar: Floating dynamic island with optical gray-to-white sheen */}
           <div className="relative hidden md:flex items-center shrink min-w-0">
             {/* Ambient specular back-glow behind the pill to make glass caustic shine */}
-            <div 
+            <div
               aria-hidden="true"
               className="absolute -inset-1 rounded-full bg-gradient-to-r from-slate-200/40 via-white/80 to-slate-200/40 blur-md pointer-events-none -z-10"
             />
-            
+
             <div className="flex items-center gap-0.5 xl:gap-1 bg-gradient-to-b from-white/95 via-white/70 to-slate-100/60 backdrop-blur-2xl px-1.5 xl:px-2 py-1 rounded-full border border-white/95 shadow-[0_8px_30px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1),inset_0_-1px_1px_rgba(0,0,0,0.04)]">
               {navLinks.map((link) => {
                 const Icon = link.icon;
@@ -297,15 +296,13 @@ export const Header: React.FC<HeaderProps> = ({
                     key={link.name}
                     href={link.href}
                     onClick={(e) => handleLinkClick(e, link.href)}
-                    className={`relative flex items-center gap-1 xl:gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-full text-[11px] xl:text-xs font-semibold transition-all duration-200 group shrink-0 select-none ${
-                      isActive 
-                        ? 'bg-white text-slate-950 font-bold shadow-[0_2px_10px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,1)] border border-black/[0.04]' 
+                    className={`relative flex items-center gap-1 xl:gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-full text-[11px] xl:text-xs font-semibold transition-all duration-200 group shrink-0 select-none ${isActive
+                        ? 'bg-white text-slate-950 font-bold shadow-[0_2px_10px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,1)] border border-black/[0.04]'
                         : 'text-slate-600 hover:text-slate-950 hover:bg-white/80'
-                    }`}
+                      }`}
                   >
-                    <Icon className={`w-3.5 h-3.5 transition-colors shrink-0 ${
-                      isActive ? 'text-[#FF3B14]' : 'text-slate-400 group-hover:text-slate-700'
-                    }`} />
+                    <Icon className={`w-3.5 h-3.5 transition-colors shrink-0 ${isActive ? 'text-[#FF3B14]' : 'text-slate-400 group-hover:text-slate-700'
+                      }`} />
                     <span className="tracking-tight whitespace-nowrap">{link.name}</span>
                     {link.badge && (
                       <span className="text-[8px] font-mono font-bold uppercase px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300/40 leading-none tracking-tight">
@@ -334,7 +331,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* High-End Floating Drawer Menu (Centered, Focused max-w-lg, Never Stretched!) */}
         <AnimatePresence>
           {menuOpen && (
-            <div 
+            <div
               className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-md transition-all"
               onClick={() => setMenuOpen(false)}
             >
@@ -383,18 +380,16 @@ export const Header: React.FC<HeaderProps> = ({
                         key={link.name}
                         href={link.href}
                         onClick={(e) => handleLinkClick(e, link.href)}
-                        className={`group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl transition-all border ${
-                          isActive
+                        className={`group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl transition-all border ${isActive
                             ? 'bg-white border-[#FF3B14]/40 shadow-sm'
                             : 'bg-white/80 hover:bg-white border-black/5 hover:border-black/15 hover:shadow-xs'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-3 sm:gap-3.5">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                            isActive 
-                              ? 'bg-[#FF3B14] text-white shadow-xs' 
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isActive
+                              ? 'bg-[#FF3B14] text-white shadow-xs'
                               : 'bg-slate-100 text-slate-700 group-hover:bg-[#FF3B14]/10 group-hover:text-[#FF3B14]'
-                          }`}>
+                            }`}>
                             <Icon className="w-5 h-5" />
                           </div>
 

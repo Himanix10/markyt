@@ -1,5 +1,6 @@
 export interface CampaignProofData {
   campaign: string;
+  campaignType?: string; // e.g. 'Carousel', 'Video', 'Reel'
   isDayOne?: boolean;
   isPurchase?: boolean;
   badge?: {
@@ -29,59 +30,77 @@ export const CAMPAIGN_PROOF_ROWS: CampaignProofData[] = [
     budgetNote: '₹10.00K spent'
   },
   {
-    campaign: 'Premium Wooden Slabs (Carousel)',
+    campaign: 'Premium Wooden Slabs',
+    campaignType: 'Carousel',
     status: 'Active',
-    results: 132,
+    results: 200,
     resultsUnit: 'conversations',
-    costPerResult: '₹27.94',
+    costPerResult: '₹27.89',
     costPerUnit: 'per conv.',
-    amountSpent: '₹3,688.08',
+    amountSpent: '₹5,550.58',
     budgetNote: '₹3.69K spent'
   },
   {
-    campaign: 'Premium Wooden Slabs (Video)',
+    campaign: 'Premium Wooden Slabs',
+    campaignType: 'Video',
     status: 'Active',
-    results: 101,
+    results: 154,
     resultsUnit: 'conversations',
-    costPerResult: '₹46.12',
+    costPerResult: '₹72.38',
     costPerUnit: 'per conv.',
-    amountSpent: '₹4,658.17',
+    amountSpent: '₹11,146.68',
     budgetNote: '₹5,000 budget'
   },
   {
     campaign: 'Skin Clinic',
-    status: 'Active',
-    results: 60,
+    status: 'Completed',
+    results: 68,
     resultsUnit: 'conversations',
-    costPerResult: '₹62.98',
+    costPerResult: '₹62.31',
     costPerUnit: 'per conv.',
-    amountSpent: '₹3,778.80',
+    amountSpent: '₹4,237.27',
     budgetNote: '₹3.78K spent'
   },
   {
     campaign: 'Fitness Coach',
     status: 'Active',
-    results: 15,
+    results: 30,
     resultsUnit: 'conversations',
-    costPerResult: '₹62.62',
+    costPerResult: '₹86.03',
     costPerUnit: 'per conv.',
-    amountSpent: '₹939.27',
+    amountSpent: '₹2,580.83',
     budgetNote: 'Ad set budget'
   },
   {
     campaign: 'Therapist',
-    isDayOne: true,
-    badge: {
-      text: 'Day 2 Data',
-      variant: 'amber'
-    },
     status: 'Active',
-    results: 6,
+    results: 13,
     resultsUnit: 'conversations',
-    costPerResult: '₹71.82',
+    costPerResult: '₹126.64',
     costPerUnit: 'per conv.',
-    amountSpent: '₹430.92',
+    amountSpent: '₹1,646.26',
+    budgetNote: 'Ad set budget'
+  },
+  {
+    campaign: 'Clothing Brand',
+    isPurchase: true,
+    status: 'Active',
+    results: 32,
+    resultsUnit: 'website purchases',
+    costPerResult: '₹273.25',
+    costPerUnit: 'per purchase',
+    amountSpent: '₹8,743.90',
+    budgetNote: 'Ad set budget'
+  },
+  {
+    campaign: 'Clothing Brand',
+    isPurchase: true,
+    status: 'Completed',
+    results: 36,
+    resultsUnit: 'website purchases',
+    costPerResult: '₹120.35',
+    costPerUnit: 'per purchase',
+    amountSpent: '₹4,332.44',
     budgetNote: 'Ad set budget'
   }
 ];
-

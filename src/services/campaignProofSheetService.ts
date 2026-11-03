@@ -121,21 +121,32 @@ export const parseCsvToRows = (csvText: string): CampaignProofData[] => {
       }
     }
 
+    // Extract campaign type tag like '(Carousel)', '(Video)', '(Reels)'
+    let campaignType = '';
+    const typeMatch = rawCampaign.match(/\((carousel|video|reels?|static|catalog)\)/i);
+    if (typeMatch) {
+      campaignType = typeMatch[1].charAt(0).toUpperCase() + typeMatch[1].slice(1).toLowerCase();
+      rawCampaign = rawCampaign.replace(typeMatch[0], '').trim();
+    }
+
     const statusRaw = getVal(['delivery', 'status'], 1).toLowerCase();
     const status: 'Active' | 'Completed' = statusRaw.includes('complete') ? 'Completed' : 'Active';
 
     const resultsRaw = getVal(['results', 'result'], 2);
     const results = parseInt(resultsRaw.replace(/[^0-9]/g, ''), 10) || 0;
 
-    const resultsUnit = getVal(['resulttype', 'unit', 'type'], 3) || 'conversations';
-    const isPurchase = resultsUnit.toLowerCase().includes('purchase') || rawCampaign.toLowerCase().includes('clothing');
+    const rawUnit = getVal(['resulttype', 'unit', 'type'], 3) || 'conversations';
+    const isPurchase = rawUnit.toLowerCase().includes('purchase') || rawCampaign.toLowerCase().includes('clothing');
+    
+    // Clean normalized unit strings to prevent ugly line wraps
+    const resultsUnit = isPurchase ? 'website purchases' : 'conversations';
 
     let costPerResult = getVal(['costresult', 'cost', 'cpr'], 4);
     if (costPerResult && !costPerResult.startsWith('₹') && !costPerResult.startsWith('$')) {
       costPerResult = `₹${costPerResult}`;
     }
 
-    const costPerUnit = getVal(['costbasis', 'basis', 'per'], 5) || (isPurchase ? 'per purchase' : 'per conv.');
+    const costPerUnit = isPurchase ? 'per purchase' : (getVal(['costbasis', 'basis', 'per'], 5) || 'per conv.');
 
     let amountSpent = getVal(['amountspent', 'spent', 'amount'], 6);
     if (amountSpent && !amountSpent.startsWith('₹') && !amountSpent.startsWith('$')) {
@@ -146,6 +157,7 @@ export const parseCsvToRows = (csvText: string): CampaignProofData[] => {
 
     rows.push({
       campaign: rawCampaign,
+      campaignType: campaignType || undefined,
       status,
       isPurchase,
       isDayOne: badgeText.toLowerCase().includes('day'),
@@ -186,19 +198,30 @@ export const normalizeJsonRows = (data: any): CampaignProofData[] => {
       badgeText = typeof bRaw === 'string' ? bRaw : (bRaw?.text || '');
     }
 
+    // Extract campaign type tag like '(Carousel)', '(Video)', '(Reels)'
+    let campaignType = String(item.campaignType || item.CampaignType || '').trim();
+    if (!campaignType) {
+      const typeMatch = rawCampaign.match(/\((carousel|video|reels?|static|catalog)\)/i);
+      if (typeMatch) {
+        campaignType = typeMatch[1].charAt(0).toUpperCase() + typeMatch[1].slice(1).toLowerCase();
+        rawCampaign = rawCampaign.replace(typeMatch[0], '').trim();
+      }
+    }
+
     const statusRaw = String(item.status || item.Status || item.delivery || item.Delivery || 'Active').trim().toLowerCase();
     const status: 'Active' | 'Completed' = statusRaw.includes('complete') ? 'Completed' : 'Active';
 
     const results = Number(item.results ?? item.Results ?? 0) || 0;
-    const resultsUnit = String(item.resultsUnit || item.ResultsUnit || item.resultType || (rawCampaign.toLowerCase().includes('clothing') ? 'website purchases' : 'conversations')).trim();
-    const isPurchase = Boolean(item.isPurchase) || resultsUnit.toLowerCase().includes('purchase');
+    const rawUnit = String(item.resultsUnit || item.ResultsUnit || item.resultType || (rawCampaign.toLowerCase().includes('clothing') ? 'website purchases' : 'conversations')).trim();
+    const isPurchase = Boolean(item.isPurchase) || rawUnit.toLowerCase().includes('purchase') || rawCampaign.toLowerCase().includes('clothing');
+    const resultsUnit = isPurchase ? 'website purchases' : 'conversations';
 
     let costPerResult = String(item.costPerResult || item.CostPerResult || item.cost || item.cpr || '₹0.00').trim();
     if (costPerResult && !costPerResult.startsWith('₹') && !costPerResult.startsWith('$')) {
       costPerResult = `₹${costPerResult}`;
     }
 
-    const costPerUnit = String(item.costPerUnit || item.CostPerUnit || item.costBasis || (isPurchase ? 'per purchase' : 'per conv.')).trim();
+    const costPerUnit = isPurchase ? 'per purchase' : String(item.costPerUnit || item.CostPerUnit || item.costBasis || 'per conv.').trim();
 
     let amountSpent = String(item.amountSpent || item.AmountSpent || item.spent || item.amount || '₹0.00').trim();
     if (amountSpent && !amountSpent.startsWith('₹') && !amountSpent.startsWith('$')) {
@@ -209,6 +232,7 @@ export const normalizeJsonRows = (data: any): CampaignProofData[] => {
 
     return {
       campaign: rawCampaign,
+      campaignType: campaignType || undefined,
       status,
       isPurchase,
       isDayOne: badgeText.toLowerCase().includes('day'),
