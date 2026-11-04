@@ -235,21 +235,24 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     viewObserver.observe(section);
 
     // Responsive GSAP ScrollTrigger with momentum scrub
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
     const pinTrigger = ScrollTrigger.create({
       trigger: stage,
       start: 'top top',
-      end: '+=350%',
+      end: isMobile ? '+=100%' : '+=350%',
       pin: stage,
       pinSpacing: true,
       scrub: 0.5,
       onUpdate: (self) => {
-        const frameIdx = Math.min(
-          Math.max(Math.round(self.progress * (TOTAL_FRAMES - 1)), 0),
-          TOTAL_FRAMES - 1
-        );
-        if (frameIdx !== currentFrameIdxRef.current) {
-          currentFrameIdxRef.current = frameIdx;
-          drawFrame(frameIdx);
+        if (!isMobile) {
+          const frameIdx = Math.min(
+            Math.max(Math.round(self.progress * (TOTAL_FRAMES - 1)), 0),
+            TOTAL_FRAMES - 1
+          );
+          if (frameIdx !== currentFrameIdxRef.current) {
+            currentFrameIdxRef.current = frameIdx;
+            drawFrame(frameIdx);
+          }
         }
       },
     });
@@ -328,11 +331,22 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         className="relative w-full h-[100svh] min-h-screen overflow-hidden flex flex-col justify-start items-center"
         style={{ backgroundColor: SECTION_BG }}
       >
-        {/* Full-screen high-quality canvas artwork */}
-        <div className="absolute inset-0 z-10 pointer-events-none w-full h-full">
+        {/* Desktop Version: Full-screen edge-to-edge 93-frame canvas scroll animation */}
+        <div className="hidden md:block absolute inset-0 z-10 pointer-events-none w-full h-full">
           <canvas
             ref={canvasRef}
             className="w-full h-full block"
+          />
+        </div>
+
+        {/* Mobile Version: High-resolution full 9:16 portrait 3D perspective artwork (matching user spec exactly) */}
+        <div className="block md:hidden absolute inset-0 z-10 pointer-events-none w-full h-full flex items-center justify-center p-2 sm:p-4">
+          <img
+            src="/images/perspective-sketch-mobile-exact.png"
+            alt="3D Perspective Creative"
+            className="w-full h-full object-contain max-h-[100svh] block select-none pointer-events-none"
+            loading="eager"
+            decoding="async"
           />
         </div>
 
@@ -340,7 +354,7 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
 
         {/* Loading Indicator */}
         {!isInitialReady && (
-          <div className="absolute bottom-8 right-8 z-40 pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-mono text-slate-600">
+          <div className="hidden md:flex absolute bottom-8 right-8 z-40 pointer-events-none items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-mono text-slate-600">
             <span className="w-2 h-2 rounded-full bg-[#FF3B14] animate-ping" />
             <span>
               Loading 3D perspective... {Math.round((loadedCount / TOTAL_FRAMES) * 100)}%
