@@ -13,18 +13,15 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 
   const imagesRef = useRef<HTMLImageElement[]>([]);
-  const [loadedCount, setLoadedCount] = useState(0);
-  const [isPreloading, setIsPreloading] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const isPreloadingRef = useRef<boolean>(false);
+  const rafPendingRef = useRef<boolean>(false);
+  const [isInitialReady, setIsInitialReady] = useState<boolean>(false);
 
-  // Layout & frame state
-  const scrollProgressRef = useRef(0);
-  const currentFrameFloatRef = useRef(0);
-  const currentFrameIdxRef = useRef(0);
-  const rafIdRef = useRef<number | null>(null);
-  const isAnimatingRef = useRef<boolean>(false);
+  // Frame tracking state (stored in refs to avoid any React re-render during scroll)
+  const currentFrameIdxRef = useRef<number>(0);
 
   // Cached layout dimensions
   const layoutRef = useRef({
@@ -34,138 +31,18 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     dh: 1080,
     dx: 0,
     dy: 0,
+    dpr: 1,
   });
 
-  // Check prefers-reduced-motion
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-
-  // Preload frames as section approaches viewport
-  useEffect(() => {
-    const target = sectionRef.current || stageRef.current;
-    if (!target) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isPreloading) {
-          setIsPreloading(true);
-        }
-      },
-      { rootMargin: '800px 0px 800px 0px' }
-    );
-
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [isPreloading]);
-
-  // Load all 93 frames (30fps sequence)
-  useEffect(() => {
-    if (!isPreloading) return;
-
-    const imgs: HTMLImageElement[] = [];
-    let count = 0;
-
-    for (let i = 1; i <= TOTAL_FRAMES; i++) {
-      const frameNum = String(i).padStart(3, '0');
-      const img = new Image();
-      img.src = `/scroll-frames/full/frame_${frameNum}.webp`;
-      img.onload = () => {
-        count++;
-        setLoadedCount(count);
-      };
-      img.onerror = () => {
-        count++;
-        setLoadedCount(count);
-      };
-      imgs.push(img);
-    }
-
-    imagesRef.current = imgs;
-  }, [isPreloading]);
-
-  // Compute Layout Geometry (Full-screen edge-to-edge, top-anchored with zero upper-part cut-off)
-  const computeLayout = useCallback(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    const rect = stage.getBoundingClientRect();
-    const stageW = Math.round(rect.width);
-    const stageH = Math.round(rect.height);
-
-    if (stageW === 0 || stageH === 0) return;
-
-    const isMobile = stageW < 768;
-    const imgAspect = 1920 / 1080;
-    const stageAspect = stageW / stageH;
-
-    let dw: number;
-    let dh: number;
-    let dx: number;
-    let dy: number;
-
-    // Full-Screen edge-to-edge on desktop; Proportional balanced framing on mobile (matching Image 2)
-    if (stageW >= 768) {
-      // Desktop: Edge-to-edge full screen (100% UNTOUCHED)
-      dw = stageW;
-      dh = stageH;
-      dx = 0;
-      dy = 0;
-    } else {
-      // Mobile portrait: Tight, cohesive composition right below the tagline with no awkward gap
-      // People span ~958px centered at x=876 in the 1920x1080 master frame
-      const targetPeopleWidth = stageW * 0.88;
-      const scale = targetPeopleWidth / 958;
-      dw = Math.round(1920 * scale);
-      dh = Math.round(1080 * scale);
-      dx = Math.round(stageW / 2 - 876 * scale);
-      dy = Math.max(8, Math.round(stageH * 0.02));
-    }
-
-    layoutRef.current = {
-      stageW,
-      stageH,
-      dw,
-      dh,
-      dx,
-      dy,
-    };
-
-    // Update canvas resolution with devicePixelRatio for ultra-sharp Retina rendering
-    const canvas = canvasRef.current;
-    const dpr = isMobile ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 2);
-
-    if (canvas) {
-      canvas.width = Math.round(stageW * dpr);
-      canvas.height = Math.round(stageH * dpr);
-      canvas.style.width = `${stageW}px`;
-      canvas.style.height = `${stageH}px`;
-    }
-  }, []);
-
-  // Draw full frame on canvas
+  // Fast Draw Frame on cached Canvas Context
   const drawFrame = useCallback((frameIdx: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d', { alpha: false });
+    const ctx = ctxRef.current;
     if (!ctx) return;
 
     const { stageW, stageH, dw, dh, dx, dy } = layoutRef.current;
     if (stageW === 0 || stageH === 0) return;
 
-    const isMobile = stageW < 768;
-    const dpr = isMobile ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 2);
-
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-
-    // Clear background
+    // Fill background
     ctx.fillStyle = SECTION_BG;
     ctx.fillRect(0, 0, stageW, stageH);
 
@@ -175,48 +52,126 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     }
   }, []);
 
-  // Frame tick animation loop
-  const triggerRender = useCallback(() => {
-    if (isAnimatingRef.current) return;
-    isAnimatingRef.current = true;
+  // Compute Layout Geometry (Full-screen on desktop; tight, cohesive composition right below tagline on mobile)
+  const computeLayout = useCallback(() => {
+    const stage = stageRef.current;
+    const canvas = canvasRef.current;
+    if (!stage || !canvas) return;
 
-    const targetFrame = scrollProgressRef.current * (TOTAL_FRAMES - 1);
+    const rect = stage.getBoundingClientRect();
+    const stageW = Math.round(rect.width);
+    const stageH = Math.round(rect.height);
 
-    const tick = () => {
-      const current = currentFrameFloatRef.current;
-      const diff = targetFrame - current;
+    if (stageW === 0 || stageH === 0) return;
 
-      if (Math.abs(diff) < 0.05) {
-        currentFrameFloatRef.current = targetFrame;
-        const newIdx = Math.min(Math.max(Math.round(targetFrame), 0), TOTAL_FRAMES - 1);
-        if (newIdx !== currentFrameIdxRef.current) {
-          currentFrameIdxRef.current = newIdx;
-          drawFrame(newIdx);
-        }
-        isAnimatingRef.current = false;
-        rafIdRef.current = null;
-        return;
-      }
+    const isMobile = stageW < 768;
 
-      // Smooth 30fps lerp
-      currentFrameFloatRef.current = current + diff * 0.18;
-      const newIdx = Math.min(
-        Math.max(Math.round(currentFrameFloatRef.current), 0),
-        TOTAL_FRAMES - 1
-      );
+    let dw: number;
+    let dh: number;
+    let dx: number;
+    let dy: number;
 
-      if (newIdx !== currentFrameIdxRef.current) {
-        currentFrameIdxRef.current = newIdx;
-        drawFrame(newIdx);
-      }
+    if (!isMobile) {
+      // Desktop: Edge-to-edge full screen (100% UNTOUCHED)
+      dw = stageW;
+      dh = stageH;
+      dx = 0;
+      dy = 0;
+    } else {
+      // Mobile portrait: Tight, cohesive composition right below the tagline with zero awkward void
+      const targetPeopleWidth = stageW * 0.88;
+      const scale = targetPeopleWidth / 958;
+      dw = Math.round(1920 * scale);
+      dh = Math.round(1080 * scale);
+      dx = Math.round(stageW / 2 - 876 * scale);
+      dy = Math.max(8, Math.round(stageH * 0.02));
+    }
 
-      rafIdRef.current = requestAnimationFrame(tick);
+    // On mobile, dpr=1 ensures lightning-fast 60/120fps GPU fill rate without stutter
+    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+
+    layoutRef.current = {
+      stageW,
+      stageH,
+      dw,
+      dh,
+      dx,
+      dy,
+      dpr,
     };
 
-    rafIdRef.current = requestAnimationFrame(tick);
-  }, [drawFrame]);
+    // Update canvas buffer size & CSS size
+    canvas.width = Math.round(stageW * dpr);
+    canvas.height = Math.round(stageH * dpr);
+    canvas.style.width = `${stageW}px`;
+    canvas.style.height = `${stageH}px`;
 
-  // GSAP Pinning & ScrollTrigger
+    // Cache context with desynchronized flag for zero-latency direct screen pipeline
+    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true }) || canvas.getContext('2d', { alpha: false });
+    if (ctx) {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'medium'; // Fast hardware-accelerated bilinear filtering
+      ctxRef.current = ctx;
+    }
+  }, []);
+
+  // Preload frames when section is approaching viewport
+  useEffect(() => {
+    const target = sectionRef.current || stageRef.current;
+    if (!target) return;
+
+    const startPreload = () => {
+      if (isPreloadingRef.current) return;
+      isPreloadingRef.current = true;
+
+      const imgs: HTMLImageElement[] = new Array(TOTAL_FRAMES);
+
+      // Load Frame 1 first with high priority for instant initial paint
+      const f1 = new Image();
+      f1.decoding = 'async';
+      f1.src = '/scroll-frames/full/frame_001.webp';
+      imgs[0] = f1;
+
+      const onFirstLoad = () => {
+        setIsInitialReady(true);
+        computeLayout();
+        drawFrame(0);
+      };
+
+      if (f1.complete) {
+        onFirstLoad();
+      } else {
+        f1.onload = onFirstLoad;
+        f1.onerror = onFirstLoad;
+      }
+
+      // Preload remaining frames in batches without triggering React re-renders
+      for (let i = 2; i <= TOTAL_FRAMES; i++) {
+        const frameNum = String(i).padStart(3, '0');
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = `/scroll-frames/full/frame_${frameNum}.webp`;
+        imgs[i - 1] = img;
+      }
+
+      imagesRef.current = imgs;
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          startPreload();
+        }
+      },
+      { rootMargin: '800px 0px 800px 0px' }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [computeLayout, drawFrame]);
+
+  // GSAP Pinning & ScrollTrigger with hardware-accelerated RAF updates
   useEffect(() => {
     const stage = stageRef.current;
     const section = sectionRef.current;
@@ -224,36 +179,31 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
 
     computeLayout();
 
-    const viewObserver = new IntersectionObserver(
-      (entries) => {
-        const inView = entries[0].isIntersecting;
-        if (!inView && rafIdRef.current !== null) {
-          cancelAnimationFrame(rafIdRef.current);
-          rafIdRef.current = null;
-          isAnimatingRef.current = false;
-        }
-      },
-      { rootMargin: '100px 0px 100px 0px' }
-    );
-    viewObserver.observe(section);
-
-    // Responsive GSAP ScrollTrigger with momentum scrub (animates on both mobile and desktop)
     const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+
+    // Pinning with smooth scrub and zero-overhead RAF frame draw
     const pinTrigger = ScrollTrigger.create({
       trigger: stage,
       start: 'top top',
-      end: isMobile ? '+=250%' : '+=350%',
+      end: isMobile ? '+=220%' : '+=320%',
       pin: stage,
       pinSpacing: true,
-      scrub: 0.5,
+      scrub: 0.35, // Responsive, buttery momentum scrub
       onUpdate: (self) => {
         const frameIdx = Math.min(
           Math.max(Math.round(self.progress * (TOTAL_FRAMES - 1)), 0),
           TOTAL_FRAMES - 1
         );
+
         if (frameIdx !== currentFrameIdxRef.current) {
           currentFrameIdxRef.current = frameIdx;
-          drawFrame(frameIdx);
+          if (!rafPendingRef.current) {
+            rafPendingRef.current = true;
+            requestAnimationFrame(() => {
+              drawFrame(currentFrameIdxRef.current);
+              rafPendingRef.current = false;
+            });
+          }
         }
       },
     });
@@ -263,7 +213,7 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     const handleResize = () => {
       if (
         typeof window !== 'undefined' &&
-        (window.innerWidth !== lastW || window.innerHeight !== lastH)
+        (Math.abs(window.innerWidth - lastW) > 10 || Math.abs(window.innerHeight - lastH) > 50)
       ) {
         lastW = window.innerWidth;
         lastH = window.innerHeight;
@@ -272,29 +222,22 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         drawFrame(currentFrameIdxRef.current);
       }
     };
+
     window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
       pinTrigger.kill();
-      viewObserver.disconnect();
       window.removeEventListener('resize', handleResize);
-      if (rafIdRef.current !== null) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
     };
-  }, [computeLayout, drawFrame, triggerRender]);
+  }, [computeLayout, drawFrame]);
 
-  // Initial draw once first frame loads
+  // Initial draw once ready
   useEffect(() => {
-    if (loadedCount >= 1) {
+    if (isInitialReady) {
       computeLayout();
-      ScrollTrigger.refresh();
-      const initialFrame = prefersReducedMotion ? TOTAL_FRAMES - 1 : 0;
-      drawFrame(initialFrame);
+      drawFrame(0);
     }
-  }, [loadedCount, computeLayout, drawFrame, prefersReducedMotion]);
-
-  const isInitialReady = loadedCount >= 1;
+  }, [isInitialReady, computeLayout, drawFrame]);
 
   return (
     <section
@@ -303,10 +246,7 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
       className="relative w-full select-none pb-12 md:pb-20"
       style={{ backgroundColor: SECTION_BG }}
     >
-      {/* =================================================================
-          The space between the perspective and the upper section
-          Where the text is placed
-         ================================================================= */}
+      {/* Tagline Header with tight mobile padding */}
       <div className="w-full flex flex-col items-center justify-center pt-6 pb-2 sm:pt-14 sm:pb-8 md:pt-24 md:pb-16 px-4">
         <div className="w-full max-w-[280px] sm:max-w-[340px] md:max-w-[420px] lg:max-w-[480px]">
           <picture className="w-full block">
@@ -323,36 +263,27 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         </div>
       </div>
 
-      {/* 
-        The Pin Stage: Exactly 100svh tall (100vh fallback), full screen.
-        Pinned by GSAP ScrollTrigger across 350% scroll distance with momentum scrub.
-      */}
+      {/* The Pin Stage: GPU-accelerated canvas stage */}
       <div
         ref={stageRef}
         className="relative w-full h-[100svh] min-h-screen overflow-hidden flex flex-col justify-start items-center"
-        style={{ backgroundColor: SECTION_BG }}
+        style={{
+          backgroundColor: SECTION_BG,
+          willChange: 'transform',
+          transform: 'translateZ(0)',
+        }}
       >
-        {/* Full-screen high-quality canvas artwork (animates on scroll on both mobile and desktop) */}
         <div className="absolute inset-0 z-10 pointer-events-none w-full h-full">
           <canvas
             ref={canvasRef}
             className="w-full h-full block"
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+            }}
           />
         </div>
-
-
-
-        {/* Loading Indicator */}
-        {!isInitialReady && (
-          <div className="absolute bottom-8 right-8 z-40 pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-mono text-slate-600">
-            <span className="w-2 h-2 rounded-full bg-[#FF3B14] animate-ping" />
-            <span>
-              Loading 3D perspective... {Math.round((loadedCount / TOTAL_FRAMES) * 100)}%
-            </span>
-          </div>
-        )}
       </div>
     </section>
   );
 };
-
