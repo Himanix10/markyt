@@ -14,7 +14,6 @@ import { FAQSection } from './components/FAQSection';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { CreativeProductionPage } from './components/CreativeProductionPage';
-import { StoryPerspectiveScrollSection } from './components/StoryPerspectiveScrollSection';
 import { SocialMediaMgmtSection } from './components/SocialMediaMgmtSection';
 import { CreativeArtStylesSection } from './components/CreativeArtStylesSection';
 import { WebsiteServicesSection } from './components/WebsiteServicesSection';
@@ -90,8 +89,6 @@ export default function App() {
           onOpenQuestionnaire={scrollToContact}
         />
 
-        {/* 10.5 3D Perspective Scroll: Been my thing since 2016. Now we are a team */}
-        <StoryPerspectiveScrollSection />
 
         {/* 11. If You're Just Here for the Creative - Art Styles Lookbook */}
         <CreativeArtStylesSection
