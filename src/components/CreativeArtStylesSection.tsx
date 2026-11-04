@@ -127,33 +127,8 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
 
     observer.observe(target);
 
-    let ticking = false;
-    const handleViewportCheck = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        if (target) {
-          const rect = target.getBoundingClientRect();
-          const inView = rect.top < window.innerHeight + 100 && rect.bottom > -100;
-          if (inView) {
-            startVisualVideos();
-          } else {
-            pauseAllVideos();
-          }
-        }
-        ticking = false;
-      });
-    };
-
-    window.addEventListener('scroll', handleViewportCheck, { passive: true });
-    window.addEventListener('touchmove', handleViewportCheck, { passive: true });
-
-    handleViewportCheck();
-
     return () => {
       observer.disconnect();
-      window.removeEventListener('scroll', handleViewportCheck);
-      window.removeEventListener('touchmove', handleViewportCheck);
     };
   }, []);
 
@@ -307,7 +282,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                       poster={video.poster}
                       loop
                       playsInline
-                      preload="metadata"
+                      preload="none"
                       onTimeUpdate={() => handleTimeUpdate(idx)}
                       onEnded={() => {
                         setPlayingAudioIndex(null);

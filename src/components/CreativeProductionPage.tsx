@@ -491,7 +491,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
               const absOffset = Math.abs(offset);
               const isMobile = windowWidth < 640;
 
-              const shouldMountVideo = isMobile ? absOffset <= 1 : absOffset <= 2;
+              const shouldMountVideo = isCenter; // High-performance: Mount only active center video to conserve GPU decoders
               const cardStyle = getCardStyle(offset);
 
               return (
@@ -517,7 +517,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       poster={work.poster ? encodeURI(work.poster) : undefined}
                       className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
                       loop
-                      preload={isMobile ? (isCenter ? 'metadata' : 'none') : (absOffset <= 1 ? 'auto' : 'metadata')}
+                      preload="auto"
                       playsInline
                       onPlay={() => {
                         if (isCenter) {
