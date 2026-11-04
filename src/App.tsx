@@ -100,7 +100,7 @@ export default function App() {
         />
 
         {/* 10.5 3D Perspective Scroll (Localhost & 3d=true Only) */}
-        {isLocalhost && <StoryPerspectiveScrollSection />}
+        <StoryPerspectiveScrollSection />
 
 
         {/* 11. If You're Just Here for the Creative - Art Styles Lookbook */}

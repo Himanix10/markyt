@@ -116,14 +116,14 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
       dx = 0;
       dy = 0;
     } else {
-      // Mobile portrait: Sized so all 3 figures, dome headroom, and floor grid are completely in view
+      // Mobile portrait: Tight, cohesive composition right below the tagline with no awkward gap
       // People span ~958px centered at x=876 in the 1920x1080 master frame
-      const targetPeopleWidth = stageW * 0.82;
+      const targetPeopleWidth = stageW * 0.88;
       const scale = targetPeopleWidth / 958;
       dw = Math.round(1920 * scale);
       dh = Math.round(1080 * scale);
       dx = Math.round(stageW / 2 - 876 * scale);
-      dy = Math.round((stageH - dh) / 2);
+      dy = Math.max(8, Math.round(stageH * 0.02));
     }
 
     layoutRef.current = {
@@ -307,7 +307,7 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
           The space between the perspective and the upper section
           Where the text is placed
          ================================================================= */}
-      <div className="w-full flex flex-col items-center justify-center pt-14 pb-10 sm:pt-20 sm:pb-14 md:pt-24 md:pb-16 px-4">
+      <div className="w-full flex flex-col items-center justify-center pt-6 pb-2 sm:pt-14 sm:pb-8 md:pt-24 md:pb-16 px-4">
         <div className="w-full max-w-[280px] sm:max-w-[340px] md:max-w-[420px] lg:max-w-[480px]">
           <picture className="w-full block">
             <source
