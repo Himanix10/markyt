@@ -34,12 +34,6 @@ const ART_STYLES: ArtStyleItem[] = [
     poster: '/showcase-gifs/showcase_4.jpg',
   },
   {
-    id: 'luxury-fragrance-lifestyle',
-    name: 'Luxury Fragrance & Lifestyle',
-    src: '/videos/zevaro-luxury-perfume.mp4?v=3',
-    poster: '/videos/posters/zevaro-luxury-perfume.jpg?v=3',
-  },
-  {
     id: 'minimalist-fashion-apparel',
     name: 'Minimalist Fashion & Apparel',
     src: '/videos/modest-fashion-apparel.mp4?v=3',
@@ -155,7 +149,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
         </div>
 
         {/* 4 GIFs / Videos horizontally visible at once */}
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 lg:gap-6 max-w-6xl mx-auto items-start">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-6 max-w-6xl mx-auto items-start">
           {ART_STYLES.map((style, idx) => (
             <div
               key={style.id}
