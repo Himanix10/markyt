@@ -15,7 +15,6 @@ import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { CreativeProductionPage } from './components/CreativeProductionPage';
 import { SocialMediaMgmtSection } from './components/SocialMediaMgmtSection';
-import { StoryPerspectiveScrollSection } from './components/StoryPerspectiveScrollSection';
 import { CreativeArtStylesSection } from './components/CreativeArtStylesSection';
 import { WebsiteServicesSection } from './components/WebsiteServicesSection';
 import { scrollToSection } from './utils/scrollHelper';
@@ -23,14 +22,6 @@ import { scrollToSection } from './utils/scrollHelper';
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const isLocalhost =
-    typeof window !== 'undefined' &&
-    (window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1' ||
-      window.location.hostname === '[::1]' ||
-      window.location.hostname.endsWith('.local') ||
-      Boolean(import.meta.env.DEV) ||
-      window.location.search.includes('3d=true'));
 
   useEffect(() => {
     // If there is a lingering hash (like #creatives from earlier), clean it up so the page starts clean at the top
@@ -98,10 +89,6 @@ export default function App() {
         <SocialMediaMgmtSection
           onOpenQuestionnaire={scrollToContact}
         />
-
-        {/* 10.5 3D Perspective Scroll (Localhost & 3d=true Only) */}
-        <StoryPerspectiveScrollSection />
-
 
         {/* 11. If You're Just Here for the Creative - Art Styles Lookbook */}
         <CreativeArtStylesSection
