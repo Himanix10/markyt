@@ -35,10 +35,17 @@ const ART_STYLES: ArtStyleItem[] = [
     poster: '/showcase-gifs/showcase_4.jpg',
   },
   {
+    id: 'luxury-fragrance-lifestyle',
+    name: 'Luxury Fragrance & Lifestyle',
+    src: '/videos/zevaro-luxury-perfume.mp4?v=6',
+    poster: '/videos/posters/zevaro-luxury-perfume.jpg?v=6',
+    hasAudio: true,
+  },
+  {
     id: 'minimalist-fashion-apparel',
     name: 'Minimalist Fashion & Apparel',
-    src: '/videos/modest-fashion-apparel.mp4?v=4',
-    poster: '/videos/posters/modest-fashion-apparel.jpg?v=3',
+    src: '/videos/modest-fashion-apparel.mp4?v=6',
+    poster: '/videos/posters/modest-fashion-apparel.jpg?v=6',
     hasAudio: true,
   },
 ];
@@ -55,7 +62,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
   const [activeModalStyle, setActiveModalStyle] = useState<ArtStyleItem | null>(null);
   const [playingAudioIndex, setPlayingAudioIndex] = useState<number | null>(null);
 
-  // Play GIF-style videos when section enters viewport; pause when user leaves
+  // Auto-play visual GIF-style loops when in viewport; audio videos remain paused on poster
   useEffect(() => {
     const target = sectionRef.current;
     if (!target) return;
@@ -63,7 +70,6 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
     const startVisualVideos = () => {
       videoRefs.current.forEach((video, idx) => {
         if (!video) return;
-        // Do not auto-play audio videos without explicit user gesture
         if (ART_STYLES[idx]?.hasAudio) return;
 
         video.defaultMuted = true;
@@ -84,7 +90,6 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
       setPlayingAudioIndex(null);
     };
 
-    // 1. IntersectionObserver for viewport entry
     const observer = new IntersectionObserver(
       (entries) => {
         const isVisible = entries[0]?.isIntersecting ?? false;
@@ -99,7 +104,6 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
 
     observer.observe(target);
 
-    // 2. Viewport check on scroll & touch
     let ticking = false;
     const handleViewportCheck = () => {
       if (ticking) return;
@@ -130,7 +134,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
     };
   }, []);
 
-  // Direct unmuted audio play/pause toggle with zero mute button
+  // Direct unmuted audio play/pause toggle with zero overlays or mute button
   const toggleAudioPlay = (idx: number, e: React.MouseEvent) => {
     e.stopPropagation();
     const video = videoRefs.current[idx];
@@ -140,9 +144,9 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
       video.pause();
       setPlayingAudioIndex(null);
     } else {
-      // Pause any other audio videos
+      // Pause any other active video
       videoRefs.current.forEach((v, i) => {
-        if (v && i !== idx && ART_STYLES[i]?.hasAudio && !v.paused) {
+        if (v && i !== idx && !v.paused) {
           v.pause();
         }
       });
@@ -155,7 +159,6 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
         playPromise
           .then(() => setPlayingAudioIndex(idx))
           .catch(() => {
-            // Autoplay fallback only if browser blocks unmuted
             video.muted = true;
             video.play().then(() => setPlayingAudioIndex(idx));
           });
@@ -195,8 +198,8 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
           </p>
         </div>
 
-        {/* Art Styles Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-6 max-w-6xl mx-auto items-start">
+        {/* 6 Art Styles Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 lg:gap-6 max-w-6xl mx-auto items-start">
           {ART_STYLES.map((style, idx) => {
             const isAudioVideo = Boolean(style.hasAudio);
             const isPlayingThisAudio = playingAudioIndex === idx;
@@ -253,7 +256,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                     <source src={style.src} type="video/mp4" />
                   </video>
 
-                  {/* Audio Video: HD Poster Overlay when Paused */}
+                  {/* Clean HD Poster Overlay when Paused */}
                   {isAudioVideo && !isPlayingThisAudio && style.poster && (
                     <img
                       src={style.poster}
@@ -263,26 +266,16 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                     />
                   )}
 
-                  {/* Audio Video: Tag Pill */}
-                  {isAudioVideo && (
-                    <div className="absolute top-2.5 left-2.5 z-20 pointer-events-none">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-[9.5px] font-mono font-bold border border-white/20 shadow-xs">
-                        <span className={`w-1.5 h-1.5 rounded-full ${isPlayingThisAudio ? 'bg-emerald-400 animate-ping' : 'bg-[#FF3B14]'}`} />
-                        <span>{isPlayingThisAudio ? 'NOW PLAYING' : 'WATCH AD'}</span>
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Audio Video: Centered Play Button when Paused (matching above sections) */}
+                  {/* Centered Play Button when Paused (clean, no badge or sticker overlays) */}
                   {isAudioVideo && !isPlayingThisAudio && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/25 backdrop-blur-[0.5px] pointer-events-none z-20">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none z-20">
                       <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#FF3B14]/95 hover:bg-[#FF3B14] backdrop-blur-md text-white flex items-center justify-center shadow-[0_0_30px_rgba(255,59,20,0.65)] group-hover:scale-110 active:scale-95 transition-all border border-white/40">
                         <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-white ml-0.5 text-white" />
                       </div>
                     </div>
                   )}
 
-                  {/* Audio Video: Hover Pause Button when Playing */}
+                  {/* Hover Pause Indicator when Playing */}
                   {isAudioVideo && isPlayingThisAudio && (
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 pointer-events-none z-20">
                       <div className="w-12 h-12 rounded-full bg-black/70 backdrop-blur-md text-white flex items-center justify-center shadow-lg border border-white/20">
@@ -291,7 +284,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                     </div>
                   )}
 
-                  {/* Audio Video: Bottom Scrubber Progress Bar */}
+                  {/* Bottom Scrubber Progress Bar */}
                   {isAudioVideo && (
                     <div className="absolute bottom-2.5 inset-x-3 z-20 flex flex-col gap-1 pointer-events-none">
                       <div className="w-full h-1 bg-white/25 rounded-full overflow-hidden">
