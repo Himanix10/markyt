@@ -175,14 +175,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateToCreatives }) => {
 
         </div>
 
-        {/* Bottom copyright */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3 font-medium">
-          <div>
-            © {new Date().getFullYear()} MARKYT. All rights reserved. Precision Performance Marketing.
-          </div>
-          <div className="text-slate-600 font-semibold">
-            ₹5,000 Validation Model • Zero Lock-in Contracts
-          </div>
+        {/* Bottom note */}
+        <div className="pt-8 flex items-center justify-center text-xs text-slate-600 font-semibold text-center">
+          ₹5,000 Validation Model • Zero Lock-in Contracts
         </div>
 
       </div>
