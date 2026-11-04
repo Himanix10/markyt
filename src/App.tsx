@@ -54,7 +54,7 @@ export default function App() {
       />
 
       {/* Top placeholder spacer so initial Hero isn't hidden under fixed header */}
-      <div className="h-[54px] sm:h-[58px] w-full shrink-0" aria-hidden="true" />
+      <div className="h-[54px] sm:h-[58px] w-full shrink-0 bg-[#B8C1FA]" aria-hidden="true" />
 
       <main className="flex-1">
         {/* 2. Hero Section with First-Page Menu Trigger */}
