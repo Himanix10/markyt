@@ -35,6 +35,13 @@ const ART_STYLES: ArtStyleItem[] = [
     poster: '/showcase-gifs/showcase_4.jpg',
   },
   {
+    id: 'artisanal-coffee-cafe',
+    name: 'Artisanal Coffee & Cafe',
+    src: '/videos/kafora-artisanal-coffee.mp4?v=1',
+    poster: '/videos/posters/kafora-artisanal-coffee.jpg?v=1',
+    hasAudio: true,
+  },
+  {
     id: 'luxury-fragrance-lifestyle',
     name: 'Luxury Fragrance & Lifestyle',
     src: '/videos/zevaro-luxury-perfume.mp4?v=6',
@@ -198,8 +205,8 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
           </p>
         </div>
 
-        {/* 6 Art Styles Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 lg:gap-6 max-w-6xl mx-auto items-start">
+        {/* Art Styles Grid */}
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-5 lg:gap-6 max-w-7xl mx-auto items-start">
           {ART_STYLES.map((style, idx) => {
             const isAudioVideo = Boolean(style.hasAudio);
             const isPlayingThisAudio = playingAudioIndex === idx;
@@ -207,7 +214,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
             return (
               <div
                 key={style.id}
-                className="group flex flex-col items-center w-full"
+                className="group flex flex-col items-center w-[calc(50%-0.6rem)] sm:w-[calc(33.333%-1rem)] md:w-[calc(25%-1.2rem)] xl:flex-1 max-w-[190px] min-w-[135px]"
               >
                 {/* Card Container */}
                 <div
