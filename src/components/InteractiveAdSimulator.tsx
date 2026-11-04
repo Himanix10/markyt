@@ -13,7 +13,7 @@ import {
   fetchCampaignProofRows 
 } from '../services/campaignProofSheetService';
 
-export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4';
+export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4?v=2';
 export const ABOUT_US_POSTER_PATH = '/videos/posters/about-us.jpg';
 
 interface InteractiveAdSimulatorProps {
@@ -27,9 +27,9 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const progressBarRef = useRef<HTMLDivElement | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
   const [isVideoReady, setIsVideoReady] = useState<boolean>(false);
 
   // Live Google Sheet sync state (automatically synced from sheet in background)
@@ -129,8 +129,9 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
   };
 
   const handleTimeUpdate = () => {
-    if (videoRef.current && videoRef.current.duration) {
-      setProgress((videoRef.current.currentTime / videoRef.current.duration) * 100);
+    if (videoRef.current && videoRef.current.duration && progressBarRef.current) {
+      const pct = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+      progressBarRef.current.style.width = `${pct}%`;
     }
   };
 
@@ -138,8 +139,11 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
     e.stopPropagation();
     if (!videoRef.current || !videoRef.current.duration) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
+    const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     videoRef.current.currentTime = pos * videoRef.current.duration;
+    if (progressBarRef.current) {
+      progressBarRef.current.style.width = `${pos * 100}%`;
+    }
   };
 
   return (
@@ -425,15 +429,18 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                     className="w-full h-full object-cover block"
                     playsInline
                     loop
-                    preload="auto"
+                    preload="metadata"
                     onTimeUpdate={handleTimeUpdate}
                     onPlay={() => setIsPlaying(true)}
                     onPlaying={() => setIsVideoReady(true)}
                     onPause={() => setIsPlaying(false)}
-                    onEnded={() => setIsPlaying(false)}
-                  >
-                    <source src={videoSrc} type="video/mp4" />
-                  </video>
+                    onEnded={() => {
+                      setIsPlaying(false);
+                      if (progressBarRef.current) {
+                        progressBarRef.current.style.width = '0%';
+                      }
+                    }}
+                  />
 
                   {/* Guaranteed HD Poster Overlay (shows when paused) */}
                   {!isPlaying && (
@@ -457,8 +464,9 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                       className="w-full h-1 bg-white/25 hover:h-1.5 rounded-full cursor-pointer transition-all overflow-hidden"
                     >
                       <div 
-                        className="h-full bg-[#FF3B14] rounded-full transition-all"
-                        style={{ width: `${progress}%` }}
+                        ref={progressBarRef}
+                        className="h-full bg-[#FF3B14] rounded-full"
+                        style={{ width: '0%' }}
                       />
                     </div>
 
