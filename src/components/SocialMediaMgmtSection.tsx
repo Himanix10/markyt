@@ -38,7 +38,7 @@ const TRANSFORMATION_SLIDES: SocialTransformationItem[] = [
     id: 'brand-strategy',
     title: 'Brand Strategy • Tech & Corporate Identity',
     tag: 'Branding & Corporate Identity',
-    image: '/images/social-transform-brandstrategy.png?v=3',
+    image: '/images/social-transform-brandstrategy.png?v=4',
     headline: 'Less text. More story.',
     style: 'Big Tech Art Style',
   },
