@@ -52,8 +52,8 @@ const COMMERCIAL_VIDEOS: CommercialVideoItem[] = [
   {
     id: 'luxury-fragrance-lifestyle',
     name: 'Luxury Fragrance & Lifestyle',
-    src: '/videos/zevaro-luxury-perfume.mp4?v=6',
-    poster: '/videos/posters/zevaro-luxury-perfume.jpg?v=6',
+    src: '/videos/zevaro-luxury-perfume.mp4?v=7',
+    poster: '/videos/posters/zevaro-luxury-perfume.jpg?v=7',
   },
   {
     id: 'minimalist-fashion-apparel',
