@@ -108,19 +108,22 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     let dx: number;
     let dy: number;
 
-    // Full-Screen edge-to-edge: upper part (turban/heads) and lower part (foot/sneaker) are 100% whole with zero cut
+    // Full-Screen edge-to-edge on desktop; Proportional balanced framing on mobile (matching Image 2)
     if (stageW >= 768) {
-      // Desktop: Edge-to-edge full screen
+      // Desktop: Edge-to-edge full screen (100% UNTOUCHED)
       dw = stageW;
       dh = stageH;
       dx = 0;
       dy = 0;
     } else {
-      // Mobile portrait: Full height coverage, centered horizontally
-      dh = stageH;
-      dw = Math.round(stageH * imgAspect);
-      dx = Math.round((stageW - dw) / 2);
-      dy = 0;
+      // Mobile portrait: Sized so all 3 figures, dome headroom, and floor grid are completely in view
+      // People span ~958px centered at x=876 in the 1920x1080 master frame
+      const targetPeopleWidth = stageW * 0.82;
+      const scale = targetPeopleWidth / 958;
+      dw = Math.round(1920 * scale);
+      dh = Math.round(1080 * scale);
+      dx = Math.round(stageW / 2 - 876 * scale);
+      dy = Math.round((stageH - dh) / 2);
     }
 
     layoutRef.current = {
@@ -234,25 +237,23 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
     );
     viewObserver.observe(section);
 
-    // Responsive GSAP ScrollTrigger with momentum scrub
+    // Responsive GSAP ScrollTrigger with momentum scrub (animates on both mobile and desktop)
     const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
     const pinTrigger = ScrollTrigger.create({
       trigger: stage,
       start: 'top top',
-      end: isMobile ? '+=100%' : '+=350%',
+      end: isMobile ? '+=250%' : '+=350%',
       pin: stage,
       pinSpacing: true,
       scrub: 0.5,
       onUpdate: (self) => {
-        if (!isMobile) {
-          const frameIdx = Math.min(
-            Math.max(Math.round(self.progress * (TOTAL_FRAMES - 1)), 0),
-            TOTAL_FRAMES - 1
-          );
-          if (frameIdx !== currentFrameIdxRef.current) {
-            currentFrameIdxRef.current = frameIdx;
-            drawFrame(frameIdx);
-          }
+        const frameIdx = Math.min(
+          Math.max(Math.round(self.progress * (TOTAL_FRAMES - 1)), 0),
+          TOTAL_FRAMES - 1
+        );
+        if (frameIdx !== currentFrameIdxRef.current) {
+          currentFrameIdxRef.current = frameIdx;
+          drawFrame(frameIdx);
         }
       },
     });
@@ -331,22 +332,11 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
         className="relative w-full h-[100svh] min-h-screen overflow-hidden flex flex-col justify-start items-center"
         style={{ backgroundColor: SECTION_BG }}
       >
-        {/* Desktop Version: Full-screen edge-to-edge 93-frame canvas scroll animation */}
-        <div className="hidden md:block absolute inset-0 z-10 pointer-events-none w-full h-full">
+        {/* Full-screen high-quality canvas artwork (animates on scroll on both mobile and desktop) */}
+        <div className="absolute inset-0 z-10 pointer-events-none w-full h-full">
           <canvas
             ref={canvasRef}
             className="w-full h-full block"
-          />
-        </div>
-
-        {/* Mobile Version: High-resolution full 9:16 portrait 3D perspective artwork (matching user spec exactly) */}
-        <div className="block md:hidden absolute inset-0 z-10 pointer-events-none w-full h-full flex items-center justify-center p-2 sm:p-4">
-          <img
-            src="/images/perspective-sketch-mobile-exact.png"
-            alt="3D Perspective Creative"
-            className="w-full h-full object-contain max-h-[100svh] block select-none pointer-events-none"
-            loading="eager"
-            decoding="async"
           />
         </div>
 
@@ -354,7 +344,7 @@ export const StoryPerspectiveScrollSection: React.FC = () => {
 
         {/* Loading Indicator */}
         {!isInitialReady && (
-          <div className="hidden md:flex absolute bottom-8 right-8 z-40 pointer-events-none items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-mono text-slate-600">
+          <div className="absolute bottom-8 right-8 z-40 pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-mono text-slate-600">
             <span className="w-2 h-2 rounded-full bg-[#FF3B14] animate-ping" />
             <span>
               Loading 3D perspective... {Math.round((loadedCount / TOTAL_FRAMES) * 100)}%
