@@ -517,7 +517,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       poster={work.poster ? encodeURI(work.poster) : undefined}
                       className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
                       loop
-                      preload={absOffset <= 1 ? 'auto' : 'metadata'}
+                      preload={isMobile ? (isCenter ? 'metadata' : 'none') : (absOffset <= 1 ? 'auto' : 'metadata')}
                       playsInline
                       onPlay={() => {
                         if (isCenter) {

@@ -13,7 +13,7 @@ import {
   fetchCampaignProofRows 
 } from '../services/campaignProofSheetService';
 
-export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4?v=2';
+export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4?v=5';
 export const ABOUT_US_POSTER_PATH = '/videos/posters/about-us.jpg';
 
 interface InteractiveAdSimulatorProps {
@@ -31,6 +31,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isVideoReady, setIsVideoReady] = useState<boolean>(false);
+  const [isBuffering, setIsBuffering] = useState<boolean>(false);
 
   // Live Google Sheet sync state (automatically synced from sheet in background)
   const [proofRows, setProofRows] = useState<CampaignProofData[]>(CAMPAIGN_PROOF_ROWS);
@@ -159,7 +160,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="absolute -inset-3 rounded-[38px] bg-gradient-to-r from-[#B8C1FA] via-[#FF3B14]/40 to-[#818CF8]/50 blur-2xl pointer-events-none -z-10"
+        className="hidden sm:block absolute -inset-3 rounded-[38px] bg-gradient-to-r from-[#B8C1FA] via-[#FF3B14]/40 to-[#818CF8]/50 blur-2xl pointer-events-none -z-10"
       />
 
       {/* Main Bright Vibrant Luxury Card */}
@@ -178,51 +179,54 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
             }}
           />
 
-          {/* Orb 1: Coral Sunset Glow */}
-          <motion.div
-            animate={{
-              x: [0, 45, -30, 0],
-              y: [0, -35, 25, 0],
-              scale: [1, 1.18, 0.9, 1],
-              rotate: [0, 40, -20, 0],
-            }}
-            transition={{
-              duration: 14,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute -top-16 -left-16 w-[440px] h-[440px] rounded-full bg-gradient-to-tr from-[#FF3B14]/45 via-[#F97316]/40 to-[#FBBF24]/35 blur-3xl"
-          />
+          {/* Desktop-only animated aurora orbs: disabled on mobile to prevent GPU blur contention */}
+          <div className="hidden sm:block">
+            {/* Orb 1: Coral Sunset Glow */}
+            <motion.div
+              animate={{
+                x: [0, 45, -30, 0],
+                y: [0, -35, 25, 0],
+                scale: [1, 1.18, 0.9, 1],
+                rotate: [0, 40, -20, 0],
+              }}
+              transition={{
+                duration: 14,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="absolute -top-16 -left-16 w-[440px] h-[440px] rounded-full bg-gradient-to-tr from-[#FF3B14]/45 via-[#F97316]/40 to-[#FBBF24]/35 blur-3xl"
+            />
 
-          {/* Orb 2: Electric Periwinkle / Violet */}
-          <motion.div
-            animate={{
-              x: [0, -40, 30, 0],
-              y: [0, 35, -25, 0],
-              scale: [1, 0.88, 1.2, 1],
-              rotate: [0, -35, 25, 0],
-            }}
-            transition={{
-              duration: 16,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute -bottom-16 -right-16 w-[480px] h-[480px] rounded-full bg-gradient-to-bl from-[#818CF8]/50 via-[#6366F1]/40 to-[#38BDF8]/35 blur-3xl"
-          />
+            {/* Orb 2: Electric Periwinkle / Violet */}
+            <motion.div
+              animate={{
+                x: [0, -40, 30, 0],
+                y: [0, 35, -25, 0],
+                scale: [1, 0.88, 1.2, 1],
+                rotate: [0, -35, 25, 0],
+              }}
+              transition={{
+                duration: 16,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="absolute -bottom-16 -right-16 w-[480px] h-[480px] rounded-full bg-gradient-to-bl from-[#818CF8]/50 via-[#6366F1]/40 to-[#38BDF8]/35 blur-3xl"
+            />
 
-          {/* Orb 3: Golden Sunshine */}
-          <motion.div
-            animate={{
-              opacity: [0.35, 0.7, 0.35],
-              scale: [0.92, 1.12, 0.92],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[300px] rounded-full bg-gradient-to-r from-amber-300/45 via-[#FDE047]/40 to-[#FF3B14]/30 blur-2xl"
-          />
+            {/* Orb 3: Golden Sunshine */}
+            <motion.div
+              animate={{
+                opacity: [0.35, 0.7, 0.35],
+                scale: [0.92, 1.12, 0.92],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[300px] rounded-full bg-gradient-to-r from-amber-300/45 via-[#FDE047]/40 to-[#FF3B14]/30 blur-2xl"
+            />
+          </div>
         </div>
 
         {/* Header Row: Meta Ads Pill + Headline */}
@@ -412,7 +416,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                 {/* Phone Inner Bezel & Screen Shell */}
                 <div 
                   onClick={togglePlay}
-                  className="relative cursor-pointer rounded-[33px] overflow-hidden bg-slate-950 aspect-[9/16] shadow-inner transition-all duration-300"
+                  className="relative cursor-pointer rounded-[33px] overflow-hidden bg-slate-950 aspect-[9/16] shadow-inner"
                 >
                   {/* Dynamic Island Pill */}
                   <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-20 h-4 bg-black rounded-full z-40 pointer-events-none flex items-center justify-between px-2 shadow-sm border border-white/5">
@@ -431,11 +435,23 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                     loop
                     preload="metadata"
                     onTimeUpdate={handleTimeUpdate}
-                    onPlay={() => setIsPlaying(true)}
-                    onPlaying={() => setIsVideoReady(true)}
-                    onPause={() => setIsPlaying(false)}
+                    onWaiting={() => setIsBuffering(true)}
+                    onCanPlay={() => setIsBuffering(false)}
+                    onPlay={() => {
+                      setIsPlaying(true);
+                      setIsBuffering(false);
+                    }}
+                    onPlaying={() => {
+                      setIsVideoReady(true);
+                      setIsBuffering(false);
+                    }}
+                    onPause={() => {
+                      setIsPlaying(false);
+                      setIsBuffering(false);
+                    }}
                     onEnded={() => {
                       setIsPlaying(false);
+                      setIsBuffering(false);
                       if (progressBarRef.current) {
                         progressBarRef.current.style.width = '0%';
                       }
@@ -479,6 +495,15 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-slate-950/25 backdrop-blur-[1px] z-30">
                       <div className="w-12 h-12 rounded-full bg-white/95 shadow-xl flex items-center justify-center text-slate-900 group-hover/heroplayer:scale-110 transition-transform border border-white/60">
                         <Play className="w-5 h-5 fill-slate-900 ml-0.5" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Centered Buffering Spinner when waiting for media buffer */}
+                  {isPlaying && isBuffering && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+                      <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-xs flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       </div>
                     </div>
                   )}

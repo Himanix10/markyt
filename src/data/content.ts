@@ -589,7 +589,7 @@ export const VIDEO_PORTFOLIO_WORKS: VideoShowcaseItem[] = [
     title: 'High-Impact Performance Creative',
     category: 'Brand & Performance Ad',
     businessType: '',
-    videoSrc: '/videos/markyt-second-campaign.mp4?v=4',
+    videoSrc: '/videos/markyt-second-campaign.mp4?v=5',
     poster: '/videos/posters/markyt-second-campaign.jpg?v=4',
     duration: '1:08',
     hookText: '“Looking for real, lasting performance marketing results without burning budget?”',
