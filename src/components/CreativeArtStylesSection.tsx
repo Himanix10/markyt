@@ -52,8 +52,14 @@ const COMMERCIAL_VIDEOS: CommercialVideoItem[] = [
   {
     id: 'luxury-fragrance-lifestyle',
     name: 'Luxury Fragrance & Lifestyle',
-    src: '/videos/zevaro-luxury-perfume.mp4?v=7',
-    poster: '/videos/posters/zevaro-luxury-perfume.jpg?v=7',
+    src: '/videos/zevaro-luxury-perfume.mp4?v=8',
+    poster: '/videos/posters/zevaro-luxury-perfume.jpg?v=8',
+  },
+  {
+    id: 'clara-luxury-perfume',
+    name: 'Luxury Perfume & Accessories',
+    src: '/videos/clara-luxury-perfume.mp4?v=1',
+    poster: '/videos/posters/clara-luxury-perfume.jpg?v=1',
   },
   {
     id: 'minimalist-fashion-apparel',
@@ -358,10 +364,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
 
                   </div>
 
-                  {/* Caption: Brand / ad name */}
-                  <p className="mt-3 sm:mt-4 text-center font-heading font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#FF3B14] transition-colors leading-snug">
-                    {video.name}
-                  </p>
+
                 </div>
               );
             })}
