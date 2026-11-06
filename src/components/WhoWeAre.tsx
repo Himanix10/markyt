@@ -9,11 +9,11 @@ export const WhoWeAre: React.FC<WhoWeAreProps> = ({
   return (
     <>
       {/* 1. Upper Manifesto Section (Continuous #B8C1FA canvas) */}
-      <section id="who-we-are" className="relative pt-5 pb-5 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20 bg-[#B8C1FA] text-slate-900 overflow-hidden border-b border-slate-900/10 scroll-mt-[54px]">
+      <section id="who-we-are" className="relative pt-1 pb-4 sm:pt-2 sm:pb-10 md:pt-3 md:pb-14 bg-[#B8C1FA] text-slate-900 overflow-hidden border-b border-slate-900/10 scroll-mt-[54px]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
           {/* Upper Manifesto Section */}
-          <div className="flex flex-col items-center text-center space-y-4 sm:space-y-6 max-w-3xl mx-auto">
+          <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4 max-w-3xl mx-auto">
             
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-950 text-white text-[11px] font-mono font-bold uppercase tracking-wider shadow-xs">

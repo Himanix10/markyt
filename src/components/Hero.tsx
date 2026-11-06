@@ -12,17 +12,17 @@ export const Hero: React.FC<HeroProps> = ({
   onNavigateToCreatives,
 }) => {
   return (
-    <section id="hero-section" className="relative overflow-hidden bg-[#B8C1FA] text-slate-900 border-b border-slate-900/10">
+    <section id="hero-section" className="relative overflow-hidden bg-[#B8C1FA] text-slate-900">
 
       {/* 1. Animated Artistic "M" Doodle Marquee Banner across the top (from Screenshot 1) */}
       <div className="border-b border-slate-900/15 bg-[#ACB7F6]">
         <MDoodleMarquee textColor="text-slate-950" className="py-2.5" />
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-7 sm:pt-12 sm:pb-16 md:pt-14 md:pb-20 relative z-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-3 sm:pt-8 sm:pb-5 md:pt-10 md:pb-6 relative z-10">
 
         {/* Giant Display Typography */}
-        <div className="text-center mb-4 sm:mb-12">
+        <div className="text-center mb-3 sm:mb-6">
 
           {/* Headline Display: TEST IT is massive red hero text, THEN SCALE IT. is animated highlighted tagline */}
           <div
