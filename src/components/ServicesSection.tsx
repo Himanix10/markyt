@@ -46,14 +46,14 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   return (
     <section 
       id="services" 
-      className="py-12 sm:py-16 md:py-24 bg-white text-slate-900 relative overflow-hidden border-t border-slate-900/10 scroll-mt-[54px]"
+      className="py-6 sm:py-16 md:py-24 bg-white text-slate-900 relative overflow-hidden border-t border-slate-900/10 scroll-mt-[54px]"
     >
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* ========================================================
             SECTION HEADING: Restrained, Editorial & Mobile-Flawless
            ======================================================== */}
-        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12 md:mb-14 px-2">
+        <div className="text-center max-w-2xl mx-auto mb-5 sm:mb-12 md:mb-14 px-2">
 
 
           {/* Main Statement with deliberate responsive line breaks */}

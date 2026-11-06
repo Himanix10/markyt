@@ -7,22 +7,22 @@ interface HeroProps {
   onOpenMenu?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ 
-  onOpenQuestionnaire, 
+export const Hero: React.FC<HeroProps> = ({
+  onOpenQuestionnaire,
   onNavigateToCreatives,
 }) => {
   return (
     <section id="hero-section" className="relative overflow-hidden bg-[#B8C1FA] text-slate-900 border-b border-slate-900/10">
-      
+
       {/* 1. Animated Artistic "M" Doodle Marquee Banner across the top (from Screenshot 1) */}
       <div className="border-b border-slate-900/15 bg-[#ACB7F6]">
         <MDoodleMarquee textColor="text-slate-950" className="py-2.5" />
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14 md:pt-14 md:pb-20 relative z-10">
-        
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-7 sm:pt-12 sm:pb-16 md:pt-14 md:pb-20 relative z-10">
+
         {/* Giant Display Typography */}
-        <div className="text-center mb-8 sm:mb-12">
+        <div className="text-center mb-4 sm:mb-12">
 
           {/* Headline Display: TEST IT is massive red hero text, THEN SCALE IT. is animated highlighted tagline */}
           <div
@@ -85,7 +85,7 @@ export const Hero: React.FC<HeroProps> = ({
             </motion.div>
           </div>
 
-          <p className="mt-7 text-base sm:text-xl text-slate-900 font-medium max-w-xl mx-auto leading-relaxed">
+          <p className="mt-4 sm:mt-7 text-base sm:text-xl text-slate-900 font-medium max-w-xl mx-auto leading-relaxed">
             You’ve probably burned money on marketing that didn’t deliver.
             <span className="block mt-1 font-bold text-slate-950">
               Why Invest Big Upfront? Start Testing at <span className="text-[#FF3B14]">₹5,000</span>.

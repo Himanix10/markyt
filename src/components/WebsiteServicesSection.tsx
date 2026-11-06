@@ -1051,7 +1051,7 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
   return (
     <section 
       id="website-services" 
-      className="pt-10 sm:pt-14 md:pt-16 pb-12 sm:pb-16 md:pb-20 bg-gradient-to-b from-[#DCF4E7] via-[#CEEEDC] to-[#DBF2E4] text-slate-900 relative overflow-hidden border-b border-slate-900/10 scroll-mt-[54px]"
+      className="pt-6 sm:pt-14 md:pt-16 pb-8 sm:pb-16 md:pb-20 bg-gradient-to-b from-[#DCF4E7] via-[#CEEEDC] to-[#DBF2E4] text-slate-900 relative overflow-hidden border-b border-slate-900/10 scroll-mt-[54px]"
     >
       {/* External Google Fonts for the 4 Distinct Websites & Continuous Seamless Scroll Keyframes */}
       <style>{`
@@ -1268,7 +1268,7 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
         {/* ========================================================
             1. SECTION HEADER
            ======================================================== */}
-        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+        <div className="text-center max-w-3xl mx-auto mb-4 sm:mb-10">
           
 
           {/* Heading */}

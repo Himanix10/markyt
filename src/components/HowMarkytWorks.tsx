@@ -95,7 +95,7 @@ export const HowMarkytWorks: React.FC<HowMarkytWorksProps> = () => {
   };
 
   return (
-    <section id="philosophy" className="relative pt-8 pb-12 sm:pt-12 sm:pb-18 md:pt-16 md:pb-24 bg-[#BEE4F8] text-slate-950 overflow-hidden border-b border-slate-950/10 scroll-mt-[54px]">
+    <section id="philosophy" className="relative pt-6 pb-8 sm:pt-12 sm:pb-18 md:pt-16 md:pb-24 bg-[#BEE4F8] text-slate-950 overflow-hidden border-b border-slate-950/10 scroll-mt-[54px]">
       
 
       {/* Floating iOS Liquid Glass Ambient Bubbles */}
@@ -117,7 +117,7 @@ export const HowMarkytWorks: React.FC<HowMarkytWorksProps> = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-5 sm:mb-12">
 
           {/* Headline with Expressive Fun Typography */}
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-heading font-black text-slate-950 tracking-tight leading-[1.08]">
@@ -127,16 +127,16 @@ export const HowMarkytWorks: React.FC<HowMarkytWorksProps> = () => {
             </span>
           </h2>
 
-          <p className="mt-3.5 text-base sm:text-lg text-slate-800 leading-relaxed font-medium max-w-2xl mx-auto">
+          <p className="mt-2.5 sm:mt-3.5 text-base sm:text-lg text-slate-800 leading-relaxed font-medium max-w-2xl mx-auto">
             A disciplined 5-stage customer journey engine engineered to turn cold prospects into qualified leads and repeat buyers.
           </p>
         </div>
 
         {/* 5-Stage Customer Journey Funnel Container - Authentic iOS Liquid Glass */}
-        <div className="bg-white/65 hover:bg-white/75 backdrop-blur-2xl backdrop-saturate-150 border border-white/90 rounded-[32px] p-5 sm:p-8 lg:p-10 shadow-[inset_0_1.5px_2px_rgba(255,255,255,1),0_20px_50px_rgba(0,0,0,0.06)] relative overflow-hidden transition-all duration-500">
+        <div className="bg-white/65 hover:bg-white/75 backdrop-blur-2xl backdrop-saturate-150 border border-white/90 rounded-[28px] sm:rounded-[32px] p-3.5 sm:p-8 lg:p-10 shadow-[inset_0_1.5px_2px_rgba(255,255,255,1),0_20px_50px_rgba(0,0,0,0.06)] relative overflow-hidden transition-all duration-500">
           
           {/* Top Control Bar with Fun Typography and Glass Pills */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-slate-900/10 mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 pb-3.5 sm:pb-5 border-b border-slate-900/10 mb-4 sm:mb-6">
             <div>
               <div className="flex items-center gap-2.5">
                 <span className="px-3 py-1 rounded-full bg-blue-500/10 backdrop-blur-md border border-blue-400/30 text-blue-900 text-[11px] font-mono font-bold uppercase tracking-wider shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">

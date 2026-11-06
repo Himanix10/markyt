@@ -4,7 +4,6 @@ import {
   Pause,
   ChevronLeft,
   ChevronRight,
-  
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { VIDEO_PORTFOLIO_WORKS } from '../data/content';
@@ -16,7 +15,7 @@ interface CreativeProductionPageProps {
 
 export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () => {
   const [activeStudioIndex, setActiveStudioIndex] = useState<number>(0);
-  const [isStudioPlaying, setIsStudioPlaying] = useState<boolean>(false);
+  const [isStudioPlaying, setIsStudioPlaying] = useState<boolean>(true);
   const [isBuffering, setIsBuffering] = useState<boolean>(false);
 
   // Responsive window width tracking for 3D stage calculations
@@ -40,23 +39,93 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
   const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({});
   const stageRef = useRef<HTMLDivElement>(null);
 
-
-
-  // User gesture tracking to prevent premature muted autoplay on initial page mount
+  // User gesture tracking to unmute audio seamlessly as soon as user interacts with the section
   const hasUserInteracted = useRef<boolean>(false);
+  const isAudioActive = useRef<boolean>(false);
 
   const totalWorks = VIDEO_PORTFOLIO_WORKS.length;
 
-  // Auto-pause video if user scrolls section out of viewport
+  // Auto-play the target video reliably with audio enabled upon user engagement
+  const playVideoSafely = useCallback((video: HTMLVideoElement | null) => {
+    if (!video) return;
+
+    if (video.currentTime > 0 && video.ended) {
+      video.currentTime = 0;
+    }
+
+    video.playsInline = true;
+    video.loop = true;
+
+    // Enable audio automatically if user has engaged with the carousel/controls
+    if (hasUserInteracted.current || isAudioActive.current) {
+      video.muted = false;
+      video.volume = 1.0;
+    } else {
+      // Passive initial load: start muted to satisfy initial browser autoplay restrictions
+      video.muted = true;
+    }
+
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsStudioPlaying(true);
+          setIsBuffering(false);
+        })
+        .catch((err) => {
+          // If browser policy rejects unmuted playback before gesture, fall back to muted seamlessly
+          if (err?.name === 'NotAllowedError') {
+            video.muted = true;
+            video.play()
+              .then(() => {
+                setIsStudioPlaying(true);
+                setIsBuffering(false);
+              })
+              .catch(() => {
+                setIsStudioPlaying(false);
+                setIsBuffering(false);
+              });
+          } else {
+            setIsStudioPlaying(false);
+            setIsBuffering(false);
+          }
+        });
+    }
+  }, []);
+
+  // Instant playback on index switch
+  useEffect(() => {
+    // 1. Pause and reset all inactive videos
+    Object.entries(videoRefs.current).forEach(([k, vid]) => {
+      if (vid && Number(k) !== activeStudioIndex) {
+        if (!vid.paused) vid.pause();
+        vid.currentTime = 0;
+        vid.muted = true;
+      }
+    });
+
+    // 2. Play the active center video once cleanly
+    const activeVideo = videoRefs.current[activeStudioIndex];
+    if (activeVideo) {
+      playVideoSafely(activeVideo);
+    }
+  }, [activeStudioIndex, playVideoSafely]);
+
+  // Auto-pause video when scrolled out of viewport, and resume when scrolled back in
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const currentVideo = videoRefs.current[activeStudioIndex];
           if (!entry.isIntersecting) {
-            const currentVideo = videoRefs.current[activeStudioIndex];
             if (currentVideo && !currentVideo.paused) {
               currentVideo.pause();
               setIsStudioPlaying(false);
+            }
+          } else {
+            // User scrolled back into view: resume active video smoothly
+            if (currentVideo && currentVideo.paused) {
+              playVideoSafely(currentVideo);
             }
           }
         });
@@ -69,11 +138,15 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     }
 
     const handleVisibilityChange = () => {
+      const currentVideo = videoRefs.current[activeStudioIndex];
       if (document.hidden) {
-        const currentVideo = videoRefs.current[activeStudioIndex];
         if (currentVideo && !currentVideo.paused) {
           currentVideo.pause();
           setIsStudioPlaying(false);
+        }
+      } else {
+        if (currentVideo && currentVideo.paused) {
+          playVideoSafely(currentVideo);
         }
       }
     };
@@ -83,98 +156,67 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
       observer.disconnect();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [activeStudioIndex]);
-
-  // Ensure all non-active videos are paused to save GPU and battery
-  useEffect(() => {
-    Object.entries(videoRefs.current).forEach(([k, vid]) => {
-      if (vid && Number(k) !== activeStudioIndex && !vid.paused) {
-        vid.pause();
-        vid.muted = true;
-      }
-    });
-  }, [activeStudioIndex]);
-
-  
-
-  // Auto-play the target video reliably on all desktop & mobile browsers
-  const playActiveVideo = useCallback((targetIndex: number) => {
-    // Pause all other videos
-    Object.entries(videoRefs.current).forEach(([k, vid]) => {
-      if (vid && Number(k) !== targetIndex && !vid.paused) {
-        vid.pause();
-        vid.currentTime = 0;
-      }
-    });
-
-    const video = videoRefs.current[targetIndex];
-    if (!video) return;
-
-    if (video.currentTime > 0 && video.ended) {
-      video.currentTime = 0;
-    }
-
-    video.muted = false;
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsStudioPlaying(true);
-          setIsBuffering(false);
-        })
-        .catch(() => {
-          // Fallback to muted only if browser autoplay policy blocks unmuted playback
-          video.muted = true;
-          video.play()
-            .then(() => {
-              setIsStudioPlaying(true);
-              setIsBuffering(false);
-            })
-            .catch(() => {
-              setIsStudioPlaying(false);
-              setIsBuffering(false);
-            });
-        });
-    }
-  }, []);
+  }, [activeStudioIndex, playVideoSafely]);
 
   // Handle switching active work
   const handleSelectWork = useCallback((newIndex: number) => {
     if (newIndex === activeStudioIndex) return;
 
     hasUserInteracted.current = true;
+    isAudioActive.current = true;
+    
+    // Pause previous video immediately
+    const prevVideo = videoRefs.current[activeStudioIndex];
+    if (prevVideo && !prevVideo.paused) {
+      prevVideo.pause();
+      prevVideo.currentTime = 0;
+    }
+
     setActiveStudioIndex(newIndex);
-    playActiveVideo(newIndex);
-  }, [activeStudioIndex, playActiveVideo]);
+    setIsStudioPlaying(true);
+  }, [activeStudioIndex]);
 
   // Seamless Infinite Loop Navigation (Prev / Next)
   const handlePrevWork = useCallback(() => {
     hasUserInteracted.current = true;
+    isAudioActive.current = true;
     const prevIndex = (activeStudioIndex - 1 + totalWorks) % totalWorks;
     handleSelectWork(prevIndex);
   }, [activeStudioIndex, totalWorks, handleSelectWork]);
 
   const handleNextWork = useCallback(() => {
     hasUserInteracted.current = true;
+    isAudioActive.current = true;
     const nextIndex = (activeStudioIndex + 1) % totalWorks;
     handleSelectWork(nextIndex);
   }, [activeStudioIndex, totalWorks, handleSelectWork]);
 
-  // Toggle Play / Pause for the active focused video
+  // Toggle Play / Pause for the active focused video (tap anywhere on center card)
   const toggleStudioPlay = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     hasUserInteracted.current = true;
+    isAudioActive.current = true;
 
     const activeVideo = videoRefs.current[activeStudioIndex];
     if (!activeVideo) return;
 
-    if (!activeVideo.paused && isStudioPlaying) {
-      activeVideo.pause();
-      setIsStudioPlaying(false);
-      setIsBuffering(false);
+    if (!activeVideo.paused) {
+      // If playing but muted, unmute so user immediately hears audio
+      if (activeVideo.muted) {
+        activeVideo.muted = false;
+        activeVideo.volume = 1.0;
+      } else {
+        // If already playing with sound, pause
+        activeVideo.pause();
+        setIsStudioPlaying(false);
+        setIsBuffering(false);
+      }
     } else {
+      // If paused, unmute and play with sound!
+      activeVideo.muted = false;
+      activeVideo.volume = 1.0;
       setIsBuffering(true);
-      playActiveVideo(activeStudioIndex);
+      playVideoSafely(activeVideo);
     }
   };
 
@@ -306,7 +348,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
       {/* Flagship Section: 3D Coverflow Reel Theater Showcase */}
       <section 
         id="creatives" 
-        className="relative overflow-hidden bg-gradient-to-b from-[#B8C1FA] via-[#C8D1FD] to-white py-10 sm:py-16 md:py-20 px-3 sm:px-6 lg:px-8 scroll-mt-[54px] select-none"
+        className="relative overflow-hidden bg-gradient-to-b from-[#B8C1FA] via-[#C8D1FD] to-white py-6 sm:py-16 md:py-20 px-3 sm:px-6 lg:px-8 scroll-mt-[54px] select-none"
       >
 
 
@@ -442,7 +484,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
         <div className="max-w-6xl mx-auto relative z-10 pt-2 sm:pt-4">
           
           {/* Section Header */}
-          <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
+          <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-8">
 
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-slate-950 tracking-tight leading-tight mb-3">
@@ -484,15 +526,13 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
               <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
-            {/* Render Active & Adjacent Cards (Capped on mobile to conserve GPU memory) */}
+            {/* Render Active & Adjacent Cards */}
             {VIDEO_PORTFOLIO_WORKS.map((work, idx) => {
               const offset = getOffset(idx);
               const isCenter = offset === 0;
               const absOffset = Math.abs(offset);
-              const isMobile = windowWidth < 640;
-
-              const shouldMountVideo = isCenter; // High-performance: Mount only active center video to conserve GPU decoders
               const cardStyle = getCardStyle(offset);
+              const shouldMountVideo = isCenter || absOffset <= 1 || (windowWidth >= 768 && absOffset <= 2);
 
               return (
                 <div
@@ -507,8 +547,8 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       : 'shadow-xl hover:ring-1 hover:ring-white/40'
                   }`}
                 >
-                  {/* Clean Edge-to-Edge Video (Mount only active & adjacent cards to conserve mobile GPU decoders) */}
-                  {shouldMountVideo ? (
+                  {/* Clean Edge-to-Edge Video (Mount only active and immediate neighbor cards to avoid decoder saturation & lag) */}
+                  {shouldMountVideo && (
                     <video
                       ref={(el) => {
                         videoRefs.current[idx] = el;
@@ -517,8 +557,10 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       poster={work.poster ? encodeURI(work.poster) : undefined}
                       className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
                       loop
-                      preload="auto"
+                      autoPlay={isCenter}
+                      muted={!isCenter}
                       playsInline
+                      preload={isCenter ? 'auto' : 'metadata'}
                       onPlay={() => {
                         if (isCenter) {
                           setIsStudioPlaying(true);
@@ -541,18 +583,16 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                         }
                       }}
                       onEnded={isCenter ? handleNextWork : undefined}
-                    >
-                      <source src={encodeURI(work.videoSrc)} type="video/mp4" />
-                    </video>
-                  ) : null}
+                    />
+                  )}
 
-                  {/* Guaranteed HD Poster Image Overlay (visible when paused, inactive, or for off-screen cards) */}
-                  {(!isStudioPlaying || !isCenter || !shouldMountVideo) && work.poster && (
+                  {/* Guaranteed HD Poster Image Overlay (visible on non-center cards and while paused/buffering) */}
+                  {(!isCenter || !isStudioPlaying) && work.poster && (
                     <img
                       src={encodeURI(work.poster)}
                       alt={work.title}
                       className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[5] transition-opacity duration-300"
-                      loading="eager"
+                      loading={absOffset <= 2 ? 'eager' : 'lazy'}
                       decoding="async"
                     />
                   )}
@@ -564,7 +604,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                   {/* Active Center Video: Controls */}
                   {isCenter ? (
                     <>
-                      {/* Center Play / Pause / Buffering Option */}
+                      {/* Center Play / Pause / Buffering Overlay */}
                       <div 
                         onClick={toggleStudioPlay}
                         className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer group/centerplay"
@@ -594,7 +634,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
           </div>
 
           {/* Indicator Dots */}
-          <div className="flex items-center justify-center gap-2 mt-4">
+          <div className="flex items-center justify-center gap-2 mt-2.5 sm:mt-4">
             {VIDEO_PORTFOLIO_WORKS.map((_, idx) => (
               <button
                 key={idx}
@@ -610,7 +650,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
           </div>
 
           {/* Fractional Pricing & Portfolio Rights Footnote */}
-          <div className="mt-6 sm:mt-7 text-center px-4">
+          <div className="mt-3.5 sm:mt-7 text-center px-4">
             <p className="text-[11px] sm:text-xs text-slate-500 font-mono leading-relaxed inline-flex items-center justify-center gap-1.5">
               <span className="text-[#FF3B14] font-bold shrink-0">*</span>
               <span>Our creative work is offered at a fractional cost in exchange for the right to showcase it in our portfolio and marketing.</span>

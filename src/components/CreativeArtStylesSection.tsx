@@ -177,13 +177,13 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
     <section
       ref={sectionRef}
       id="creative-styles"
-      className="relative pt-10 sm:pt-14 md:pt-16 pb-16 sm:pb-24 bg-[#FAFBF6] text-slate-900 border-b border-slate-200/80 overflow-hidden select-none"
+      className="relative pt-6 sm:pt-14 md:pt-16 pb-8 sm:pb-24 bg-[#FAFBF6] text-slate-900 border-b border-slate-200/80 overflow-hidden select-none"
       style={{ backgroundColor: '#FAFBF6' }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* ================= SECTION 1: CHOOSE YOUR ART STYLE ================= */}
-        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-12">
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-heading font-black text-slate-950 tracking-tight leading-[1.12]">
             Choose your{' '}
             <span className="font-editorial-italic font-normal italic text-[#FF3B14]">
@@ -239,10 +239,10 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
         </div>
 
         {/* ================= SECTION 2: BRAND & COMMERCIAL VIDEO ADS ================= */}
-        <div className="mt-16 sm:mt-24 pt-12 sm:pt-16 border-t border-slate-200/80">
+        <div className="mt-8 sm:mt-24 pt-6 sm:pt-16 border-t border-slate-200/80">
           
           {/* Header */}
-          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+          <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-12">
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-heading font-black text-slate-950 tracking-tight leading-[1.12]">
               Turning ideas into{' '}
               <span className="font-editorial-italic font-normal italic text-[#FF3B14]">

@@ -51,12 +51,12 @@ export const SocialMediaMgmtSection: React.FC<SocialMediaMgmtSectionProps> = () 
       className="text-slate-900 relative overflow-hidden scroll-mt-[54px] bg-[#FAFBF6]"
     >
       {/* 1. Top Part: Heading & Social Proof */}
-      <div className="pt-12 pb-8 sm:pt-16 sm:pb-10 md:pt-20 md:pb-12 bg-gradient-to-b from-white via-[#FFF5ED] via-50% to-[#FAFBF6]">
+      <div className="pt-6 pb-5 sm:pt-16 sm:pb-10 md:pt-20 md:pb-12 bg-gradient-to-b from-white via-[#FFF5ED] via-50% to-[#FAFBF6]">
         <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
           {/* ========================================================
               1. SECTION HEADING
              ======================================================== */}
-          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+          <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-12">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-slate-950 tracking-tight leading-[1.15] mb-3">
               Your Social Media,{' '}
               <span className="font-editorial-italic font-normal italic text-[#FF3B14]">
@@ -91,18 +91,18 @@ export const SocialMediaMgmtSection: React.FC<SocialMediaMgmtSectionProps> = () 
       </div>
 
       {/* 2. Bottom Part: Transformation Showcase with #FAFBF6 background */}
-      <div className="pb-16 sm:pb-24 md:pb-28 bg-[#FAFBF6]">
+      <div className="pb-6 sm:pb-24 md:pb-28 bg-[#FAFBF6]">
         <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
           {/* ========================================================
               2. TRANSFORMATION SHOWCASE
              ======================================================== */}
-          <div className="text-center mb-6 sm:mb-8 md:mb-10">
+          <div className="text-center mb-4 sm:mb-8 md:mb-10">
             <h3 className="text-2xl sm:text-3xl md:text-4xl font-heading font-black text-slate-950 tracking-tight">
               Less text. More story.
             </h3>
           </div>
 
-          <div className="flex flex-col gap-6 sm:gap-8 md:gap-10">
+          <div className="flex flex-col gap-4 sm:gap-8 md:gap-10">
             {TRANSFORMATION_SLIDES.map((slide, idx) => (
               <div
                 key={slide.id}

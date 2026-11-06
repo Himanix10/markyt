@@ -140,7 +140,7 @@ export const StepByStepProcess: React.FC<StepByStepProcessProps> = () => {
   return (
     <section 
       id="process" 
-      className="relative pt-10 pb-12 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20 bg-gradient-to-b from-[#B8C1FA] via-[#C8D1FD] to-[#F6F3EC] text-slate-900 overflow-hidden border-y border-slate-900/10 scroll-mt-[54px]"
+      className="relative pt-6 pb-8 sm:pt-14 sm:pb-16 md:pt-16 md:pb-20 bg-gradient-to-b from-[#B8C1FA] via-[#C8D1FD] to-[#F6F3EC] text-slate-900 overflow-hidden border-y border-slate-900/10 scroll-mt-[54px]"
     >
       {/* Animated Floating Sprint Framework Accents */}
       <motion.div
@@ -209,7 +209,7 @@ export const StepByStepProcess: React.FC<StepByStepProcessProps> = () => {
       </motion.div>
 
       {/* Section Header */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mb-8 sm:mb-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mb-4 sm:mb-10">
         <div className="max-w-3xl">
 
           {/* Headline with Expressive Editorial Font Styling */}

@@ -230,7 +230,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
         </div>
 
         {/* Header Row: Meta Ads Pill + Headline */}
-        <div className="relative z-10 mb-5 sm:mb-6 flex flex-col gap-2.5">
+        <div className="relative z-10 mb-3.5 sm:mb-6 flex flex-col gap-1.5 sm:gap-2.5">
           <div className="flex items-center gap-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-slate-900/10 shadow-xs">
               <span className="relative flex h-2 w-2">
@@ -252,33 +252,33 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
         </div>
 
         {/* Content Grid: Table and Video Side-by-Side (Aligned at Top and Bottom) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-10 items-center relative z-10">
           
           {/* Left Column: Real Proof Table */}
-          <div className="lg:col-span-7 xl:col-span-8 flex flex-col justify-start text-left">
+          <div className="lg:col-span-7 xl:col-span-7 flex flex-col justify-center text-left">
             {/* Live Meta Ads Manager Proof Table */}
-            <div className="rounded-2xl border border-slate-900/10 bg-white/95 backdrop-blur-md overflow-hidden shadow-md sm:shadow-lg">
+            <div className="rounded-2xl border border-slate-900/10 bg-white/95 backdrop-blur-md overflow-hidden shadow-md sm:shadow-lg flex flex-col">
 
-              {/* Seamless Full-Width Table - Zero horizontal scroll on any screen */}
-              <div className="w-full overflow-hidden">
+              {/* Scrollable Table Body with Sticky Header - Perfectly balanced with video player height */}
+              <div className="w-full max-h-[320px] sm:max-h-[420px] md:max-h-[460px] overflow-y-auto overscroll-contain">
                 <table className="w-full table-fixed text-left border-collapse">
                   <colgroup>
                     <col className="w-[28%]" />
-                    <col className="w-[16%]" />
-                    <col className="w-[16%]" />
                     <col className="w-[19%]" />
-                    <col className="w-[21%]" />
+                    <col className="w-[14%]" />
+                    <col className="w-[17%]" />
+                    <col className="w-[22%]" />
                   </colgroup>
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-100/90 text-[8.5px] sm:text-[10px] md:text-[11px] font-space font-bold uppercase tracking-wider text-slate-600">
-                      <th className="py-2.5 sm:py-3 px-2 sm:px-3 text-left whitespace-nowrap">Campaign</th>
-                      <th className="py-2.5 sm:py-3 px-1 sm:px-2 text-center whitespace-nowrap">Delivery</th>
-                      <th className="py-2.5 sm:py-3 px-1 sm:px-2 text-right whitespace-nowrap">Results</th>
-                      <th className="py-2.5 sm:py-3 px-1 sm:px-2 text-right whitespace-nowrap">
+                  <thead className="sticky top-0 z-10 bg-slate-100/95 backdrop-blur-md shadow-xs">
+                    <tr className="border-b border-slate-200 text-[8.5px] sm:text-[10px] md:text-[11px] font-space font-bold uppercase tracking-wider text-slate-600">
+                      <th className="py-2.5 sm:py-3 px-2 sm:px-3 text-left whitespace-nowrap bg-slate-100/95">Campaign</th>
+                      <th className="py-2.5 sm:py-3 px-1 sm:px-2 text-center whitespace-nowrap bg-slate-100/95">Delivery</th>
+                      <th className="py-2.5 sm:py-3 px-1 sm:px-2 text-right whitespace-nowrap bg-slate-100/95">Results</th>
+                      <th className="py-2.5 sm:py-3 px-1 sm:px-2 text-right whitespace-nowrap bg-slate-100/95">
                         <span className="hidden sm:inline">Cost / Result</span>
                         <span className="sm:hidden">Cost/Res.</span>
                       </th>
-                      <th className="py-2.5 sm:py-3 px-2 sm:px-3 text-right whitespace-nowrap">
+                      <th className="py-2.5 sm:py-3 px-2 sm:px-3 text-right whitespace-nowrap bg-slate-100/95">
                         <span className="hidden sm:inline">Amount Spent</span>
                         <span className="sm:hidden">Spent</span>
                       </th>
@@ -321,18 +321,17 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                           </div>
                         </td>
 
-                        {/* 2. Delivery Badge */}
-                        <td className="py-2 sm:py-2.5 px-1 sm:px-2 text-center align-middle overflow-hidden">
+                        {/* 2. Delivery Badge - Zero Cropping */}
+                        <td className="py-2 sm:py-2.5 px-1 sm:px-1.5 text-center align-middle">
                           {row.status === 'Active' ? (
-                            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-emerald-50 text-emerald-700 text-[8px] sm:text-[9.5px] md:text-[10.5px] font-semibold border border-emerald-200/80 shadow-2xs">
+                            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-emerald-50 text-emerald-700 text-[8px] sm:text-[9px] md:text-[10px] font-semibold border border-emerald-200/80 shadow-2xs whitespace-nowrap">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                               <span>Active</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-50 text-amber-800 text-[8px] sm:text-[9.5px] md:text-[10.5px] font-semibold border border-amber-300/80 shadow-2xs" title="Completed">
+                            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-50 text-amber-800 text-[8px] sm:text-[9px] md:text-[10px] font-semibold border border-amber-300/80 shadow-2xs whitespace-nowrap" title="Completed">
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                              <span className="hidden sm:inline">Completed</span>
-                              <span className="sm:hidden">Done</span>
+                              <span>Completed</span>
                             </span>
                           )}
                         </td>
@@ -358,12 +357,12 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                         </td>
 
                         {/* 5. Amount Spent */}
-                        <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-right align-middle overflow-hidden">
-                          <div className="font-mono tabular-nums font-bold text-slate-950 text-[10.5px] sm:text-xs md:text-[13px] leading-tight truncate">
+                        <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-right align-middle">
+                          <div className="font-mono tabular-nums font-bold text-slate-950 text-[10.5px] sm:text-xs md:text-[13px] leading-tight whitespace-nowrap">
                             {row.amountSpent}
                           </div>
                           {row.budgetNote && (
-                            <div className="text-[7px] sm:text-[8px] md:text-[8.5px] text-slate-400 font-mono leading-tight mt-0.5 truncate">
+                            <div className="text-[7px] sm:text-[8px] md:text-[8.5px] text-slate-400 font-mono leading-tight mt-0.5 whitespace-nowrap">
                               {row.budgetNote}
                             </div>
                           )}
@@ -375,16 +374,10 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
               </div>
 
               {/* Table Footer */}
-              <div className="px-2.5 sm:px-4 py-2 sm:py-2.5 bg-slate-100/70 border-t border-slate-200/80 text-[8px] sm:text-[9.5px] md:text-[10px] text-slate-500">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0" />
-                    <span>Real client sprint data from active Meta Ads Manager</span>
-                  </div>
-
-                  <span className="font-mono font-semibold text-slate-700 hidden md:inline">
-                    Direct Purchases &amp; Inquiries
-                  </span>
+              <div className="px-2.5 sm:px-4 py-1.5 sm:py-2.5 bg-slate-100/70 border-t border-slate-200/80 text-[8px] sm:text-[9.5px] md:text-[10px] text-slate-500">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0" />
+                  <span>Real client sprint data from active Meta Ads Manager</span>
                 </div>
 
                 <p className="mt-1 pt-1 border-t border-slate-200/60 text-[7px] sm:text-[8.5px] text-slate-400 leading-tight">
@@ -395,8 +388,8 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
           </div>
 
           {/* Right Column: Hero Video Player in Premium iPhone Mockup Chassis */}
-          <div className="lg:col-span-5 xl:col-span-4 flex justify-center items-start">
-            <div className="relative group/heroplayer w-full max-w-[275px] sm:max-w-[285px]">
+          <div className="lg:col-span-5 xl:col-span-5 flex justify-center items-center">
+            <div className="relative group/heroplayer w-full max-w-[270px] sm:max-w-[330px] md:max-w-[345px]">
               
               {/* Subtle Warm Accent Backdrop */}
               <div 

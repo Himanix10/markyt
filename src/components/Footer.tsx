@@ -16,8 +16,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateToCreatives }) => {
     <footer className="bg-[#FAFAFB] text-slate-900 border-t border-slate-200 relative overflow-hidden">
 
       {/* Main Footer Links */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-slate-200 text-xs text-slate-600">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-10 pb-8 sm:pb-12 border-b border-slate-200 text-xs text-slate-600">
           
           {/* Brand Col */}
           <div className="space-y-4 md:col-span-1">
@@ -176,7 +176,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateToCreatives }) => {
         </div>
 
         {/* Bottom note */}
-        <div className="pt-8 flex items-center justify-center text-xs text-slate-600 font-semibold text-center">
+        <div className="pt-5 sm:pt-8 flex items-center justify-center text-xs text-slate-600 font-semibold text-center">
           ₹5,000 Validation Model • Zero Lock-in Contracts
         </div>
 

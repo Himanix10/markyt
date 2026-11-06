@@ -25,7 +25,6 @@ export default defineConfig(() => {
         output: {
           manualChunks: {
             'vendor-react': ['react', 'react-dom'],
-            'vendor-gsap': ['gsap', 'gsap/ScrollTrigger'],
             'vendor-motion': ['motion', 'motion/react'],
             'vendor-icons': ['lucide-react'],
           },
