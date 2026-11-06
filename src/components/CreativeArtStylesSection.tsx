@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { X, Play, Pause } from 'lucide-react';
+import { X, Play, Pause, Sparkles } from 'lucide-react';
 
 interface ArtStyleItem {
   id: string;
@@ -208,13 +208,30 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
     <section
       ref={sectionRef}
       id="creative-styles"
-      className="relative pt-6 sm:pt-14 md:pt-16 pb-8 sm:pb-24 bg-[#FAFBF6] text-slate-900 border-b border-slate-200/80 overflow-hidden select-none"
+      className="relative pt-4 sm:pt-6 md:pt-8 pb-8 sm:pb-24 bg-[#FAFBF6] text-slate-900 border-b border-slate-200/80 overflow-hidden select-none"
       style={{ backgroundColor: '#FAFBF6' }}
     >
+      {/* Delicate background dot texture so the canvas feels intentional, tactile, and never barren */}
+      <div 
+        className="absolute inset-0 bg-[radial-gradient(#0f172a_0.75px,transparent_0.75px)] [background-size:20px_20px] opacity-[0.035] pointer-events-none" 
+        aria-hidden="true" 
+      />
+
+      {/* Subtle tasteful connector divider between Transformation Showcase & Art Styles */}
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 mb-4 sm:mb-6 flex items-center justify-center relative z-10">
+        <div className="h-px bg-gradient-to-r from-transparent via-slate-900/15 to-transparent w-full max-w-md" />
+      </div>
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* ================= SECTION 1: CHOOSE YOUR ART STYLE ================= */}
-        <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-10">
+          {/* Section Kicker Pill Badge - adds clear visual hierarchy so the space feels polished, appealing, and not blank */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-950 text-white text-[11px] font-mono font-bold uppercase tracking-wider shadow-xs mb-3 sm:mb-4">
+            <Sparkles className="w-3.5 h-3.5 text-[#FF3B14]" />
+            <span>Creative Lookbook • Hand-Crafted Visuals</span>
+          </div>
+
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-heading font-black text-slate-950 tracking-tight leading-[1.12]">
             Choose your{' '}
             <span className="font-editorial-italic font-normal italic text-[#FF3B14]">
@@ -222,7 +239,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
             </span>.
           </h2>
 
-          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-600 max-w-lg mx-auto font-normal leading-relaxed">
+          <p className="mt-2.5 sm:mt-3 text-sm sm:text-base text-slate-600 max-w-lg mx-auto font-normal leading-relaxed">
             Tell us what you have in mind. We’ll bring your story to life in the art style that feels right for you.
           </p>
         </div>

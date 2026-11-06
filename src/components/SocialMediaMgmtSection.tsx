@@ -91,7 +91,7 @@ export const SocialMediaMgmtSection: React.FC<SocialMediaMgmtSectionProps> = () 
       </div>
 
       {/* 2. Bottom Part: Transformation Showcase with #FAFBF6 background */}
-      <div className="pb-6 sm:pb-24 md:pb-28 bg-[#FAFBF6]">
+      <div className="pb-3 sm:pb-6 md:pb-8 bg-[#FAFBF6]">
         <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
           {/* ========================================================
               2. TRANSFORMATION SHOWCASE
