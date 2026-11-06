@@ -212,9 +212,9 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     isAudioActive.current = true;
     userWantsPlaying.current = true;
     
-    // Forcibly silence and pause all video references immediately to guarantee zero audio leak
-    Object.values(videoRefs.current).forEach((v) => {
-      if (v) {
+    // Forcibly silence and pause all inactive video references immediately to guarantee zero audio leak
+    Object.entries(videoRefs.current).forEach(([k, v]) => {
+      if (v && Number(k) !== newIndex) {
         try {
           v.pause();
           v.currentTime = 0;
@@ -226,7 +226,15 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
 
     setActiveStudioIndex(newIndex);
     setIsStudioPlaying(true);
-  }, [activeStudioIndex]);
+
+    // Immediately start playing the target video with sound on the first scroll/click
+    const targetVideo = videoRefs.current[newIndex];
+    if (targetVideo && userWantsPlaying.current) {
+      targetVideo.muted = false;
+      targetVideo.volume = 1.0;
+      playVideoSafely(targetVideo);
+    }
+  }, [activeStudioIndex, playVideoSafely]);
 
   // Seamless Infinite Loop Navigation (Prev / Next)
   const handlePrevWork = useCallback(() => {
@@ -575,7 +583,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
               const isCenter = offset === 0;
               const absOffset = Math.abs(offset);
               const cardStyle = getCardStyle(offset);
-              const shouldMountVideo = isCenter; // High-Performance Mobile: Only mount active video so 100% network bandwidth & GPU decoder are dedicated to active video
+              const shouldMountVideo = absOffset <= 1; // Mount active and adjacent cards so they are preloaded and start playing instantly on first scroll
 
               return (
                 <div
@@ -590,24 +598,40 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       : 'shadow-xl hover:ring-1 hover:ring-white/40'
                   }`}
                 >
-                  {/* Clean Edge-to-Edge Video (Mount strictly active video so mobile GPU decoders stay fast and smooth) */}
+                  {/* Guaranteed HD Poster Image (Always rendered at z-[1] so cards NEVER flash black) */}
+                  {work.poster && (
+                    <img
+                      src={encodeURI(work.poster)}
+                      alt={work.title}
+                      className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[1]"
+                      loading={absOffset <= 2 ? 'eager' : 'lazy'}
+                      decoding="async"
+                    />
+                  )}
+
+                  {/* Clean Edge-to-Edge Video mounted at z-[2] on top of poster */}
                   {shouldMountVideo && (
                     <video
                       ref={(el) => {
                         if (el) {
                           videoRefs.current[idx] = el;
+                          if (idx === activeStudioIndex && isStageInView && userWantsPlaying.current) {
+                            el.muted = false;
+                            el.volume = 1.0;
+                            playVideoSafely(el);
+                          }
                         } else {
                           delete videoRefs.current[idx];
                         }
                       }}
                       src={encodeURI(work.videoSrc)}
                       poster={work.poster ? encodeURI(work.poster) : undefined}
-                      className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
+                      className="absolute inset-0 w-full h-full object-cover bg-transparent cursor-pointer z-[2]"
                       loop
                       autoPlay={isCenter && isStageInView && userWantsPlaying.current}
                       muted={!isCenter}
                       playsInline
-                      preload="auto"
+                      preload={isCenter ? "auto" : "metadata"}
                       onPlay={() => {
                         if (isCenter) setIsStudioPlaying(true);
                       }}
@@ -618,17 +642,6 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                         if (isCenter) setIsStudioPlaying(false);
                       }}
                       onEnded={isCenter ? handleNextWork : undefined}
-                    />
-                  )}
-
-                  {/* Guaranteed HD Poster Image Overlay (visible on non-center cards and while paused/buffering) */}
-                  {(!isCenter || !isStudioPlaying) && work.poster && (
-                    <img
-                      src={encodeURI(work.poster)}
-                      alt={work.title}
-                      className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[5] transition-opacity duration-300"
-                      loading={absOffset <= 2 ? 'eager' : 'lazy'}
-                      decoding="async"
                     />
                   )}
 
