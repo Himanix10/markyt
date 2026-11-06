@@ -16,7 +16,6 @@ interface CreativeProductionPageProps {
 export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () => {
   const [activeStudioIndex, setActiveStudioIndex] = useState<number>(0);
   const [isStudioPlaying, setIsStudioPlaying] = useState<boolean>(true);
-  const [isBuffering, setIsBuffering] = useState<boolean>(false);
 
   // Responsive window width tracking for 3D stage calculations
   const [windowWidth, setWindowWidth] = useState<number>(
@@ -56,7 +55,6 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
       video.pause();
       video.muted = true;
       setIsStudioPlaying(false);
-      setIsBuffering(false);
       return;
     }
 
@@ -81,10 +79,8 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
       playPromise
         .then(() => {
           setIsStudioPlaying(true);
-          setIsBuffering(false);
         })
         .catch((err) => {
-          setIsBuffering(false);
           // AbortError is natural when switching slides or scrubbed rapidly; never pause or kill playing state on AbortError
           if (err?.name === 'AbortError') {
             return;
@@ -95,17 +91,14 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
             video.play()
               .then(() => {
                 setIsStudioPlaying(true);
-                setIsBuffering(false);
               })
               .catch((e) => {
-                setIsBuffering(false);
                 if (e?.name !== 'AbortError') {
                   setIsStudioPlaying(false);
                 }
               });
           } else {
             setIsStudioPlaying(false);
-            setIsBuffering(false);
           }
         });
     }
@@ -153,13 +146,13 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
           } else {
             setIsStageInView(true);
             // User scrolled into view: start active video cleanly
-            if (currentVideo && currentVideo.paused) {
+            if (currentVideo && currentVideo.paused && userWantsPlaying.current) {
               playVideoSafely(currentVideo);
             }
           }
         });
       },
-      { threshold: 0.25 }
+      { threshold: 0.1, rootMargin: '60px 0px 60px 0px' }
     );
 
     if (stageRef.current) {
@@ -210,7 +203,6 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     // If user explicitly paused/stopped the video, KEEP IT STOPPED when moving forward!
     if (!userWantsPlaying.current) {
       setIsStudioPlaying(false);
-      setIsBuffering(false);
     } else {
       setIsStudioPlaying(true);
     }
@@ -241,14 +233,12 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
       userWantsPlaying.current = false;
       activeVideo.pause();
       setIsStudioPlaying(false);
-      setIsBuffering(false);
     } else {
       // User explicitly requested playback / unmuting
       userWantsPlaying.current = true;
       activeVideo.muted = false;
       activeVideo.volume = 1.0;
       setIsStudioPlaying(true);
-      setIsBuffering(false);
       playVideoSafely(activeVideo);
     }
   };
@@ -587,64 +577,25 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                         if (el) {
                           videoRefs.current[idx] = el;
                         } else {
-                          const old = videoRefs.current[idx];
-                          if (old) {
-                            try {
-                              old.pause();
-                              old.currentTime = 0;
-                              old.muted = true;
-                              old.volume = 0;
-                              old.removeAttribute('src');
-                              old.load();
-                            } catch {}
-                            delete videoRefs.current[idx];
-                          }
+                          delete videoRefs.current[idx];
                         }
                       }}
                       src={encodeURI(work.videoSrc)}
                       poster={work.poster ? encodeURI(work.poster) : undefined}
                       className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
                       loop
-                      autoPlay={isCenter && isStageInView}
+                      autoPlay={isCenter && isStageInView && userWantsPlaying.current}
                       muted={!isCenter || !(hasUserInteracted.current || isAudioActive.current)}
                       playsInline
                       preload="auto"
                       onPlay={() => {
-                        if (isCenter) {
-                          setIsStudioPlaying(true);
-                          setIsBuffering(false);
-                        }
+                        if (isCenter) setIsStudioPlaying(true);
                       }}
                       onPlaying={() => {
-                        if (isCenter) {
-                          setIsStudioPlaying(true);
-                          setIsBuffering(false);
-                        }
-                      }}
-                      onTimeUpdate={() => {
-                        if (isCenter && isBuffering) {
-                          setIsBuffering(false);
-                        }
-                      }}
-                      onCanPlay={() => {
-                        if (isCenter) setIsBuffering(false);
-                      }}
-                      onCanPlayThrough={() => {
-                        if (isCenter) setIsBuffering(false);
-                      }}
-                      onLoadedData={() => {
-                        if (isCenter) setIsBuffering(false);
-                      }}
-                      onWaiting={() => {
-                        if (isCenter && videoRefs.current[activeStudioIndex]?.paused) {
-                          setIsBuffering(true);
-                        }
+                        if (isCenter) setIsStudioPlaying(true);
                       }}
                       onPause={() => {
-                        if (isCenter) {
-                          setIsStudioPlaying(false);
-                          setIsBuffering(false);
-                        }
+                        if (isCenter) setIsStudioPlaying(false);
                       }}
                       onEnded={isCenter ? handleNextWork : undefined}
                     />
