@@ -39,14 +39,40 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
   const stageRef = useRef<HTMLDivElement>(null);
   const [isStageInView, setIsStageInView] = useState<boolean>(false);
 
-  // User gesture & playback intent tracking
-  const hasUserInteracted = useRef<boolean>(false);
-  const isAudioActive = useRef<boolean>(false);
+  // User gesture & playback intent tracking (defaults to audio-active so scrolling into view plays with audio)
+  const hasUserInteracted = useRef<boolean>(true);
+  const isAudioActive = useRef<boolean>(true);
   const userWantsPlaying = useRef<boolean>(true);
 
   const totalWorks = VIDEO_PORTFOLIO_WORKS.length;
 
-  // Auto-play the target video reliably with audio enabled upon user engagement
+  // Global listener: as soon as the user scrolls, touches, or taps anywhere on the site, activate unmuted audio
+  useEffect(() => {
+    const enableAudioOnGesture = () => {
+      hasUserInteracted.current = true;
+      isAudioActive.current = true;
+      const currentVideo = videoRefs.current[activeStudioIndex];
+      if (currentVideo && isStageInView && userWantsPlaying.current && currentVideo.muted) {
+        currentVideo.muted = false;
+        currentVideo.volume = 1.0;
+        currentVideo.play().catch(() => {});
+      }
+    };
+
+    window.addEventListener('pointerdown', enableAudioOnGesture, { passive: true });
+    window.addEventListener('touchstart', enableAudioOnGesture, { passive: true });
+    window.addEventListener('scroll', enableAudioOnGesture, { passive: true });
+    window.addEventListener('click', enableAudioOnGesture, { passive: true });
+
+    return () => {
+      window.removeEventListener('pointerdown', enableAudioOnGesture);
+      window.removeEventListener('touchstart', enableAudioOnGesture);
+      window.removeEventListener('scroll', enableAudioOnGesture);
+      window.removeEventListener('click', enableAudioOnGesture);
+    };
+  }, [activeStudioIndex, isStageInView]);
+
+  // Auto-play the target video reliably with audio enabled
   const playVideoSafely = useCallback((video: HTMLVideoElement | null) => {
     if (!video) return;
 
@@ -65,14 +91,9 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     video.playsInline = true;
     video.loop = true;
 
-    // Enable audio automatically if user has engaged with the carousel/controls
-    if (hasUserInteracted.current || isAudioActive.current) {
-      video.muted = false;
-      video.volume = 1.0;
-    } else {
-      // Passive initial load: start muted to satisfy initial browser autoplay restrictions
-      video.muted = true;
-    }
+    // Direct unmuted audio playback
+    video.muted = false;
+    video.volume = 1.0;
 
     const playPromise = video.play();
     if (playPromise !== undefined) {
@@ -81,11 +102,11 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
           setIsStudioPlaying(true);
         })
         .catch((err) => {
-          // AbortError is natural when switching slides or scrubbed rapidly; never pause or kill playing state on AbortError
+          // AbortError is natural when switching slides rapidly
           if (err?.name === 'AbortError') {
             return;
           }
-          // If browser policy rejects unmuted playback before direct touch gesture, fall back to muted seamlessly
+          // If browser policy strictly blocks unmuted playback without prior touch, fall back to muted
           if (err?.name === 'NotAllowedError') {
             video.muted = true;
             video.play()
@@ -131,7 +152,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     }
   }, [activeStudioIndex, isStageInView, playVideoSafely]);
 
-  // Auto-pause video when scrolled out of viewport, and start when scrolled in
+  // Auto-pause video and stop audio when scrolled out of viewport, and resume with audio when scrolled in
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -139,20 +160,23 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
           const currentVideo = videoRefs.current[activeStudioIndex];
           if (!entry.isIntersecting) {
             setIsStageInView(false);
-            if (currentVideo && !currentVideo.paused) {
+            if (currentVideo) {
               currentVideo.pause();
+              currentVideo.muted = true;
               setIsStudioPlaying(false);
             }
           } else {
             setIsStageInView(true);
-            // User scrolled into view: start active video cleanly
-            if (currentVideo && currentVideo.paused && userWantsPlaying.current) {
+            // User scrolled into view: start active video with audio cleanly
+            if (currentVideo && userWantsPlaying.current) {
+              currentVideo.muted = false;
+              currentVideo.volume = 1.0;
               playVideoSafely(currentVideo);
             }
           }
         });
       },
-      { threshold: 0.1, rootMargin: '60px 0px 60px 0px' }
+      { threshold: 0.15 }
     );
 
     if (stageRef.current) {
@@ -185,6 +209,8 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     if (newIndex === activeStudioIndex) return;
 
     hasUserInteracted.current = true;
+    isAudioActive.current = true;
+    userWantsPlaying.current = true;
     
     // Forcibly silence and pause all video references immediately to guarantee zero audio leak
     Object.values(videoRefs.current).forEach((v) => {
@@ -199,13 +225,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     });
 
     setActiveStudioIndex(newIndex);
-
-    // If user explicitly paused/stopped the video, KEEP IT STOPPED when moving forward!
-    if (!userWantsPlaying.current) {
-      setIsStudioPlaying(false);
-    } else {
-      setIsStudioPlaying(true);
-    }
+    setIsStudioPlaying(true);
   }, [activeStudioIndex]);
 
   // Seamless Infinite Loop Navigation (Prev / Next)
@@ -585,7 +605,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
                       loop
                       autoPlay={isCenter && isStageInView && userWantsPlaying.current}
-                      muted={!isCenter || !(hasUserInteracted.current || isAudioActive.current)}
+                      muted={!isCenter}
                       playsInline
                       preload="auto"
                       onPlay={() => {
