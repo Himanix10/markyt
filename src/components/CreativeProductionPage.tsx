@@ -574,7 +574,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
               const isCenter = offset === 0;
               const absOffset = Math.abs(offset);
               const cardStyle = getCardStyle(offset);
-              const shouldMountVideo = isCenter; // High-Performance: Mount strictly the active center video to prevent GPU & bandwidth saturation
+              const shouldMountVideo = isCenter || absOffset === 1; // Instant Zero-Lag: Pre-buffer immediate neighbors so clicks start in 0ms, keeping GPU decoder usage at only 3
 
               return (
                 <div
@@ -614,8 +614,8 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       poster={work.poster ? encodeURI(work.poster) : undefined}
                       className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
                       loop
-                      autoPlay={isStageInView}
-                      muted={!(hasUserInteracted.current || isAudioActive.current)}
+                      autoPlay={isCenter && isStageInView}
+                      muted={!isCenter || !(hasUserInteracted.current || isAudioActive.current)}
                       playsInline
                       preload="auto"
                       onPlay={() => {
