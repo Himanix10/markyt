@@ -211,17 +211,6 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
       className="relative pt-4 sm:pt-6 md:pt-8 pb-8 sm:pb-24 bg-[#FAFBF6] text-slate-900 border-b border-slate-200/80 overflow-hidden select-none"
       style={{ backgroundColor: '#FAFBF6' }}
     >
-      {/* Delicate background dot texture so the canvas feels intentional, tactile, and never barren */}
-      <div 
-        className="absolute inset-0 bg-[radial-gradient(#0f172a_0.75px,transparent_0.75px)] [background-size:20px_20px] opacity-[0.035] pointer-events-none" 
-        aria-hidden="true" 
-      />
-
-      {/* Subtle tasteful connector divider between Transformation Showcase & Art Styles */}
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 mb-4 sm:mb-6 flex items-center justify-center relative z-10">
-        <div className="h-px bg-gradient-to-r from-transparent via-slate-900/15 to-transparent w-full max-w-md" />
-      </div>
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* ================= SECTION 1: CHOOSE YOUR ART STYLE ================= */}
