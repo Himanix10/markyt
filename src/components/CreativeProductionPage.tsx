@@ -291,8 +291,8 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
       accumulatedDeltaX.current += e.deltaX;
       const now = Date.now();
 
-      const WHEEL_THRESHOLD = 30;
-      const WHEEL_COOLDOWN = 280;
+      const WHEEL_THRESHOLD = 20;
+      const WHEEL_COOLDOWN = 240;
 
       if (now - lastWheelTime.current > WHEEL_COOLDOWN) {
         if (accumulatedDeltaX.current > WHEEL_THRESHOLD) {
@@ -328,10 +328,10 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     const deltaY = e.changedTouches[0].clientY - touchStartY.current;
 
     // Only swipe if horizontal swipe is dominant over vertical scroll
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
-      if (deltaX > 40) {
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 25) {
+      if (deltaX > 25) {
         handlePrevWork();
-      } else if (deltaX < -40) {
+      } else if (deltaX < -25) {
         handleNextWork();
       }
     }
