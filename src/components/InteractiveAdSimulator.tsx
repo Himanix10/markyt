@@ -429,7 +429,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                     className="w-full h-full object-cover block"
                     playsInline
                     loop
-                    preload="metadata"
+                    preload="auto"
                     onTimeUpdate={handleTimeUpdate}
                     onWaiting={() => setIsBuffering(true)}
                     onCanPlay={() => setIsBuffering(false)}
@@ -491,15 +491,6 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-slate-950/25 backdrop-blur-[1px] z-30">
                       <div className="w-12 h-12 rounded-full bg-white/95 shadow-xl flex items-center justify-center text-slate-900 group-hover/heroplayer:scale-110 transition-transform border border-white/60">
                         <Play className="w-5 h-5 fill-slate-900 ml-0.5" />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Centered Buffering Spinner when waiting for media buffer */}
-                  {isPlaying && isBuffering && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-                      <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-xs flex items-center justify-center">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       </div>
                     </div>
                   )}

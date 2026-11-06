@@ -158,6 +158,13 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
         }
       });
 
+      // Pause GIF video loops so mobile GPU decoder & network bandwidth are 100% dedicated to this video
+      gifVideoRefs.current.forEach((v) => {
+        if (v && !v.paused) {
+          v.pause();
+        }
+      });
+
       // Show immediate loading state so user knows the click registered
       setLoadingAudioIndex(idx);
       video.muted = false;
@@ -305,7 +312,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                       poster={video.poster}
                       loop
                       playsInline
-                      preload="metadata"
+                      preload="auto"
                       onTimeUpdate={() => handleTimeUpdate(idx)}
                       onEnded={() => {
                         setPlayingAudioIndex(null);
@@ -316,9 +323,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                       }}
                       className="w-full h-full object-cover select-none pointer-events-none"
                       aria-label={video.name}
-                    >
-                      <source src={video.src} type="video/mp4" />
-                    </video>
+                    />
 
                     {/* Clean HD Poster Overlay when Paused */}
                     {!isPlaying && video.poster && (

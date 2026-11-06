@@ -236,7 +236,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     const activeVideo = videoRefs.current[activeStudioIndex];
     if (!activeVideo) return;
 
-    if (!activeVideo.paused && isStudioPlaying && !activeVideo.muted) {
+    if (!activeVideo.paused && isStudioPlaying) {
       // User explicitly stopped/paused the video
       userWantsPlaying.current = false;
       activeVideo.pause();
@@ -249,9 +249,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
       activeVideo.volume = 1.0;
       setIsStudioPlaying(true);
       setIsBuffering(false);
-      if (activeVideo.paused) {
-        playVideoSafely(activeVideo);
-      }
+      playVideoSafely(activeVideo);
     }
   };
 
@@ -561,21 +559,13 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
               <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
-            {/* Seamless Browser HTTP Cache Preload for Next Video */}
-            <link 
-              rel="preload" 
-              as="video" 
-              type="video/mp4" 
-              href={encodeURI(VIDEO_PORTFOLIO_WORKS[(activeStudioIndex + 1) % totalWorks].videoSrc)} 
-            />
-
             {/* Render Active & Adjacent Cards */}
             {VIDEO_PORTFOLIO_WORKS.map((work, idx) => {
               const offset = getOffset(idx);
               const isCenter = offset === 0;
               const absOffset = Math.abs(offset);
               const cardStyle = getCardStyle(offset);
-              const shouldMountVideo = isCenter || absOffset === 1; // Instant Zero-Lag: Pre-buffer immediate neighbors so clicks start in 0ms, keeping GPU decoder usage at only 3
+              const shouldMountVideo = isCenter; // High-Performance Mobile: Only mount active video so 100% network bandwidth & GPU decoder are dedicated to active video
 
               return (
                 <div
@@ -678,16 +668,12 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                   {/* Active Center Video: Controls */}
                   {isCenter ? (
                     <>
-                      {/* Center Play / Pause / Buffering Overlay */}
+                      {/* Center Play / Pause Overlay (Zero buffering spinner obstruction) */}
                       <div 
                         onClick={toggleStudioPlay}
                         className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer group/centerplay"
                       >
-                        {isBuffering && isStudioPlaying && (!videoRefs.current[activeStudioIndex] || videoRefs.current[activeStudioIndex]?.currentTime === 0) ? (
-                          <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-xl border border-white/30 pointer-events-none">
-                            <div className="w-6 h-6 sm:w-7 sm:h-7 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                          </div>
-                        ) : !isStudioPlaying ? (
+                        {!isStudioPlaying ? (
                           <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-[#FF3B14]/90 hover:bg-[#FF3B14] backdrop-blur-md text-white flex items-center justify-center shadow-[0_0_35px_rgba(255,59,20,0.6)] hover:scale-110 active:scale-95 transition-all border border-white/30">
                             <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-white ml-1 text-white" />
                           </div>
