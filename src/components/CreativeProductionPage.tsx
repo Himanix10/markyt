@@ -84,6 +84,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
           setIsBuffering(false);
         })
         .catch((err) => {
+          setIsBuffering(false);
           // AbortError is natural when switching slides or scrubbed rapidly; never pause or kill playing state on AbortError
           if (err?.name === 'AbortError') {
             return;
@@ -97,9 +98,9 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                 setIsBuffering(false);
               })
               .catch((e) => {
+                setIsBuffering(false);
                 if (e?.name !== 'AbortError') {
                   setIsStudioPlaying(false);
-                  setIsBuffering(false);
                 }
               });
           } else {
@@ -235,22 +236,22 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     const activeVideo = videoRefs.current[activeStudioIndex];
     if (!activeVideo) return;
 
-    if (!activeVideo.paused && isStudioPlaying) {
+    if (!activeVideo.paused && isStudioPlaying && !activeVideo.muted) {
       // User explicitly stopped/paused the video
       userWantsPlaying.current = false;
       activeVideo.pause();
-      activeVideo.muted = true;
       setIsStudioPlaying(false);
       setIsBuffering(false);
     } else {
-      // User explicitly requested playback
+      // User explicitly requested playback / unmuting
       userWantsPlaying.current = true;
-      activeVideo.currentTime = 0;
       activeVideo.muted = false;
       activeVideo.volume = 1.0;
       setIsStudioPlaying(true);
-      setIsBuffering(true);
-      playVideoSafely(activeVideo);
+      setIsBuffering(false);
+      if (activeVideo.paused) {
+        playVideoSafely(activeVideo);
+      }
     }
   };
 
@@ -630,8 +631,24 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                           setIsBuffering(false);
                         }
                       }}
+                      onTimeUpdate={() => {
+                        if (isCenter && isBuffering) {
+                          setIsBuffering(false);
+                        }
+                      }}
+                      onCanPlay={() => {
+                        if (isCenter) setIsBuffering(false);
+                      }}
+                      onCanPlayThrough={() => {
+                        if (isCenter) setIsBuffering(false);
+                      }}
+                      onLoadedData={() => {
+                        if (isCenter) setIsBuffering(false);
+                      }}
                       onWaiting={() => {
-                        if (isCenter) setIsBuffering(true);
+                        if (isCenter && videoRefs.current[activeStudioIndex]?.paused) {
+                          setIsBuffering(true);
+                        }
                       }}
                       onPause={() => {
                         if (isCenter) {
@@ -666,8 +683,8 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                         onClick={toggleStudioPlay}
                         className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer group/centerplay"
                       >
-                        {isBuffering ? (
-                          <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-xl border border-white/30">
+                        {isBuffering && isStudioPlaying && (!videoRefs.current[activeStudioIndex] || videoRefs.current[activeStudioIndex]?.currentTime === 0) ? (
+                          <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-xl border border-white/30 pointer-events-none">
                             <div className="w-6 h-6 sm:w-7 sm:h-7 border-3 border-white border-t-transparent rounded-full animate-spin" />
                           </div>
                         ) : !isStudioPlaying ? (
