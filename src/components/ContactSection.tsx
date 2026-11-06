@@ -20,7 +20,7 @@ export const ContactSection: React.FC<ContactSectionProps> = () => {
         </h2>
         
         <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto font-medium leading-relaxed">
-          Start with our ₹5,000 test sprint. We write your script, edit your videos, and launch your ads on Instagram and Facebook in just 48 to 72 hours.
+          Start with our test sprint. We write your script, edit your videos, and launch your ads on Instagram and Facebook in just 48 to 72 hours.
         </p>
 
         <div className="flex items-center justify-center pt-2 sm:pt-4">
