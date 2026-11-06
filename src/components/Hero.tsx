@@ -88,7 +88,7 @@ export const Hero: React.FC<HeroProps> = ({
           <p className="mt-4 sm:mt-7 text-base sm:text-xl text-slate-900 font-medium max-w-xl mx-auto leading-relaxed">
             You’ve probably burned money on marketing that didn’t deliver.
             <span className="block mt-1 font-bold text-slate-950">
-              Why Invest Big Upfront? Start Testing at <span className="text-[#FF3B14]">₹5,000</span>.
+              Why Invest Big Upfront? Start Testing <span className="text-[#FF3B14]">Today</span>.
             </span>
           </p>
         </div>
