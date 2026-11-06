@@ -40,15 +40,25 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
   const stageRef = useRef<HTMLDivElement>(null);
   const [isStageInView, setIsStageInView] = useState<boolean>(false);
 
-  // User gesture tracking to unmute audio seamlessly as soon as user interacts with the section
+  // User gesture & playback intent tracking
   const hasUserInteracted = useRef<boolean>(false);
   const isAudioActive = useRef<boolean>(false);
+  const userWantsPlaying = useRef<boolean>(true);
 
   const totalWorks = VIDEO_PORTFOLIO_WORKS.length;
 
   // Auto-play the target video reliably with audio enabled upon user engagement
   const playVideoSafely = useCallback((video: HTMLVideoElement | null) => {
     if (!video) return;
+
+    // If user has stopped/paused the video, do NOT play
+    if (!userWantsPlaying.current) {
+      video.pause();
+      video.muted = true;
+      setIsStudioPlaying(false);
+      setIsBuffering(false);
+      return;
+    }
 
     if (video.currentTime > 0 && video.ended) {
       video.currentTime = 0;
@@ -102,19 +112,28 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
 
   // Play active center video when in view or when user switches cards
   useEffect(() => {
-    // 1. Pause and reset all inactive videos
+    // 1. Pause, silence and reset all inactive videos
     Object.entries(videoRefs.current).forEach(([k, vid]) => {
       if (vid && Number(k) !== activeStudioIndex) {
-        if (!vid.paused) vid.pause();
-        vid.currentTime = 0;
-        vid.muted = true;
+        try {
+          if (!vid.paused) vid.pause();
+          vid.currentTime = 0;
+          vid.muted = true;
+          vid.volume = 0;
+        } catch {}
       }
     });
 
-    // 2. Play active center video only if stage is visible or user has interacted
+    // 2. Play active center video only if stage is visible and user hasn't explicitly stopped it
     const activeVideo = videoRefs.current[activeStudioIndex];
-    if (activeVideo && (isStageInView || hasUserInteracted.current)) {
-      playVideoSafely(activeVideo);
+    if (activeVideo) {
+      if (isStageInView && userWantsPlaying.current) {
+        playVideoSafely(activeVideo);
+      } else {
+        activeVideo.pause();
+        activeVideo.muted = true;
+        setIsStudioPlaying(false);
+      }
     }
   }, [activeStudioIndex, isStageInView, playVideoSafely]);
 
@@ -172,30 +191,37 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     if (newIndex === activeStudioIndex) return;
 
     hasUserInteracted.current = true;
-    isAudioActive.current = true;
     
-    // Pause previous video immediately
-    const prevVideo = videoRefs.current[activeStudioIndex];
-    if (prevVideo && !prevVideo.paused) {
-      prevVideo.pause();
-      prevVideo.currentTime = 0;
-    }
+    // Forcibly silence and pause all video references immediately to guarantee zero audio leak
+    Object.values(videoRefs.current).forEach((v) => {
+      if (v) {
+        try {
+          v.pause();
+          v.currentTime = 0;
+          v.muted = true;
+          v.volume = 0;
+        } catch {}
+      }
+    });
 
     setActiveStudioIndex(newIndex);
-    setIsStudioPlaying(true);
+
+    // If user explicitly paused/stopped the video, KEEP IT STOPPED when moving forward!
+    if (!userWantsPlaying.current) {
+      setIsStudioPlaying(false);
+      setIsBuffering(false);
+    } else {
+      setIsStudioPlaying(true);
+    }
   }, [activeStudioIndex]);
 
   // Seamless Infinite Loop Navigation (Prev / Next)
   const handlePrevWork = useCallback(() => {
-    hasUserInteracted.current = true;
-    isAudioActive.current = true;
     const prevIndex = (activeStudioIndex - 1 + totalWorks) % totalWorks;
     handleSelectWork(prevIndex);
   }, [activeStudioIndex, totalWorks, handleSelectWork]);
 
   const handleNextWork = useCallback(() => {
-    hasUserInteracted.current = true;
-    isAudioActive.current = true;
     const nextIndex = (activeStudioIndex + 1) % totalWorks;
     handleSelectWork(nextIndex);
   }, [activeStudioIndex, totalWorks, handleSelectWork]);
@@ -209,24 +235,20 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     const activeVideo = videoRefs.current[activeStudioIndex];
     if (!activeVideo) return;
 
-    if (!activeVideo.paused) {
-      // If playing but muted, restart from 0 with audio so user hears speech from the start
-      if (activeVideo.muted) {
-        activeVideo.currentTime = 0;
-        activeVideo.muted = false;
-        activeVideo.volume = 1.0;
-        setIsStudioPlaying(true);
-      } else {
-        // If already playing with sound, toggle pause
-        activeVideo.pause();
-        setIsStudioPlaying(false);
-        setIsBuffering(false);
-      }
+    if (!activeVideo.paused && isStudioPlaying) {
+      // User explicitly stopped/paused the video
+      userWantsPlaying.current = false;
+      activeVideo.pause();
+      activeVideo.muted = true;
+      setIsStudioPlaying(false);
+      setIsBuffering(false);
     } else {
-      // If paused, unmute and play with sound from start
+      // User explicitly requested playback
+      userWantsPlaying.current = true;
       activeVideo.currentTime = 0;
       activeVideo.muted = false;
       activeVideo.volume = 1.0;
+      setIsStudioPlaying(true);
       setIsBuffering(true);
       playVideoSafely(activeVideo);
     }
@@ -571,7 +593,22 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                   {shouldMountVideo && (
                     <video
                       ref={(el) => {
-                        videoRefs.current[idx] = el;
+                        if (el) {
+                          videoRefs.current[idx] = el;
+                        } else {
+                          const old = videoRefs.current[idx];
+                          if (old) {
+                            try {
+                              old.pause();
+                              old.currentTime = 0;
+                              old.muted = true;
+                              old.volume = 0;
+                              old.removeAttribute('src');
+                              old.load();
+                            } catch {}
+                            delete videoRefs.current[idx];
+                          }
+                        }
                       }}
                       src={encodeURI(work.videoSrc)}
                       poster={work.poster ? encodeURI(work.poster) : undefined}
