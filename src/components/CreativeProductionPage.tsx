@@ -73,7 +73,11 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
           setIsBuffering(false);
         })
         .catch((err) => {
-          // If browser policy rejects unmuted playback before gesture, fall back to muted seamlessly
+          // AbortError is natural when switching slides or scrubbed rapidly; never pause or kill playing state on AbortError
+          if (err?.name === 'AbortError') {
+            return;
+          }
+          // If browser policy rejects unmuted playback before direct touch gesture, fall back to muted seamlessly
           if (err?.name === 'NotAllowedError') {
             video.muted = true;
             video.play()
@@ -81,9 +85,11 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                 setIsStudioPlaying(true);
                 setIsBuffering(false);
               })
-              .catch(() => {
-                setIsStudioPlaying(false);
-                setIsBuffering(false);
+              .catch((e) => {
+                if (e?.name !== 'AbortError') {
+                  setIsStudioPlaying(false);
+                  setIsBuffering(false);
+                }
               });
           } else {
             setIsStudioPlaying(false);
@@ -526,13 +532,21 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
               <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
+            {/* Seamless Browser HTTP Cache Preload for Next Video */}
+            <link 
+              rel="preload" 
+              as="video" 
+              type="video/mp4" 
+              href={encodeURI(VIDEO_PORTFOLIO_WORKS[(activeStudioIndex + 1) % totalWorks].videoSrc)} 
+            />
+
             {/* Render Active & Adjacent Cards */}
             {VIDEO_PORTFOLIO_WORKS.map((work, idx) => {
               const offset = getOffset(idx);
               const isCenter = offset === 0;
               const absOffset = Math.abs(offset);
               const cardStyle = getCardStyle(offset);
-              const shouldMountVideo = isCenter || absOffset <= 1 || (windowWidth >= 768 && absOffset <= 2);
+              const shouldMountVideo = isCenter; // High-Performance: Mount strictly the active center video to prevent GPU & bandwidth saturation
 
               return (
                 <div
@@ -547,7 +561,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       : 'shadow-xl hover:ring-1 hover:ring-white/40'
                   }`}
                 >
-                  {/* Clean Edge-to-Edge Video (Mount only active and immediate neighbor cards to avoid decoder saturation & lag) */}
+                  {/* Clean Edge-to-Edge Video (Mount strictly active video so mobile GPU decoders stay fast and smooth) */}
                   {shouldMountVideo && (
                     <video
                       ref={(el) => {
@@ -557,10 +571,10 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       poster={work.poster ? encodeURI(work.poster) : undefined}
                       className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
                       loop
-                      autoPlay={isCenter}
-                      muted={!isCenter}
+                      autoPlay
+                      muted={!(hasUserInteracted.current || isAudioActive.current)}
                       playsInline
-                      preload={isCenter ? 'auto' : 'metadata'}
+                      preload="auto"
                       onPlay={() => {
                         if (isCenter) {
                           setIsStudioPlaying(true);

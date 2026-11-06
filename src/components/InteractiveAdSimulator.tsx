@@ -103,12 +103,15 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
         .then(() => {
           setIsPlaying(true);
         })
-        .catch(() => {
+        .catch((err) => {
+          if (err?.name === 'AbortError') return;
           // Autoplay policy prevented audio: play muted so video plays 100% reliably
           video.muted = true;
           video.play()
             .then(() => setIsPlaying(true))
-            .catch(() => setIsPlaying(false));
+            .catch((e) => {
+              if (e?.name !== 'AbortError') setIsPlaying(false);
+            });
         });
     }
   };

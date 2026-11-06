@@ -218,11 +218,10 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                   }}
                   src={style.src}
                   poster={style.poster}
-                  autoPlay
                   loop
                   muted
                   playsInline
-                  preload="metadata"
+                  preload="none"
                   className="w-full h-full object-cover select-none pointer-events-none"
                   aria-label={style.name}
                 >
