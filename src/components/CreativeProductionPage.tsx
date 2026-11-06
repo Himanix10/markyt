@@ -38,6 +38,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
   // Video element refs mapped by index
   const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({});
   const stageRef = useRef<HTMLDivElement>(null);
+  const [isStageInView, setIsStageInView] = useState<boolean>(false);
 
   // User gesture tracking to unmute audio seamlessly as soon as user interacts with the section
   const hasUserInteracted = useRef<boolean>(false);
@@ -99,7 +100,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     }
   }, []);
 
-  // Instant playback on index switch
+  // Play active center video when in view or when user switches cards
   useEffect(() => {
     // 1. Pause and reset all inactive videos
     Object.entries(videoRefs.current).forEach(([k, vid]) => {
@@ -110,26 +111,28 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
       }
     });
 
-    // 2. Play the active center video once cleanly
+    // 2. Play active center video only if stage is visible or user has interacted
     const activeVideo = videoRefs.current[activeStudioIndex];
-    if (activeVideo) {
+    if (activeVideo && (isStageInView || hasUserInteracted.current)) {
       playVideoSafely(activeVideo);
     }
-  }, [activeStudioIndex, playVideoSafely]);
+  }, [activeStudioIndex, isStageInView, playVideoSafely]);
 
-  // Auto-pause video when scrolled out of viewport, and resume when scrolled back in
+  // Auto-pause video when scrolled out of viewport, and start when scrolled in
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const currentVideo = videoRefs.current[activeStudioIndex];
           if (!entry.isIntersecting) {
+            setIsStageInView(false);
             if (currentVideo && !currentVideo.paused) {
               currentVideo.pause();
               setIsStudioPlaying(false);
             }
           } else {
-            // User scrolled back into view: resume active video smoothly
+            setIsStageInView(true);
+            // User scrolled into view: start active video cleanly
             if (currentVideo && currentVideo.paused) {
               playVideoSafely(currentVideo);
             }
@@ -207,18 +210,21 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     if (!activeVideo) return;
 
     if (!activeVideo.paused) {
-      // If playing but muted, unmute so user immediately hears audio
+      // If playing but muted, restart from 0 with audio so user hears speech from the start
       if (activeVideo.muted) {
+        activeVideo.currentTime = 0;
         activeVideo.muted = false;
         activeVideo.volume = 1.0;
+        setIsStudioPlaying(true);
       } else {
-        // If already playing with sound, pause
+        // If already playing with sound, toggle pause
         activeVideo.pause();
         setIsStudioPlaying(false);
         setIsBuffering(false);
       }
     } else {
-      // If paused, unmute and play with sound!
+      // If paused, unmute and play with sound from start
+      activeVideo.currentTime = 0;
       activeVideo.muted = false;
       activeVideo.volume = 1.0;
       setIsBuffering(true);
@@ -571,7 +577,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       poster={work.poster ? encodeURI(work.poster) : undefined}
                       className="absolute inset-0 w-full h-full object-cover bg-slate-950 cursor-pointer"
                       loop
-                      autoPlay
+                      autoPlay={isStageInView}
                       muted={!(hasUserInteracted.current || isAudioActive.current)}
                       playsInline
                       preload="auto"

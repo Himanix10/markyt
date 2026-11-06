@@ -46,26 +46,26 @@ const COMMERCIAL_VIDEOS: CommercialVideoItem[] = [
   {
     id: 'artisanal-coffee-cafe',
     name: 'Artisanal Coffee & Cafe',
-    src: '/videos/kafora-artisanal-coffee.mp4?v=1',
-    poster: '/videos/posters/kafora-artisanal-coffee.jpg?v=1',
+    src: '/videos/kafora-artisanal-coffee.mp4',
+    poster: '/videos/posters/kafora-artisanal-coffee.jpg',
   },
   {
     id: 'luxury-fragrance-lifestyle',
     name: 'Luxury Fragrance & Lifestyle',
-    src: '/videos/zevaro-luxury-perfume.mp4?v=8',
-    poster: '/videos/posters/zevaro-luxury-perfume.jpg?v=8',
+    src: '/videos/zevaro-luxury-perfume.mp4',
+    poster: '/videos/posters/zevaro-luxury-perfume.jpg',
   },
   {
     id: 'clara-luxury-perfume',
     name: 'Luxury Perfume & Accessories',
-    src: '/videos/clara-luxury-perfume.mp4?v=1',
-    poster: '/videos/posters/clara-luxury-perfume.jpg?v=1',
+    src: '/videos/clara-luxury-perfume.mp4',
+    poster: '/videos/posters/clara-luxury-perfume.jpg',
   },
   {
     id: 'minimalist-fashion-apparel',
     name: 'Minimalist Fashion & Apparel',
-    src: '/videos/modest-fashion-apparel.mp4?v=6',
-    poster: '/videos/posters/modest-fashion-apparel.jpg?v=6',
+    src: '/videos/modest-fashion-apparel.mp4',
+    poster: '/videos/posters/modest-fashion-apparel.jpg',
   },
 ];
 
@@ -81,6 +81,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
   
   const [activeModalStyle, setActiveModalStyle] = useState<ArtStyleItem | null>(null);
   const [playingAudioIndex, setPlayingAudioIndex] = useState<number | null>(null);
+  const [loadingAudioIndex, setLoadingAudioIndex] = useState<number | null>(null);
 
   // Auto-play visual GIF-style loops when in viewport; audio videos remain paused on poster
   useEffect(() => {
@@ -111,6 +112,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
         }
       });
       setPlayingAudioIndex(null);
+      setLoadingAudioIndex(null);
     };
 
     const observer = new IntersectionObserver(
@@ -118,6 +120,12 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
         const isVisible = entries[0]?.isIntersecting ?? false;
         if (isVisible) {
           startVisualVideos();
+          // Warm up metadata so tapping any commercial video plays immediately
+          commercialVideoRefs.current.forEach((v) => {
+            if (v && v.preload !== 'auto') {
+              v.preload = 'metadata';
+            }
+          });
         } else {
           pauseAllVideos();
         }
@@ -132,7 +140,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
     };
   }, []);
 
-  // Direct unmuted audio play/pause toggle with zero overlays or mute button
+  // Direct unmuted audio play/pause toggle with instant visual feedback
   const toggleAudioPlay = (idx: number, e: React.MouseEvent) => {
     e.stopPropagation();
     const video = commercialVideoRefs.current[idx];
@@ -141,6 +149,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
     if (!video.paused && playingAudioIndex === idx) {
       video.pause();
       setPlayingAudioIndex(null);
+      setLoadingAudioIndex(null);
     } else {
       // Pause any other active commercial video
       commercialVideoRefs.current.forEach((v, i) => {
@@ -149,16 +158,31 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
         }
       });
 
-      // Play with audio unmuted
+      // Show immediate loading state so user knows the click registered
+      setLoadingAudioIndex(idx);
       video.muted = false;
       video.defaultMuted = false;
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise
-          .then(() => setPlayingAudioIndex(idx))
-          .catch(() => {
+          .then(() => {
+            setPlayingAudioIndex(idx);
+            setLoadingAudioIndex(null);
+          })
+          .catch((err) => {
+            if (err?.name === 'AbortError') return;
             video.muted = true;
-            video.play().then(() => setPlayingAudioIndex(idx));
+            video.play()
+              .then(() => {
+                setPlayingAudioIndex(idx);
+                setLoadingAudioIndex(null);
+              })
+              .catch((e) => {
+                if (e?.name !== 'AbortError') {
+                  setPlayingAudioIndex(null);
+                  setLoadingAudioIndex(null);
+                }
+              });
           });
       }
     }
@@ -281,10 +305,11 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                       poster={video.poster}
                       loop
                       playsInline
-                      preload="none"
+                      preload="metadata"
                       onTimeUpdate={() => handleTimeUpdate(idx)}
                       onEnded={() => {
                         setPlayingAudioIndex(null);
+                        setLoadingAudioIndex(null);
                         if (commercialProgressBarRefs.current[idx]) {
                           commercialProgressBarRefs.current[idx]!.style.width = '0%';
                         }
@@ -305,11 +330,15 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                       />
                     )}
 
-                    {/* Centered Play Button when Paused (clean, no badge or sticker overlays) */}
+                    {/* Centered Play Button when Paused or Loading (instant spinner on press) */}
                     {!isPlaying && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none z-20">
                         <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#FF3B14]/95 hover:bg-[#FF3B14] backdrop-blur-md text-white flex items-center justify-center shadow-[0_0_30px_rgba(255,59,20,0.65)] group-hover:scale-110 active:scale-95 transition-all border border-white/40">
-                          <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-white ml-0.5 text-white" />
+                          {loadingAudioIndex === idx ? (
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-white ml-0.5 text-white" />
+                          )}
                         </div>
                       </div>
                     )}
