@@ -360,18 +360,18 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
     // Stacking order
     const zIndex = isCenter ? 30 : absOffset === 1 ? 20 : 10;
     
-    // Horizontal displacement calibrated for phone vs desktop
+    // Horizontal displacement calibrated for phone vs desktop (tight, elegant 3D coverflow with zero awkward dead space)
     const translateX = isSmallMobile 
-      ? offset * 115 
+      ? offset * 105 
       : isMobile 
-        ? offset * 145 
-        : offset * 255;
+        ? offset * 150 
+        : offset * 195;
       
     // 3D Depth & Inward concave rotation
-    const translateZ = isCenter ? 0 : absOffset === 1 ? -90 : -200;
-    const rotateY = isCenter ? 0 : offset * -20;
-    const scale = isCenter ? 1 : absOffset === 1 ? (isSmallMobile ? 0.8 : 0.84) : 0.68;
-    const opacity = isCenter ? 1 : absOffset === 1 ? 0.75 : 0.45;
+    const translateZ = isCenter ? 0 : absOffset === 1 ? -75 : -165;
+    const rotateY = isCenter ? 0 : offset * (absOffset === 1 ? -20 : -28);
+    const scale = isCenter ? 1 : absOffset === 1 ? (isSmallMobile ? 0.82 : 0.86) : 0.70;
+    const opacity = isCenter ? 1 : absOffset === 1 ? 0.85 : 0.55;
 
     return {
       transform: `translate3d(-50%, -50%, ${translateZ}px) translateX(${translateX}px) rotateY(${rotateY}deg) scale(${scale})`,
