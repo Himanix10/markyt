@@ -263,14 +263,14 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
             <div className="rounded-2xl border border-slate-900/10 bg-white/95 backdrop-blur-md overflow-hidden shadow-md sm:shadow-lg flex flex-col">
 
               {/* Scrollable Table Body with Sticky Header - Perfectly balanced with video player height */}
-              <div className="w-full max-h-[320px] sm:max-h-[420px] md:max-h-[460px] overflow-y-auto overscroll-contain">
-                <table className="w-full table-fixed text-left border-collapse">
+              <div className="w-full max-h-[320px] sm:max-h-[420px] md:max-h-[460px] overflow-x-auto overflow-y-auto overscroll-contain">
+                <table className="w-full min-w-[500px] sm:min-w-full table-fixed text-left border-collapse">
                   <colgroup>
-                    <col className="w-[28%]" />
-                    <col className="w-[19%]" />
-                    <col className="w-[14%]" />
-                    <col className="w-[17%]" />
-                    <col className="w-[22%]" />
+                    <col className="w-[30%] min-w-[135px]" />
+                    <col className="w-[18%] min-w-[85px]" />
+                    <col className="w-[15%] min-w-[70px]" />
+                    <col className="w-[17%] min-w-[85px]" />
+                    <col className="w-[20%] min-w-[100px]" />
                   </colgroup>
                   <thead className="sticky top-0 z-10 bg-slate-100/95 backdrop-blur-md shadow-xs">
                     <tr className="border-b border-slate-200 text-[8.5px] sm:text-[10px] md:text-[11px] font-space font-bold uppercase tracking-wider text-slate-600">
@@ -279,11 +279,11 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                       <th className="py-2.5 sm:py-3 px-1 sm:px-2 text-right whitespace-nowrap bg-slate-100/95">Results</th>
                       <th className="py-2.5 sm:py-3 px-1 sm:px-2 text-right whitespace-nowrap bg-slate-100/95">
                         <span className="hidden sm:inline">Cost / Result</span>
-                        <span className="sm:hidden">Cost/Res.</span>
+                        <span className="sm:hidden">Cost / Result</span>
                       </th>
                       <th className="py-2.5 sm:py-3 px-2 sm:px-3 text-right whitespace-nowrap bg-slate-100/95">
                         <span className="hidden sm:inline">Amount Spent</span>
-                        <span className="sm:hidden">Spent</span>
+                        <span className="sm:hidden">Amount Spent</span>
                       </th>
                     </tr>
                   </thead>
@@ -378,9 +378,14 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
 
               {/* Table Footer */}
               <div className="px-2.5 sm:px-4 py-1.5 sm:py-2.5 bg-slate-100/70 border-t border-slate-200/80 text-[8px] sm:text-[9.5px] md:text-[10px] text-slate-500">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0" />
-                  <span>Real client sprint data from active Meta Ads Manager</span>
+                <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0" />
+                    <span>Real client sprint data from active Meta Ads Manager</span>
+                  </div>
+                  <span className="sm:hidden text-[7.5px] font-mono text-slate-400 shrink-0 flex items-center gap-0.5">
+                    Swipe ↔
+                  </span>
                 </div>
 
                 <p className="mt-1 pt-1 border-t border-slate-200/60 text-[7px] sm:text-[8.5px] text-slate-400 leading-tight">
