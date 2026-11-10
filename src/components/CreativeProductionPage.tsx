@@ -424,27 +424,6 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
           aria-hidden="true"
         />
 
-        {/* 3. Production Timeline Frame Ruler along Top Edge */}
-        <div className="absolute top-0 inset-x-0 h-6 border-b border-slate-900/10 pointer-events-none hidden sm:flex items-center justify-between px-8 text-[9px] font-mono text-slate-500/75 select-none">
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5 text-slate-700 font-semibold">
-              TIMELINE: 00:00:00
-            </span>
-            <span className="hidden md:inline">FRAME RATE: 60.00 FPS</span>
-          </div>
-          <div className="flex items-center gap-8 tracking-widest text-[8.5px]">
-            <span>00:05</span>
-            <span className="hidden lg:inline">00:10</span>
-            <span>00:15</span>
-            <span className="hidden lg:inline">00:20</span>
-            <span className="text-[#FF3B14] font-semibold">00:25 [IN/OUT]</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden md:inline">AUDIO: 48kHz / 24-BIT</span>
-            <span className="px-1.5 py-0.5 rounded bg-slate-900/10 text-slate-800 text-[8px] font-bold">PRORES HQ</span>
-          </div>
-        </div>
-
         {/* 6. Precision Viewfinder HUD Reticles (Corners) */}
         {/* Top-Left Viewfinder HUD */}
         <div className="absolute top-9 left-5 lg:left-8 pointer-events-none hidden sm:flex items-center gap-2 z-10 select-none">
@@ -473,25 +452,11 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
         {/* Bottom-Left Viewfinder HUD */}
         <div className="absolute bottom-6 left-5 lg:left-8 pointer-events-none hidden sm:flex items-center gap-2 z-10 select-none">
           <div className="w-5 h-5 border-b-2 border-l-2 border-slate-900/40" />
-          <span className="text-[9px] font-mono tracking-widest text-slate-500 uppercase">
-            CAM SUITE // ASPECT 9:16
-          </span>
         </div>
 
         {/* Bottom-Right Viewfinder HUD */}
         <div className="absolute bottom-6 right-5 lg:right-8 pointer-events-none hidden sm:flex items-center gap-2 z-10 select-none">
-          <span className="text-[9px] font-mono tracking-widest text-slate-500 uppercase">
-            SHUTTER 180° // AUTO-PLAY
-          </span>
           <div className="w-5 h-5 border-b-2 border-r-2 border-slate-900/40" />
-        </div>
-
-        {/* 7. Center Crosshair Framing Marks */}
-        <div className="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none hidden xl:block text-slate-400/50 font-mono text-xs select-none">
-          + SAFE MARGIN 90%
-        </div>
-        <div className="absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none hidden xl:block text-slate-400/50 font-mono text-xs select-none text-right">
-          STAGE CENTER +
         </div>
 
         {/* Floating Creative Production Accents */}
