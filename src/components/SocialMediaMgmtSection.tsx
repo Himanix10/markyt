@@ -22,7 +22,7 @@ const TRANSFORMATION_SLIDES: SocialTransformationItem[] = [
     id: 'fitness',
     title: 'Trainers First • Fitness Coaching',
     tag: 'Fitness & Coaching',
-    image: '/images/social-transform-1.png?v=3',
+    image: '/images/social-transform-1.png?v=5',
     headline: 'Less text. More story.',
     style: 'Corporate Memphis',
   },
@@ -30,7 +30,7 @@ const TRANSFORMATION_SLIDES: SocialTransformationItem[] = [
     id: 'rainbow-marshmallow',
     title: 'Rainbow Marshmallow • Cereal & Snacks',
     tag: 'FMCG & Kids Food',
-    image: '/images/social-transform-cereal.jpg?v=3',
+    image: '/images/social-transform-cereal.png?v=5',
     headline: 'Less text. More story.',
     style: 'Vector Illustration',
   },
@@ -38,7 +38,7 @@ const TRANSFORMATION_SLIDES: SocialTransformationItem[] = [
     id: 'brand-strategy',
     title: 'Brand Strategy • Tech & Corporate Identity',
     tag: 'Branding & Corporate Identity',
-    image: '/images/social-transform-brandstrategy.png?v=4',
+    image: '/images/social-transform-brandstrategy.png?v=5',
     headline: 'Less text. More story.',
     style: 'Big Tech Art Style',
   },
@@ -112,7 +112,7 @@ export const SocialMediaMgmtSection: React.FC<SocialMediaMgmtSectionProps> = () 
                   <img
                     src={slide.image}
                     alt={slide.title}
-                    className="w-full h-auto object-contain pointer-events-none select-none mix-blend-multiply"
+                    className="w-full h-auto object-contain pointer-events-none select-none"
                     draggable={false}
                     loading={idx === 0 ? 'eager' : 'lazy'}
                     decoding="async"
