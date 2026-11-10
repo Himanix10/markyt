@@ -428,24 +428,10 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
         {/* Top-Left Viewfinder HUD */}
         <div className="absolute top-9 left-5 lg:left-8 pointer-events-none hidden sm:flex items-center gap-2 z-10 select-none">
           <div className="w-5 h-5 border-t-2 border-l-2 border-slate-900/40" />
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/85 backdrop-blur-md border border-slate-900/10 shadow-2xs text-[10px] font-mono font-bold text-slate-800">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span>LIVE PREVIEW</span>
-            <span className="text-slate-300">|</span>
-            <span className="text-slate-600 font-normal">4K UHD</span>
-          </div>
         </div>
 
         {/* Top-Right Viewfinder HUD */}
         <div className="absolute top-9 right-5 lg:right-8 pointer-events-none hidden sm:flex items-center gap-2 z-10 select-none">
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/85 backdrop-blur-md border border-slate-900/10 shadow-2xs text-[10px] font-mono font-bold text-slate-800">
-            <span className="text-emerald-700">STEREO HI-FI</span>
-            <span className="text-slate-300">|</span>
-            <span className="text-slate-600 font-normal">DCI-P3</span>
-          </div>
           <div className="w-5 h-5 border-t-2 border-r-2 border-slate-900/40" />
         </div>
 
@@ -458,42 +444,6 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
         <div className="absolute bottom-6 right-5 lg:right-8 pointer-events-none hidden sm:flex items-center gap-2 z-10 select-none">
           <div className="w-5 h-5 border-b-2 border-r-2 border-slate-900/40" />
         </div>
-
-        {/* Floating Creative Production Accents */}
-        <motion.div
-          animate={{
-            y: [0, -8, 0],
-            rotate: [-1, 1, -1],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute top-16 left-12 lg:left-24 z-10 hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-slate-900/10 shadow-sm text-slate-900 pointer-events-none select-none"
-        >
-          {/* Animated mini equalizer / audio wave bars */}
-          <div className="flex items-end gap-0.5 h-3.5">
-            <motion.span 
-              animate={{ height: ['40%', '100%', '40%'] }} 
-              transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }} 
-              className="w-1 bg-[#FF3B14] rounded-full" 
-            />
-            <motion.span 
-              animate={{ height: ['80%', '30%', '90%', '80%'] }} 
-              transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} 
-              className="w-1 bg-slate-950 rounded-full" 
-            />
-            <motion.span 
-              animate={{ height: ['50%', '100%', '60%'] }} 
-              transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} 
-              className="w-1 bg-[#FF3B14] rounded-full" 
-            />
-          </div>
-          <span className="text-[11px] font-mono font-bold tracking-tight text-slate-800">
-            9:16 Vertical Storytelling
-          </span>
-        </motion.div>
 
 
 
