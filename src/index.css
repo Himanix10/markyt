@@ -48,6 +48,18 @@ section[id], div[id] {
   letter-spacing: -0.025em;
 }
 
+.font-inter {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.font-outfit {
+  font-family: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.font-urbanist {
+  font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 .font-mono {
   font-family: 'JetBrains Mono', monospace;
 }
@@ -67,7 +79,7 @@ section[id], div[id] {
 }
 
 .font-editorial-italic {
-  font-family: 'Instrument Serif', Georgia, serif;
+  font-family: 'Instrument Serif', 'Playfair Display', Georgia, serif;
   font-style: italic;
 }
 
@@ -75,9 +87,24 @@ section[id], div[id] {
   font-family: 'Space Grotesk', sans-serif;
 }
 
+.font-bricolage {
+  font-family: 'Bricolage Grotesque', 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.03em;
+}
+
 .font-cabinet {
   font-family: 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: -0.025em;
+}
+
+.font-satoshi {
+  font-family: 'Satoshi', 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-clash {
+  font-family: 'Clash Display', 'Cabinet Grotesk', 'Syne', sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .font-syne {

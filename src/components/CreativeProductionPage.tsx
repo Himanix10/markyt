@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { VIDEO_PORTFOLIO_WORKS } from '../data/content';
+import { SectionContactBar } from './SectionContactBar';
 
 interface CreativeProductionPageProps {
   onOpenQuestionnaire?: () => void;
@@ -15,7 +16,7 @@ interface CreativeProductionPageProps {
 
 export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () => {
   const [activeStudioIndex, setActiveStudioIndex] = useState<number>(0);
-  const [isStudioPlaying, setIsStudioPlaying] = useState<boolean>(true);
+  const [isStudioPlaying, setIsStudioPlaying] = useState<boolean>(false);
 
   // Responsive window width tracking for 3D stage calculations
   const [windowWidth, setWindowWidth] = useState<number>(
@@ -39,20 +40,21 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
   const stageRef = useRef<HTMLDivElement>(null);
   const [isStageInView, setIsStageInView] = useState<boolean>(false);
 
-  // User gesture & playback intent tracking (defaults to audio-active so scrolling into view plays with audio)
-  const hasUserInteracted = useRef<boolean>(true);
-  const isAudioActive = useRef<boolean>(true);
-  const userWantsPlaying = useRef<boolean>(true);
+  // User gesture & playback intent tracking (starts paused so scrolling into view never creates chaos)
+  const hasUserInteracted = useRef<boolean>(false);
+  const isAudioActive = useRef<boolean>(false);
+  const userWantsPlaying = useRef<boolean>(false);
+  const hasUserInitiatedPlay = useRef<boolean>(false);
 
   const totalWorks = VIDEO_PORTFOLIO_WORKS.length;
 
-  // Global listener: as soon as the user scrolls, touches, or taps anywhere on the site, activate unmuted audio
+  // Global listener: unmute video if user has already explicitly initiated playing
   useEffect(() => {
     const enableAudioOnGesture = () => {
       hasUserInteracted.current = true;
       isAudioActive.current = true;
       const currentVideo = videoRefs.current[activeStudioIndex];
-      if (currentVideo && isStageInView && userWantsPlaying.current && currentVideo.muted) {
+      if (currentVideo && isStageInView && hasUserInitiatedPlay.current && userWantsPlaying.current && currentVideo.muted) {
         currentVideo.muted = false;
         currentVideo.volume = 1.0;
         currentVideo.play().catch(() => {});
@@ -61,13 +63,11 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
 
     window.addEventListener('pointerdown', enableAudioOnGesture, { passive: true });
     window.addEventListener('touchstart', enableAudioOnGesture, { passive: true });
-    window.addEventListener('scroll', enableAudioOnGesture, { passive: true });
     window.addEventListener('click', enableAudioOnGesture, { passive: true });
 
     return () => {
       window.removeEventListener('pointerdown', enableAudioOnGesture);
       window.removeEventListener('touchstart', enableAudioOnGesture);
-      window.removeEventListener('scroll', enableAudioOnGesture);
       window.removeEventListener('click', enableAudioOnGesture);
     };
   }, [activeStudioIndex, isStageInView]);
@@ -167,8 +167,8 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
             }
           } else {
             setIsStageInView(true);
-            // User scrolled into view: start active video with audio cleanly
-            if (currentVideo && userWantsPlaying.current) {
+            // User scrolled into view: ONLY resume active video if user has already explicitly clicked play
+            if (currentVideo && hasUserInitiatedPlay.current && userWantsPlaying.current) {
               currentVideo.muted = false;
               currentVideo.volume = 1.0;
               playVideoSafely(currentVideo);
@@ -191,7 +191,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
           setIsStudioPlaying(false);
         }
       } else {
-        if (currentVideo && currentVideo.paused) {
+        if (currentVideo && currentVideo.paused && hasUserInitiatedPlay.current && userWantsPlaying.current) {
           playVideoSafely(currentVideo);
         }
       }
@@ -210,6 +210,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
 
     hasUserInteracted.current = true;
     isAudioActive.current = true;
+    hasUserInitiatedPlay.current = true;
     userWantsPlaying.current = true;
     
     // Forcibly silence and pause all inactive video references immediately to guarantee zero audio leak
@@ -262,7 +263,8 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
       activeVideo.pause();
       setIsStudioPlaying(false);
     } else {
-      // User explicitly requested playback / unmuting
+      // User explicitly requested playback / clicked to start
+      hasUserInitiatedPlay.current = true;
       userWantsPlaying.current = true;
       activeVideo.muted = false;
       activeVideo.volume = 1.0;
@@ -398,7 +400,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
 
       {/* Flagship Section: 3D Coverflow Reel Theater Showcase */}
       <section 
-        id="creatives" 
+        id="creative-production" 
         className="relative overflow-hidden bg-gradient-to-b from-[#B8C1FA] via-[#C8D1FD] to-white py-6 sm:py-16 md:py-20 px-3 sm:px-6 lg:px-8 scroll-mt-[54px] select-none"
       >
 
@@ -452,13 +454,12 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-8">
 
-
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-slate-950 tracking-tight leading-tight mb-3">
               Ad <span className="font-editorial-italic font-normal italic text-[#FF3B14]">Creatives</span>
             </h2>
 
             <p className="text-sm sm:text-base md:text-[17px] text-slate-700 leading-relaxed max-w-xl mx-auto font-normal">
-              Animations, product shoots, high-end creatives: brands usually pay ₹50,000 or more. We do it for a fraction of that, using a talented team and bunch of smart tools with AI rendering. Projects start at just ₹5,000<span className="text-[#FF3B14] font-bold">*</span>.
+              Animations, product shoots, high-end creatives: brands usually pay ₹50,000 or more. We do it for a fraction of that, using a talented team and bunch of smart tools with AI rendering. Projects start at just ₹9,000<span className="text-[#FF3B14] font-bold">*</span>.
             </p>
           </div>
 
@@ -530,7 +531,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       ref={(el) => {
                         if (el) {
                           videoRefs.current[idx] = el;
-                          if (idx === activeStudioIndex && isStageInView && userWantsPlaying.current) {
+                          if (idx === activeStudioIndex && isStageInView && hasUserInitiatedPlay.current && userWantsPlaying.current) {
                             el.muted = false;
                             el.volume = 1.0;
                             playVideoSafely(el);
@@ -543,7 +544,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       poster={work.poster ? encodeURI(work.poster) : undefined}
                       className="absolute inset-0 w-full h-full object-cover bg-transparent cursor-pointer z-[2]"
                       loop
-                      autoPlay={isCenter && isStageInView && userWantsPlaying.current}
+                      autoPlay={isCenter && isStageInView && hasUserInitiatedPlay.current && userWantsPlaying.current}
                       muted={!isCenter}
                       playsInline
                       preload={isCenter ? "auto" : "metadata"}
@@ -615,6 +616,13 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
               <span>Our creative work is offered at a fractional cost in exchange for the right to showcase it in our portfolio and marketing.</span>
             </p>
           </div>
+
+          {/* Section Contact Bar with Personalized WhatsApp Prompt */}
+          <SectionContactBar
+            sectionName="Ad Creatives & Video Production"
+            helperText="Need in-house video production or creators?"
+            prompt="Hi Markyt team! I'm interested in your in-house video production, ad creatives, and creator network. How can we get studio-quality video ads for my brand?"
+          />
 
         </div>
       </section>

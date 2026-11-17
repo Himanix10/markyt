@@ -9,14 +9,11 @@ import { Hero } from './components/Hero';
 import { WhoWeAre } from './components/WhoWeAre';
 import { HowMarkytWorks } from './components/HowMarkytWorks';
 import { ServicesSection } from './components/ServicesSection';
-import { StepByStepProcess } from './components/StepByStepProcess';
-import { FAQSection } from './components/FAQSection';
-import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { CreativeProductionPage } from './components/CreativeProductionPage';
-import { SocialMediaMgmtSection } from './components/SocialMediaMgmtSection';
 import { CreativeArtStylesSection } from './components/CreativeArtStylesSection';
 import { WebsiteServicesSection } from './components/WebsiteServicesSection';
+import { RedTrailCursor } from './components/RedTrailCursor';
 import { scrollToSection } from './utils/scrollHelper';
 
 export default function App() {
@@ -39,12 +36,15 @@ export default function App() {
   };
 
   const scrollToContact = () => {
-    scrollToSection('#get-in-touch');
+    const prompt = "Hi Markyt team! I'm interested in starting a ₹5,000 validation sprint for my business.";
+    window.open(`https://wa.me/917045602440?text=${encodeURIComponent(prompt)}`, '_blank');
   };
 
 
   return (
     <div className="min-h-screen bg-[#F6F3EC] text-slate-900 flex flex-col font-sans selection:bg-[#FF3B14]/20 selection:text-slate-950 overflow-x-hidden w-full max-w-full">
+      {/* Global Interactive Orange/Red Trail Cursor across the whole website */}
+      <RedTrailCursor />
       
       {/* 1. Header Navigation with Dedicated Menu Trigger */}
       <Header 
@@ -54,9 +54,9 @@ export default function App() {
       />
 
       {/* Top placeholder spacer so initial Hero isn't hidden under fixed header */}
-      <div className="h-[54px] sm:h-[58px] w-full shrink-0 bg-[#B8C1FA]" aria-hidden="true" />
+      <div className="h-[54px] sm:h-[58px] w-full shrink-0 bg-[#ACB7F6] -mb-px" aria-hidden="true" />
 
-      <main className="flex-1">
+      <main className="flex-1 bg-[#B8C1FA]">
         {/* 2. Hero Section with First-Page Menu Trigger */}
         <Hero 
           onOpenQuestionnaire={scrollToContact} 
@@ -85,12 +85,7 @@ export default function App() {
           onOpenQuestionnaire={scrollToContact}
         />
 
-        {/* 10. Social Media Management & Organic Growth Engine */}
-        <SocialMediaMgmtSection
-          onOpenQuestionnaire={scrollToContact}
-        />
-
-        {/* 11. If You're Just Here for the Creative - Art Styles Lookbook */}
+        {/* 10. If You're Just Here for the Creative - Art Styles Lookbook */}
         <CreativeArtStylesSection
           onOpenQuestionnaire={scrollToContact}
         />
@@ -99,16 +94,6 @@ export default function App() {
         <WebsiteServicesSection
           onOpenQuestionnaire={scrollToContact}
         />
-
-        {/* 12. Step By Step Sprint Roadmap */}
-        <StepByStepProcess onOpenQuestionnaire={scrollToContact} />
-
-
-        {/* 12. Contact Us (Direct WhatsApp & Instagram Strategy Line) */}
-        <ContactSection onOpenQuestionnaire={scrollToContact} />
-
-        {/* 13. Frequently Asked Questions */}
-        <FAQSection />
       </main>
 
       {/* 15. Footer */}

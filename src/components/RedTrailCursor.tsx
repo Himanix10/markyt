@@ -104,9 +104,10 @@ export const RedTrailCursor: React.FC = () => {
       ctx.clearRect(0, 0, width, height);
 
       if (mouse.isVisible && isInitialized) {
-        // Node 0 tracks mouse with high responsiveness
-        chain[0].x += (mouse.x - chain[0].x) * 0.78;
-        chain[0].y += (mouse.y - chain[0].y) * 0.78;
+        // Node 0 tracks mouse with zero lag (Option C: pinned directly to pointer)
+        // Original before Option C: chain[0].x += (mouse.x - chain[0].x) * 0.78; chain[0].y += (mouse.y - chain[0].y) * 0.78;
+        chain[0].x = mouse.x;
+        chain[0].y = mouse.y;
 
         // Subsequent nodes follow with strict distance clamping
         // This mathematically caps the tail length to ~115px (3x current length) so it never stretches excessively

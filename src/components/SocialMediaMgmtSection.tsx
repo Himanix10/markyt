@@ -48,10 +48,10 @@ export const SocialMediaMgmtSection: React.FC<SocialMediaMgmtSectionProps> = () 
   return (
     <section
       id="social-media-mgmt"
-      className="text-slate-900 relative overflow-hidden scroll-mt-[54px] bg-[#FAFBF6]"
+      className="text-slate-900 relative overflow-hidden scroll-mt-[54px] bg-[#FEEC96]"
     >
       {/* 1. Top Part: Heading & Social Proof */}
-      <div className="pt-6 pb-5 sm:pt-16 sm:pb-10 md:pt-20 md:pb-12 bg-gradient-to-b from-white via-[#FFF5ED] via-50% to-[#FAFBF6]">
+      <div className="pt-6 pb-5 sm:pt-16 sm:pb-10 md:pt-20 md:pb-12 bg-[#FEEC96]">
         <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
           {/* ========================================================
               1. SECTION HEADING

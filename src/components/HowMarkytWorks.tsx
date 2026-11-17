@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { FUNNEL_STAGES } from '../data/content';
+import { SectionContactBar } from './SectionContactBar';
 import {
   Compass,
   MapPin,
@@ -270,6 +271,13 @@ export const HowMarkytWorks: React.FC<HowMarkytWorksProps> = () => {
           </div>
 
         </div>
+
+        {/* Section Contact Bar after the Funnel Card marking the end of the section */}
+        <SectionContactBar
+          sectionName="Performance Marketing"
+          helperText="Inquiring About Performance Marketing?"
+          prompt="Hi Markyt team! I'm inquiring about your performance marketing services and how you test and scale campaigns for businesses."
+        />
 
       </div>
     </section>

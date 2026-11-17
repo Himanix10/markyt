@@ -1,98 +1,48 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { MDoodleMarquee } from './MDoodleMarquee';
+import { TaglineHeroAnimation } from './TaglineHeroAnimation';
+
 interface HeroProps {
-  onOpenQuestionnaire: () => void;
+  onOpenQuestionnaire?: () => void;
   onNavigateToCreatives?: () => void;
   onOpenMenu?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({
-  onOpenQuestionnaire,
-  onNavigateToCreatives,
-}) => {
+export const Hero: React.FC<HeroProps> = () => {
   return (
-    <section id="hero-section" className="relative overflow-hidden bg-[#B8C1FA] text-slate-900">
-
-      {/* 1. Animated Artistic "M" Doodle Marquee Banner across the top (from Screenshot 1) */}
-      <div className="border-b border-slate-900/15 bg-[#ACB7F6]">
-        <MDoodleMarquee textColor="text-slate-950" className="py-2.5" />
+    <section 
+      id="hero-section" 
+      className="relative overflow-hidden bg-gradient-to-b from-[#D6D5F5] via-[#C8CEF8] to-[#B8C1FA] text-slate-900 select-none cursor-default"
+    >
+      {/* 1. Animated Artistic "M" Doodle Marquee Banner across the top */}
+      <div className="bg-[#ACB7F6]">
+        <MDoodleMarquee textColor="text-slate-950" className="py-2 sm:py-2.5" />
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-3 sm:pt-8 sm:pb-5 md:pt-10 md:pb-6 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-6 sm:pt-8 sm:pb-9 md:pt-10 md:pb-11 relative z-10 flex flex-col items-center justify-center text-center">
+        
+        {/* Subtle Ambient Viewfinder Corner Crop Marks */}
+        {/* Top-Left */}
+        <div className="absolute top-2 left-4 sm:left-6 w-5 h-5 border-t-2 border-l-2 border-slate-400/20 pointer-events-none" />
+        {/* Top-Right */}
+        <div className="absolute top-2 right-4 sm:right-6 w-5 h-5 border-t-2 border-r-2 border-slate-400/20 pointer-events-none" />
+        {/* Bottom-Left */}
+        <div className="absolute bottom-2 left-4 sm:left-6 w-5 h-5 border-b-2 border-l-2 border-slate-400/20 pointer-events-none" />
+        {/* Bottom-Right */}
+        <div className="absolute bottom-2 right-4 sm:right-6 w-5 h-5 border-b-2 border-r-2 border-slate-400/20 pointer-events-none" />
 
-        {/* Giant Display Typography */}
-        <div className="text-center mb-3 sm:mb-6">
+        {/* 2. Tagline Hero Animation: Exponential Growth Bars, Radar Pulse, and Animated Sprint Progress Track */}
+        <TaglineHeroAnimation />
 
-          {/* Headline Display: TEST IT is massive red hero text, THEN SCALE IT. is animated highlighted tagline */}
-          <div
-            className="relative flex flex-col items-center justify-center font-heading font-black tracking-tighter select-none py-2 px-2 sm:px-6"
-          >
-            {/* Top Line: Dominant Massive Red Text with restrained scale */}
-            <div className="text-[2.85rem] min-[380px]:text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] xl:text-[7.8rem] text-[#FF3B14] tracking-tighter leading-[0.9] drop-shadow-xs">
-              TEST IT
-            </div>
-
-            {/* Bottom Line: Bold, High-Contrast Tagline in Anton Typography */}
-            <motion.div
-              className="relative inline-flex items-center justify-center mt-2 sm:mt-3 group cursor-default"
-              animate={{
-                scale: [1, 1.015, 1],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              {/* Tagline Container */}
-              <div className="relative px-3 sm:px-6 py-1">
-                <span className="relative z-10 text-slate-950 text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-anton uppercase leading-none tracking-wider block drop-shadow-xs">
-                  THEN SCALE IT.
-                </span>
-
-                {/* Energetic Neon/Marker Highlighter Accent that expands and glows */}
-                <motion.div
-                  className="absolute bottom-1 sm:bottom-2 left-2 right-2 h-3 sm:h-5 md:h-6 bg-[#FF3B14]/25 rounded-md -z-0 pointer-events-none"
-                  animate={{
-                    opacity: [0.35, 0.75, 0.35],
-                    scaleX: [0.95, 1.02, 0.95],
-                  }}
-                  transition={{
-                    duration: 2.6,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
-              </div>
-
-              {/* Dynamic Accent Underline Runner */}
-              <div className="absolute -bottom-2 left-4 right-4 h-1 sm:h-1.5 rounded-full overflow-hidden bg-slate-950/20">
-                <motion.div
-                  className="absolute top-0 bottom-0 left-0 bg-[#FF3B14] rounded-full shadow-xs"
-                  animate={{
-                    left: ['0%', '0%', '100%'],
-                    right: ['100%', '0%', '0%'],
-                  }}
-                  transition={{
-                    duration: 2.4,
-                    repeat: Infinity,
-                    ease: [0.65, 0, 0.35, 1],
-                    repeatDelay: 0.4,
-                  }}
-                />
-              </div>
-            </motion.div>
-          </div>
-
-          <p className="mt-4 sm:mt-7 text-base sm:text-xl text-slate-900 font-medium max-w-xl mx-auto leading-relaxed">
+        {/* Subtitle / Value Proposition: Crisp Geometric Sans (Plus Jakarta Sans) */}
+        <p className="mt-4 sm:mt-6 max-w-xl mx-auto leading-relaxed select-none">
+          <span className="block text-slate-700 text-sm sm:text-base md:text-[17px] font-heading font-medium tracking-tight">
             You’ve probably burned money on marketing that didn’t deliver.
-            <span className="block mt-1 font-bold text-slate-950">
-              Why Invest Big Upfront? Start Testing <span className="text-[#FF3B14]">Today</span>.
-            </span>
-          </p>
-        </div>
-
+          </span>
+          <span className="block mt-1 sm:mt-1.5 text-[#111111] text-sm sm:text-base md:text-[17px] font-heading font-bold tracking-tight">
+            Why Invest Big Upfront? Start Testing <span className="text-[#FF4518]">Today</span>.
+          </span>
+        </p>
       </div>
     </section>
   );

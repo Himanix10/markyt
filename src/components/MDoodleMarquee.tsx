@@ -86,20 +86,49 @@ export const MDoodleMarquee: React.FC<{
   textColor = "text-black",
   className = "",
 }) => {
-  const doodleKeys = Object.keys(MDoodleIcons) as Array<keyof typeof MDoodleIcons>;
+    const doodleKeys = Object.keys(MDoodleIcons) as Array<keyof typeof MDoodleIcons>;
+    // Repeat doodle set so each track is ultra-wide (>3500px), eliminating any gaps on any screen
+    const trackItems = [...doodleKeys, ...doodleKeys, ...doodleKeys, ...doodleKeys];
 
-  return (
-    <div className={`w-full overflow-hidden select-none py-3 ${bgColor} ${className}`}>
-      <div className="flex items-center gap-10 whitespace-nowrap animate-marquee">
-        {[...doodleKeys, ...doodleKeys, ...doodleKeys, ...doodleKeys].map((key, idx) => {
+    const renderDoodleTrack = (ariaHidden: boolean = false) => (
+      <div
+        className="flex items-center shrink-0 gap-8 sm:gap-10 pr-8 sm:pr-10 animate-doodle-marquee"
+        aria-hidden={ariaHidden ? "true" : undefined}
+      >
+        {trackItems.map((key, idx) => {
           const Icon = MDoodleIcons[key];
           return (
-            <div key={`${key}-${idx}`} className={`inline-flex items-center justify-center ${textColor} opacity-85 hover:opacity-100 hover:scale-125 transition-transform duration-200 cursor-pointer`}>
-              <Icon className="w-9 h-9 sm:w-11 sm:h-11" color="currentColor" />
+            <div
+              key={`${key}-${idx}`}
+              className={`inline-flex items-center justify-center ${textColor} opacity-85 hover:opacity-100 hover:scale-115 transition-transform duration-150 cursor-pointer`}
+            >
+              <Icon className="w-8 h-8 sm:w-10 sm:h-10" color="currentColor" />
             </div>
           );
         })}
       </div>
-    </div>
-  );
-};
+    );
+
+    return (
+      <div className={`w-full overflow-hidden select-none py-2 sm:py-2.5 ${bgColor} ${className}`}>
+        <style>{`
+        @keyframes doodleMarqueeLoop {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+          100% {
+            transform: translate3d(-100%, 0, 0);
+          }
+        }
+        .animate-doodle-marquee {
+          animation: doodleMarqueeLoop 40s linear infinite !important;
+          will-change: transform;
+        }
+      `}</style>
+        <div className="flex w-max">
+          {renderDoodleTrack(false)}
+          {renderDoodleTrack(true)}
+        </div>
+      </div>
+    );
+  };

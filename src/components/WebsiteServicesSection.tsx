@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SectionContactBar } from './SectionContactBar';
 import { 
   Globe, 
   ChevronLeft, 
@@ -1281,9 +1282,8 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
 
           {/* Subheading */}
           <p className="text-base sm:text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto font-normal">
-            If you think your business needs a website, we can build one for you. It's a one-time charge starting at ₹3,000, and we look after it for the first month. After that, if you need more support, we can sort that out separately.
+            If you think your business needs a website, we can build one for you, and we look after it for the first month. After that, if you need more support, we can sort that out separately.
           </p>
-
         </div>
 
         {/* ========================================================
@@ -1551,6 +1551,13 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
               />
             ))}
           </div>
+
+          {/* Section Contact Bar with Personalized WhatsApp Prompt */}
+          <SectionContactBar
+            sectionName="Websites"
+            helperText="Need a website built for your business?"
+            prompt="Hi Markyt team! I want to build a website for my business."
+          />
 
         </div>
 

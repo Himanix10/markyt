@@ -1,9 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { X, Play, Pause, Sparkles } from 'lucide-react';
+import { X, Play, Pause, Instagram, ArrowUpRight } from 'lucide-react';
+import { SectionContactBar } from './SectionContactBar';
 
 interface ArtStyleItem {
   id: string;
   name: string;
+  subtitle: string;
   src: string;
   poster: string;
 }
@@ -12,24 +14,28 @@ const ART_STYLES: ArtStyleItem[] = [
   {
     id: 'electric-2d-doodle',
     name: 'Electric 2D Doodle',
+    subtitle: 'Dynamic Line Art & Glow',
     src: '/showcase-gifs/showcase_1.mp4',
     poster: '/showcase-gifs/showcase_1.jpg',
   },
   {
     id: 'mixed-media-sketch',
     name: 'Mixed-Media Sketch',
+    subtitle: 'Live-Action × Hand-Drawn Art',
     src: '/showcase-gifs/showcase_2.mp4',
     poster: '/showcase-gifs/showcase_2.jpg',
   },
   {
     id: 'die-cut-paper-sticker',
     name: 'Die-Cut Paper Sticker',
+    subtitle: 'Tactile Collage & Papercraft',
     src: '/showcase-gifs/showcase_3.mp4',
     poster: '/showcase-gifs/showcase_3.jpg',
   },
   {
     id: 'meadow-storybook-cel',
     name: 'Meadow Storybook Cel',
+    subtitle: 'Warm Illustrated Cel Animation',
     src: '/showcase-gifs/showcase_4.mp4',
     poster: '/showcase-gifs/showcase_4.jpg',
   },
@@ -38,6 +44,8 @@ const ART_STYLES: ArtStyleItem[] = [
 interface CommercialVideoItem {
   id: string;
   name: string;
+  subtitle?: string;
+  sceneSubtitle?: string;
   src: string;
   poster: string;
 }
@@ -45,25 +53,25 @@ interface CommercialVideoItem {
 const COMMERCIAL_VIDEOS: CommercialVideoItem[] = [
   {
     id: 'artisanal-coffee-cafe',
-    name: 'Artisanal Coffee & Cafe',
+    name: 'Warm Cinematic Ambience',
     src: '/videos/kafora-artisanal-coffee.mp4',
     poster: '/videos/posters/kafora-artisanal-coffee.jpg',
   },
   {
     id: 'luxury-fragrance-lifestyle',
-    name: 'Luxury Fragrance & Lifestyle',
+    name: 'Bold Studio Commercial',
     src: '/videos/zevaro-luxury-perfume.mp4',
     poster: '/videos/posters/zevaro-luxury-perfume.jpg',
   },
   {
     id: 'clara-luxury-perfume',
-    name: 'Luxury Perfume & Accessories',
+    name: 'Editorial Lifestyle Showcase',
     src: '/videos/clara-luxury-perfume.mp4',
     poster: '/videos/posters/clara-luxury-perfume.jpg',
   },
   {
     id: 'minimalist-fashion-apparel',
-    name: 'Minimalist Fashion & Apparel',
+    name: 'Contemporary Lookbook Aesthetic',
     src: '/videos/modest-fashion-apparel.mp4',
     poster: '/videos/posters/modest-fashion-apparel.jpg',
   },
@@ -207,107 +215,121 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
   return (
     <section
       ref={sectionRef}
-      id="creative-styles"
-      className="relative pt-4 sm:pt-6 md:pt-8 pb-8 sm:pb-24 bg-[#FAFBF6] text-slate-900 border-b border-slate-200/80 overflow-hidden select-none"
-      style={{ backgroundColor: '#FAFBF6' }}
+      id="social-media"
+      className="relative pt-8 sm:pt-16 md:pt-20 pb-12 sm:pb-24 bg-white text-slate-900 border-b border-slate-200/80 overflow-hidden select-none scroll-mt-[54px]"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* ================= SECTION 1: CHOOSE YOUR ART STYLE ================= */}
-        <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-10">
-          {/* Section Kicker Pill Badge - adds clear visual hierarchy so the space feels polished, appealing, and not blank */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-950 text-white text-[11px] font-mono font-bold uppercase tracking-wider shadow-xs mb-3 sm:mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-[#FF3B14]" />
-            <span>Creative Lookbook • Hand-Crafted Visuals</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-heading font-black text-slate-950 tracking-tight leading-[1.12]">
-            Choose your{' '}
+        {/* ================= 1. SOCIAL MEDIA MANAGEMENT TEXT & PROOF ================= */}
+        <div id="social-media-mgmt" className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-[64px] font-heading font-black text-slate-950 tracking-tight leading-[1.08] mb-3 sm:mb-4">
+            Your Social Media,{' '}
             <span className="font-editorial-italic font-normal italic text-[#FF3B14]">
-              artstyle
+              Handled
             </span>.
           </h2>
 
-          <p className="mt-2.5 sm:mt-3 text-sm sm:text-base text-slate-600 max-w-lg mx-auto font-normal leading-relaxed">
-            Tell us what you have in mind. We’ll bring your story to life in the art style that feels right for you.
+          <p className="text-sm sm:text-base md:text-lg text-slate-700 leading-relaxed max-w-xl mx-auto font-normal mb-4">
+            We make your posts &amp; reels, and if you’d like, we’ll run your social media for you too. Management starts at ₹7,000 a month.
           </p>
-        </div>
 
-        {/* 4 Art Styles Grid (Same Layout & Sizing) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto items-start">
-          {ART_STYLES.map((style, idx) => (
-            <div
-              key={style.id}
-              className="group flex flex-col items-center w-full"
+          {/* Live Proof Managed Account */}
+          <div className="flex flex-col items-center justify-center gap-3 pt-2">
+            <p className="text-center text-sm sm:text-base md:text-lg text-slate-800 max-w-xl mx-auto font-medium leading-relaxed">
+              We’ve helped grow their page to <strong className="font-bold text-slate-950 font-heading">50K+ followers</strong> organically, with reels getting thousands of views and some reaching millions.
+            </p>
+
+            <a
+              href="https://www.instagram.com/quintessentialsmumbai/?hl=en"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-950 hover:bg-[#FF3B14] text-white font-heading font-black text-sm sm:text-base shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+              title="View @quintessentialsmumbai on Instagram"
             >
-              {/* Card Container */}
-              <div
-                onClick={() => setActiveModalStyle(style)}
-                className="relative w-full aspect-[9/16] rounded-2xl sm:rounded-3xl overflow-hidden bg-black shadow-md border border-slate-200/90 hover:shadow-xl hover:border-slate-300 transition-all duration-300 cursor-pointer"
-              >
-                <video
-                  ref={(el) => {
-                    if (el) {
-                      el.defaultMuted = true;
-                      el.muted = true;
-                    }
-                    gifVideoRefs.current[idx] = el;
-                  }}
-                  src={style.src}
-                  poster={style.poster}
-                  loop
-                  muted
-                  playsInline
-                  preload="none"
-                  className="w-full h-full object-cover select-none pointer-events-none"
-                  aria-label={style.name}
-                >
-                  <source src={style.src} type="video/mp4" />
-                </video>
-              </div>
-
-              {/* Caption: Art-style name */}
-              <p className="mt-3 sm:mt-4 text-center font-heading font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#FF3B14] transition-colors leading-snug">
-                {style.name}
-              </p>
-            </div>
-          ))}
+              <Instagram className="w-4 h-4 text-rose-400 group-hover:text-white transition-colors shrink-0" />
+              <span className="tracking-tight">@quintessentialsmumbai</span>
+              <ArrowUpRight className="w-4 h-4 text-white/70 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+            </a>
+          </div>
         </div>
 
-        {/* ================= SECTION 2: BRAND & COMMERCIAL VIDEO ADS ================= */}
-        <div className="mt-8 sm:mt-24 pt-6 sm:pt-16 border-t border-slate-200/80">
+        {/* ================= 2. CHOOSE YOUR ART STYLE (HEADING & 4 GIFS) ================= */}
+        <div id="art-styles" className="mt-12 sm:mt-16 pt-2 sm:pt-4">
           
-          {/* Header */}
-          <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-12">
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-heading font-black text-slate-950 tracking-tight leading-[1.12]">
-              Turning ideas into{' '}
+          <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-10">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-black text-slate-950 tracking-tight leading-[1.18]">
+              Choose your{' '}
               <span className="font-editorial-italic font-normal italic text-[#FF3B14]">
-                visual impact
+                artstyle
               </span>.
             </h2>
 
-            <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-600 max-w-lg mx-auto font-normal leading-relaxed">
-              We make videos that tell your brand’s story, grab attention, and get people interested in what you offer.
+            <p className="mt-2.5 sm:mt-3 text-sm sm:text-base text-slate-600 max-w-lg mx-auto font-normal leading-relaxed">
+              Tell us what you have in mind. We’ll bring your story to life in the art style that feels right for you.
             </p>
           </div>
 
-          {/* 3 Commercial Videos Grid - Exact Same Card Size and Layout as the GIFs above */}
-          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 max-w-5xl mx-auto items-start">
+          {/* 4 Hand-Crafted Art Style GIFs */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto items-start">
+            {ART_STYLES.map((style, idx) => (
+              <div
+                key={style.id}
+                className="group flex flex-col items-center w-full"
+              >
+                {/* Card Container */}
+                <div
+                  onClick={() => setActiveModalStyle(style)}
+                  className="relative w-full aspect-[9/16] rounded-2xl sm:rounded-3xl overflow-hidden bg-black shadow-[0_8px_24px_-4px_rgba(0,0,0,0.12)] border border-slate-200/90 hover:shadow-[0_20px_40px_-8px_rgba(0,0,0,0.22)] hover:border-slate-400/80 transition-all duration-300 cursor-pointer"
+                >
+                  <video
+                    ref={(el) => {
+                      if (el) {
+                        el.defaultMuted = true;
+                        el.muted = true;
+                      }
+                      gifVideoRefs.current[idx] = el;
+                    }}
+                    src={style.src}
+                    poster={style.poster}
+                    loop
+                    muted
+                    playsInline
+                    preload="none"
+                    className="w-full h-full object-cover select-none pointer-events-none"
+                    aria-label={style.name}
+                  >
+                    <source src={style.src} type="video/mp4" />
+                  </video>
+                </div>
+
+                {/* Caption: Art-style name */}
+                <p className="mt-3 sm:mt-4 text-center font-heading font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#FF3B14] transition-colors leading-snug">
+                  {style.name}
+                </p>
+              </div>
+            ))}
+          </div>
+
+        </div>
+
+        {/* ================= 3. 4 COMMERCIAL VIDEOS ================= */}
+        <div className="mt-6 sm:mt-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto items-start">
             {COMMERCIAL_VIDEOS.map((video, idx) => {
               const isPlaying = playingAudioIndex === idx;
 
               return (
                 <div
                   key={video.id}
-                  className="group flex flex-col items-center w-[calc(50%-0.5rem)] sm:w-[calc(50%-0.75rem)] md:w-[calc(25%-1.125rem)]"
+                  className="group flex flex-col items-center w-full"
                 >
                   {/* Card Container */}
                   <div
                     onClick={(e) => toggleAudioPlay(idx, e)}
-                    className={`relative w-full aspect-[9/16] rounded-2xl sm:rounded-3xl overflow-hidden bg-black shadow-md border transition-all duration-300 cursor-pointer ${
+                    className={`relative w-full aspect-[9/16] rounded-2xl sm:rounded-3xl overflow-hidden bg-black shadow-[0_8px_24px_-4px_rgba(0,0,0,0.12)] border transition-all duration-300 cursor-pointer ${
                       isPlaying
                         ? 'border-[#FF3B14]/80 shadow-[0_15px_35px_-5px_rgba(255,59,20,0.35)] ring-1 ring-[#FF3B14]/50'
-                        : 'border-slate-200/90 hover:shadow-xl hover:border-slate-300'
+                        : 'border-slate-200/90 hover:shadow-[0_20px_40px_-8px_rgba(0,0,0,0.22)] hover:border-slate-400/80'
                     }`}
                   >
                     <video
@@ -364,7 +386,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                     )}
 
                     {/* Bottom Scrubber Progress Bar */}
-                    <div className="absolute bottom-2.5 inset-x-3 z-20 flex flex-col gap-1 pointer-events-none">
+                    <div className="absolute bottom-2 inset-x-3 z-20 flex flex-col gap-1 pointer-events-none">
                       <div className="w-full h-1 bg-white/25 rounded-full overflow-hidden">
                         <div
                           ref={(el) => {
@@ -378,13 +400,23 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
 
                   </div>
 
+                  {/* Caption: Commercial Video Style (Same as GIFs above) */}
+                  <p className="mt-3 sm:mt-4 text-center font-heading font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#FF3B14] transition-colors leading-snug">
+                    {video.name}
+                  </p>
 
                 </div>
               );
             })}
           </div>
-
         </div>
+
+        {/* Section Contact Bar with Personalized WhatsApp Prompt */}
+        <SectionContactBar
+          sectionName="Social Media Management"
+          helperText="Want your posts, reels, and page handled?"
+          prompt="Hi Markyt team! I would like to know how you will manage the social media for my business, including custom post design, organic reels, and growth."
+        />
 
       </div>
 

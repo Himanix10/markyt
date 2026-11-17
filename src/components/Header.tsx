@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  // Nav items: Who We Are, Our Creatives, Social Media Mgmt, Websites, Contact Us, and FAQ
+  // Nav items: Who We Are, Our Creatives, Social Media Management, Websites, Contact Us
   const navLinks = [
     {
       name: 'Who We Are',
@@ -69,12 +69,12 @@ export const Header: React.FC<HeaderProps> = ({
       desc: 'In-site creative showcase & verified campaigns',
     },
     {
-      name: 'Social Media Mgmt',
-      href: '#social-media-mgmt',
-      id: 'social-media-mgmt',
+      name: 'Social Media Management',
+      href: '#social-media',
+      id: 'social-media',
       icon: Instagram,
       badge: null,
-      desc: 'Organic Reels, aesthetic feeds, content calendars & community growth',
+      desc: 'Full-service social media management, organic growth & post creation',
     },
     {
       name: 'Websites',
@@ -91,14 +91,6 @@ export const Header: React.FC<HeaderProps> = ({
       icon: PhoneCall,
       badge: null,
       desc: 'Direct strategy line, WhatsApp intake & validation sprint',
-    },
-    {
-      name: 'FAQ',
-      href: '#faq',
-      id: 'faq',
-      icon: HelpCircle,
-      badge: null,
-      desc: 'Straight answers on ₹5,000 budget cap, asset ownership & zero lock-in',
     },
   ];
 
@@ -127,90 +119,62 @@ export const Header: React.FC<HeaderProps> = ({
 
   useEffect(() => {
     const getActiveSection = (): string => {
+      // 1. Bottom of page check: When scrolled to the very end of the page, activate website-services
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 100
+      ) {
+        return 'website-services';
+      }
+
       const header = document.querySelector('header');
       const headerHeight = header ? header.offsetHeight : 64;
-      // Active focal reading line directly below the fixed header
-      const focalLine = headerHeight + 50;
+      const focalLine = headerHeight + 100; // Focal reading line below header
 
-      const servicesEl = document.getElementById('services');
-      const whoWeAreEl = document.getElementById('who-we-are');
-      const creativesEl = document.getElementById('creatives');
-      const socialEl = document.getElementById('social-media-mgmt');
       const websiteEl = document.getElementById('website-services');
-      const contactEl = document.getElementById('get-in-touch');
-      const faqEl = document.getElementById('faq');
+      const socialMediaEl = document.getElementById('social-media');
+      const creativesEl = document.getElementById('creatives');
 
-      // 1. FAQ Section (checked first from bottom)
-      if (faqEl) {
-        const rect = faqEl.getBoundingClientRect();
-        if (rect.top <= focalLine && rect.bottom > focalLine) {
-          return 'faq';
-        }
-        if (
-          window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 60 &&
-          rect.top <= window.innerHeight
-        ) {
-          return 'faq';
-        }
+      // Check bottom-up:
+      // A. Website Services
+      if (websiteEl && websiteEl.getBoundingClientRect().top <= focalLine) {
+        return 'website-services';
       }
 
-      // 2. Contact Section
-      if (contactEl) {
-        const rect = contactEl.getBoundingClientRect();
-        if (rect.top <= focalLine && rect.bottom > focalLine) {
-          return 'get-in-touch';
-        }
+      // B. Social Media Management
+      if (socialMediaEl && socialMediaEl.getBoundingClientRect().top <= focalLine) {
+        return 'social-media';
       }
 
-      // 3. Website Services Section
-      if (websiteEl) {
-        const rect = websiteEl.getBoundingClientRect();
-        if (rect.top <= focalLine && rect.bottom > focalLine) {
-          return 'website-services';
-        }
+      // C. Our Creatives (starts at ServicesSection "creatives" and spans through CreativeProductionPage)
+      if (creativesEl && creativesEl.getBoundingClientRect().top <= focalLine) {
+        return 'creatives';
       }
 
-      // 4. Social Media Mgmt Section
-      if (socialEl) {
-        const rect = socialEl.getBoundingClientRect();
-        if (rect.top <= focalLine && rect.bottom > focalLine) {
-          return 'social-media-mgmt';
-        }
-      }
-
-      // 5. Our Creatives Section
-      if (creativesEl) {
-        const rect = creativesEl.getBoundingClientRect();
-        if (rect.top <= focalLine && rect.bottom > focalLine) {
-          return 'creatives';
-        }
-      }
-
-      // 4. Who We Are Section (extends from top of site through the end of Focused Services #services)
-      const endOfWhoWeAreEl = servicesEl || whoWeAreEl;
-      if (endOfWhoWeAreEl) {
-        const endRect = endOfWhoWeAreEl.getBoundingClientRect();
-        if (endRect.bottom > focalLine) {
-          return 'who-we-are';
-        }
-      } else {
-        return 'who-we-are';
-      }
-
-      return '';
+      // D. Who We Are (Hero, Manifesto, Simulator, and Funnels)
+      return 'who-we-are';
     };
 
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-      setActiveSection(getActiveSection());
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 15);
+          setActiveSection(getActiveSection());
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
     handleScroll();
     const timer = setTimeout(handleScroll, 100);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
       clearTimeout(timer);
     };
   }, []);
@@ -220,8 +184,18 @@ export const Header: React.FC<HeaderProps> = ({
     const wasMenuOpen = menuOpen;
     setMenuOpen(false);
 
+    if (href === '#get-in-touch') {
+      window.open(
+        `https://wa.me/${MARKYT_CONTACT.whatsappNumber}?text=${encodeURIComponent(
+          'Hi Markyt team! I want to discuss marketing for my business.'
+        )}`,
+        '_blank'
+      );
+      return;
+    }
+
     const targetId = href.replace('#', '');
-    if (['who-we-are', 'creatives', 'social-media-mgmt', 'website-services', 'get-in-touch', 'faq'].includes(targetId)) {
+    if (['who-we-are', 'creatives', 'social-media', 'website-services', 'get-in-touch'].includes(targetId)) {
       setActiveSection(targetId);
     }
 
@@ -242,22 +216,17 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300">
+    <header className="fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300">
 
 
 
       {/* Main Modernized Navbar with iPhone Liquid Glass Aesthetic */}
       <nav
         className={`relative w-full transition-all duration-300 ${isScrolled
-            ? 'bg-gradient-to-b from-white/95 via-[#FBF9F5]/90 to-slate-200/40 backdrop-blur-2xl backdrop-saturate-150 border-b border-black/[0.08] shadow-[0_6px_28px_rgba(0,0,0,0.06)] py-2 sm:py-2.5'
-            : 'bg-gradient-to-b from-white/90 via-[#FBF9F5]/80 to-slate-200/30 backdrop-blur-xl backdrop-saturate-150 border-b border-black/[0.04] py-2.5 sm:py-3'
+            ? 'bg-white/95 backdrop-blur-2xl backdrop-saturate-150 border-b border-black/[0.08] shadow-[0_6px_28px_rgba(0,0,0,0.08)] py-2 sm:py-2.5'
+            : 'bg-white/90 backdrop-blur-xl backdrop-saturate-150 border-b border-black/[0.04] py-2.5 sm:py-3'
           }`}
       >
-        {/* Optical Gray-to-White Gradient Beam below navigation for liquid glass refraction & shine */}
-        <div
-          aria-hidden="true"
-          className="absolute -bottom-5 left-0 right-0 h-5 bg-gradient-to-b from-slate-300/25 via-slate-200/10 to-transparent pointer-events-none"
-        />
 
         <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 xl:gap-3">
 
@@ -296,9 +265,9 @@ export const Header: React.FC<HeaderProps> = ({
                     key={link.name}
                     href={link.href}
                     onClick={(e) => handleLinkClick(e, link.href)}
-                    className={`relative flex items-center gap-1 xl:gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-full text-[11px] xl:text-xs font-semibold transition-all duration-200 group shrink-0 select-none ${isActive
-                        ? 'bg-white text-slate-950 font-bold shadow-[0_2px_10px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,1)] border border-black/[0.04]'
-                        : 'text-slate-600 hover:text-slate-950 hover:bg-white/80'
+                    className={`relative flex items-center gap-1 xl:gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-full text-[11px] xl:text-xs font-semibold transition-all duration-200 group shrink-0 select-none ${isActive
+                        ? 'bg-slate-950 text-white font-bold shadow-md'
+                        : 'text-slate-600 hover:text-slate-950 hover:bg-slate-200/60'
                       }`}
                   >
                     <Icon className={`w-3.5 h-3.5 transition-colors shrink-0 ${isActive ? 'text-[#FF3B14]' : 'text-slate-400 group-hover:text-slate-700'

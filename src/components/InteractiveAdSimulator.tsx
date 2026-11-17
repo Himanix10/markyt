@@ -13,8 +13,8 @@ import {
   fetchCampaignProofRows 
 } from '../services/campaignProofSheetService';
 
-export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4?v=5';
-export const ABOUT_US_POSTER_PATH = '/videos/posters/about-us.jpg';
+export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4?v=hd1080';
+export const ABOUT_US_POSTER_PATH = '/videos/posters/about-us.jpg?v=hd1080';
 
 interface InteractiveAdSimulatorProps {
   onOpenQuestionnaire?: () => void;
@@ -163,73 +163,50 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="hidden sm:block absolute -inset-3 rounded-[38px] bg-gradient-to-r from-[#B8C1FA] via-[#FF3B14]/40 to-[#818CF8]/50 blur-2xl pointer-events-none -z-10"
+        className="absolute -inset-3 rounded-[38px] bg-gradient-to-r from-[#B8C1FA] via-[#FF3B14]/40 to-[#818CF8]/50 blur-2xl pointer-events-none -z-10"
       />
 
       {/* Main Bright Vibrant Luxury Card */}
       <div 
         ref={containerRef}
-        className="relative bg-gradient-to-br from-[#B8C1FA] via-[#C8D1FD] to-[#FFD8CF] rounded-3xl border-2 border-white/95 shadow-[0_25px_60px_-15px_rgba(79,70,229,0.22),0_10px_25px_-5px_rgba(255,59,20,0.12)] overflow-hidden p-2.5 sm:p-6 lg:p-8 z-0"
+        className="relative bg-gradient-to-br from-[#B8C1FA] via-[#C8D1FD] to-[#FFD8CF] rounded-3xl border-2 border-white/95 shadow-[0_25px_60px_-15px_rgba(79,70,229,0.22),0_10px_25px_-5px_rgba(255,59,20,0.12)] overflow-hidden p-3.5 sm:p-6 lg:p-8 z-0"
       >
         {/* Animated Aurora Gradient Blobs & Subtle Dot Matrix Texture */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-          {/* Subtle Grid Dot Matrix */}
+          <motion.div 
+            animate={{
+              x: [0, 25, 0],
+              y: [0, -15, 0],
+              scale: [1, 1.15, 1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-gradient-to-br from-[#FFD8CF]/80 to-[#FF8C68]/50 blur-3xl opacity-75"
+          />
+          <motion.div 
+            animate={{
+              x: [0, -25, 0],
+              y: [0, 20, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1
+            }}
+            className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-gradient-to-tl from-[#B8C1FA]/90 via-[#818CF8]/40 to-transparent blur-3xl opacity-80"
+          />
           <div 
-            className="absolute inset-0 opacity-[0.3]"
+            className="absolute inset-0 opacity-[0.06]"
             style={{
-              backgroundImage: 'radial-gradient(rgba(15, 23, 42, 0.15) 1px, transparent 1px)',
-              backgroundSize: '24px 24px',
+              backgroundImage: 'radial-gradient(#0F172A 1.5px, transparent 1.5px)',
+              backgroundSize: '20px 20px',
             }}
           />
-
-          {/* Desktop-only animated aurora orbs: disabled on mobile to prevent GPU blur contention */}
-          <div className="hidden sm:block">
-            {/* Orb 1: Coral Sunset Glow */}
-            <motion.div
-              animate={{
-                x: [0, 45, -30, 0],
-                y: [0, -35, 25, 0],
-                scale: [1, 1.18, 0.9, 1],
-                rotate: [0, 40, -20, 0],
-              }}
-              transition={{
-                duration: 14,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="absolute -top-16 -left-16 w-[440px] h-[440px] rounded-full bg-gradient-to-tr from-[#FF3B14]/45 via-[#F97316]/40 to-[#FBBF24]/35 blur-3xl"
-            />
-
-            {/* Orb 2: Electric Periwinkle / Violet */}
-            <motion.div
-              animate={{
-                x: [0, -40, 30, 0],
-                y: [0, 35, -25, 0],
-                scale: [1, 0.88, 1.2, 1],
-                rotate: [0, -35, 25, 0],
-              }}
-              transition={{
-                duration: 16,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="absolute -bottom-16 -right-16 w-[480px] h-[480px] rounded-full bg-gradient-to-bl from-[#818CF8]/50 via-[#6366F1]/40 to-[#38BDF8]/35 blur-3xl"
-            />
-
-            {/* Orb 3: Golden Sunshine */}
-            <motion.div
-              animate={{
-                opacity: [0.35, 0.7, 0.35],
-                scale: [0.92, 1.12, 0.92],
-              }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[300px] rounded-full bg-gradient-to-r from-amber-300/45 via-[#FDE047]/40 to-[#FF3B14]/30 blur-2xl"
-            />
-          </div>
         </div>
 
         {/* Header Row: Meta Ads Pill + Headline */}
@@ -399,9 +376,9 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
           <div className="lg:col-span-5 xl:col-span-5 flex justify-center items-center">
             <div className="relative group/heroplayer w-full max-w-[270px] sm:max-w-[330px] md:max-w-[345px]">
               
-              {/* Subtle Warm Accent Backdrop */}
+              {/* Subtle Natural Shadow & Warm Accent Backdrop */}
               <div 
-                className="absolute -inset-2 rounded-[44px] bg-gradient-to-tr from-[#FF3B14]/25 via-[#F97316]/20 to-[#818CF8]/30 blur-lg pointer-events-none -z-10" 
+                className="absolute -inset-2 rounded-[44px] bg-gradient-to-tr from-[#FF3B14]/15 via-slate-900/15 to-transparent blur-lg pointer-events-none -z-10" 
               />
 
               {/* Phone Outer Chassis (Space Black Titanium with Chamfered Edge) */}
@@ -432,6 +409,11 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                     src={videoSrc}
                     poster={ABOUT_US_POSTER_PATH}
                     className="w-full h-full object-cover block"
+                    style={{
+                      transform: 'translateZ(0)',
+                      backfaceVisibility: 'hidden',
+                      imageRendering: 'auto',
+                    }}
                     playsInline
                     loop
                     preload="auto"

@@ -1,6 +1,6 @@
 import React from 'react';
 import { MARKYT_CONTACT } from '../data/content';
-import { Mail, Instagram, Youtube, ArrowUpRight } from 'lucide-react';
+import { Mail, Instagram, ArrowUpRight } from 'lucide-react';
 import headerLogo from '../assets/images/markyt_header_logo_trimmed.png';
 import { scrollToSection } from '../utils/scrollHelper';
 
@@ -73,14 +73,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateToCreatives }) => {
               </li>
               <li>
                 <a 
-                  href="#social-media-mgmt" 
+                  href="#social-media" 
                   onClick={(e) => {
                     e.preventDefault();
-                    scrollToSection('#social-media-mgmt');
+                    scrollToSection('#social-media');
                   }}
                   className="hover:text-emerald-700 transition-colors"
                 >
-                  Social Media Mgmt
+                  Social Media Management
                 </a>
               </li>
               <li>
@@ -97,26 +97,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateToCreatives }) => {
               </li>
               <li>
                 <a 
-                  href="#get-in-touch" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('#get-in-touch');
-                  }}
+                  href={`https://wa.me/${MARKYT_CONTACT.whatsappNumber}?text=${encodeURIComponent('Hi Markyt team! I want to chat about performance marketing for my business.')}`} 
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-emerald-700 transition-colors"
                 >
                   Contact Us
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#faq" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('#faq');
-                  }}
-                  className="hover:text-emerald-700 transition-colors"
-                >
-                  FAQ
                 </a>
               </li>
             </ul>
@@ -156,28 +142,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateToCreatives }) => {
                 <span className="font-semibold">{MARKYT_CONTACT.instagramHandle} (Instagram)</span>
                 <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover:text-slate-950 transition-colors" />
               </a>
-              <a 
-                href={MARKYT_CONTACT.youtube}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-slate-700 hover:text-slate-950 group transition-colors"
-                title="Watch MARKYT on YouTube"
-              >
-                <Youtube className="w-4 h-4 text-[#FF0000] group-hover:scale-110 transition-transform" />
-                <span className="font-semibold">{MARKYT_CONTACT.youtubeHandle} (YouTube)</span>
-                <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover:text-slate-950 transition-colors" />
-              </a>
               <div className="pt-2 text-xs text-slate-500">
                 Operating with 5+ years experience per practitioner.
               </div>
             </div>
           </div>
 
-        </div>
-
-        {/* Bottom note */}
-        <div className="pt-5 sm:pt-8 flex items-center justify-center text-xs text-slate-600 font-semibold text-center">
-          ₹5,000 Validation Model • Zero Lock-in Contracts
         </div>
 
       </div>
