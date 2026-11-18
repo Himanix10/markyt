@@ -224,7 +224,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
           </h2>
 
           <p className="text-sm sm:text-base md:text-lg text-slate-700 leading-relaxed max-w-xl mx-auto font-normal mb-4">
-            We make your posts &amp; reels, and if you’d like, we’ll run your social media for you too. Management starts at ₹7,000 a month.
+            We make your posts and reels, and if you’d like, we’ll handle your social media too. We’re already looking after a luxury brand and a mocktail bomb brand. Management starts at ₹7,000 a month.
           </p>
 
           {/* Live Proof Managed Account */}
