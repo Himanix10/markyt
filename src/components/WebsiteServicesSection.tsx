@@ -1342,9 +1342,10 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
             </div>
           </div>
 
-          {/* Main Card Viewport */}
-          <div 
-            className="preview-card relative w-full h-[470px] sm:h-[490px] md:h-[510px] rounded-2xl sm:rounded-3xl border border-slate-900/15 shadow-xl bg-white overflow-hidden select-none cursor-grab active:cursor-grabbing group"
+          {/* Main Card Viewport Wrapper */}
+          <div className="relative w-full">
+            <div 
+              className="preview-card relative w-full h-[470px] sm:h-[490px] md:h-[510px] rounded-2xl sm:rounded-3xl border border-slate-900/15 shadow-xl bg-white overflow-hidden select-none cursor-grab active:cursor-grabbing group"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
             onMouseDown={handleMouseDown}
@@ -1468,33 +1469,34 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
                 </div>
               ))}
             </div>
-
-            {/* Desktop Navigation Floating Arrows (Hidden on mobile to never overlap screen content) */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePrev();
-              }}
-              className="hidden md:flex absolute -left-4 lg:-left-5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/95 hover:bg-white text-slate-800 shadow-md items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer z-30 border border-slate-900/10 hover:shadow-lg"
-              aria-label="Previous preview"
-            >
-              <ChevronLeft className="w-5 h-5 text-slate-800" />
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleNext();
-              }}
-              className="hidden md:flex absolute -right-4 lg:-right-5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/95 hover:bg-white text-slate-800 shadow-md items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer z-30 border border-slate-900/10 hover:shadow-lg"
-              aria-label="Next preview"
-            >
-              <ChevronRight className="w-5 h-5 text-slate-800" />
-            </button>
-
           </div>
+
+          {/* Desktop Navigation Floating Arrows (Outside overflow-hidden so they are 100% visible and unclipped) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrev();
+            }}
+            className="hidden md:flex absolute -left-5 lg:-left-6 top-1/2 -translate-y-1/2 w-11 h-11 lg:w-12 lg:h-12 rounded-full bg-white hover:bg-slate-50 text-slate-800 shadow-xl items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer z-30 border border-slate-900/15 hover:shadow-2xl"
+            aria-label="Previous preview"
+          >
+            <ChevronLeft className="w-5 h-5 text-slate-800" />
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNext();
+            }}
+            className="hidden md:flex absolute -right-5 lg:-right-6 top-1/2 -translate-y-1/2 w-11 h-11 lg:w-12 lg:h-12 rounded-full bg-white hover:bg-slate-50 text-slate-800 shadow-xl items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer z-30 border border-slate-900/15 hover:shadow-2xl"
+            aria-label="Next preview"
+          >
+            <ChevronRight className="w-5 h-5 text-slate-800" />
+          </button>
+
+        </div>
 
           {/* Mobile Navigation Bar: Prev / Dots / Next (Clean, spacious, zero overlap below card) */}
           <div className="flex md:hidden items-center justify-between gap-3 mt-4 px-2">
