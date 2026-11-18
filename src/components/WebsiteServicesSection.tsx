@@ -48,7 +48,22 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [mobileViewMode, setMobileViewMode] = useState<'mobile' | 'desktop'>('mobile');
+  const [isSectionInView, setIsSectionInView] = useState<boolean>(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
   const touchStartX = useRef<number | null>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setIsSectionInView(entries[0]?.isIntersecting ?? false);
+      },
+      { threshold: 0.05, rootMargin: '100px 0px 100px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // ============================================================================
   // CARD 1: CAFÉ ("The Roasted Bean", Bandra) – warm and editorial
@@ -1051,6 +1066,7 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
 
   return (
     <section 
+      ref={sectionRef}
       id="website-services" 
       className="pt-6 sm:pt-14 md:pt-16 pb-8 sm:pb-16 md:pb-20 bg-gradient-to-b from-[#DCF4E7] via-[#CEEEDC] to-[#DBF2E4] text-slate-900 relative overflow-hidden border-b border-slate-900/10 scroll-mt-[54px]"
     >
@@ -1356,7 +1372,10 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
               className="flex w-full h-full transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)"
               style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
-              {CARDS.map((card) => (
+              {CARDS.map((card, cardIdx) => {
+                const isCardActive = cardIdx === currentIndex && isSectionInView && !isPaused;
+
+                return (
                 <div 
                   key={card.id} 
                   className="w-full h-full shrink-0 p-2.5 sm:p-4 md:p-6 bg-[#D8EFE2] flex flex-col relative overflow-hidden"
@@ -1387,7 +1406,7 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
 
                       {/* Continuous Vertical Auto-Scroll with Right Padding for Corner Phone */}
                       <div className="w-full flex-1 overflow-hidden relative bg-white">
-                        <div className="animate-site-seamless w-full pr-40 md:pr-48">
+                        <div className={`w-full pr-40 md:pr-48 ${isCardActive ? 'animate-site-seamless' : ''}`}>
                           {card.renderDesktop()}
                           {card.renderDesktop()}
                         </div>
@@ -1400,7 +1419,7 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
                       <div className="w-full h-full rounded-[20px] bg-white overflow-hidden relative flex flex-col">
                         <div className="absolute top-1 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-black rounded-full z-30" />
                         <div className="w-full h-full pt-3 overflow-hidden relative">
-                          <div className="animate-site-seamless w-full">
+                          <div className={`w-full ${isCardActive ? 'animate-site-seamless' : ''}`}>
                             {card.renderMobile()}
                             {card.renderMobile()}
                           </div>
@@ -1430,7 +1449,7 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
 
                             {/* Mobile Site Auto-Scrolling Interior */}
                             <div className="w-full flex-1 overflow-hidden relative bg-white">
-                              <div className="animate-site-seamless w-full">
+                              <div className={`w-full ${isCardActive ? 'animate-site-seamless' : ''}`}>
                                 {card.renderMobile()}
                                 {card.renderMobile()}
                               </div>
@@ -1457,7 +1476,7 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
                           <div className="w-2 h-2 rounded-full bg-emerald-500" />
                         </div>
                         <div className="w-full flex-1 overflow-hidden relative bg-white">
-                          <div className="animate-site-seamless w-full">
+                          <div className={`w-full ${isCardActive ? 'animate-site-seamless' : ''}`}>
                             {card.renderDesktop()}
                             {card.renderDesktop()}
                           </div>
@@ -1467,7 +1486,8 @@ export const WebsiteServicesSection: React.FC<WebsiteServicesSectionProps> = ({
                   </div>
 
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
 

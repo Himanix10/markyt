@@ -499,7 +499,8 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
               const isCenter = offset === 0;
               const absOffset = Math.abs(offset);
               const cardStyle = getCardStyle(offset);
-              const shouldMountVideo = absOffset <= 1; // Mount active and adjacent cards so they are preloaded and start playing instantly on first scroll
+              const isMobile = windowWidth < 768;
+              const shouldMountVideo = isMobile ? absOffset === 0 : absOffset <= 1;
 
               return (
                 <div
@@ -547,7 +548,7 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
                       autoPlay={isCenter && isStageInView && hasUserInitiatedPlay.current && userWantsPlaying.current}
                       muted={!isCenter}
                       playsInline
-                      preload={isCenter ? "auto" : "metadata"}
+                      preload={isCenter ? "auto" : "none"}
                       onPlay={() => {
                         if (isCenter) setIsStudioPlaying(true);
                       }}

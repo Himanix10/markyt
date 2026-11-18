@@ -128,12 +128,6 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
         const isVisible = entries[0]?.isIntersecting ?? false;
         if (isVisible) {
           startVisualVideos();
-          // Warm up metadata so tapping any commercial video plays immediately
-          commercialVideoRefs.current.forEach((v) => {
-            if (v && v.preload !== 'auto') {
-              v.preload = 'metadata';
-            }
-          });
         } else {
           pauseAllVideos();
         }
@@ -340,7 +334,7 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                       poster={video.poster}
                       loop
                       playsInline
-                      preload="auto"
+                      preload="none"
                       onTimeUpdate={() => handleTimeUpdate(idx)}
                       onEnded={() => {
                         setPlayingAudioIndex(null);
@@ -359,7 +353,8 @@ export const CreativeArtStylesSection: React.FC<CreativeArtStylesSectionProps> =
                         src={video.poster}
                         alt={video.name}
                         className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none transition-opacity duration-200"
-                        loading="eager"
+                        loading="lazy"
+                        decoding="async"
                       />
                     )}
 

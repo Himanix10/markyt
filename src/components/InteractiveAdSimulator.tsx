@@ -416,7 +416,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                     }}
                     playsInline
                     loop
-                    preload="auto"
+                    preload="none"
                     onTimeUpdate={handleTimeUpdate}
                     onWaiting={() => setIsBuffering(true)}
                     onCanPlay={() => setIsBuffering(false)}
@@ -447,7 +447,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                       src={ABOUT_US_POSTER_PATH}
                       alt="Know About Us"
                       className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[5]"
-                      loading="eager"
+                      loading="lazy"
                       decoding="async"
                     />
                   )}

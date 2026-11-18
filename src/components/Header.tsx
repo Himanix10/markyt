@@ -223,8 +223,8 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Main Modernized Navbar with iPhone Liquid Glass Aesthetic */}
       <nav
         className={`relative w-full transition-all duration-300 ${isScrolled
-            ? 'bg-white/95 backdrop-blur-2xl backdrop-saturate-150 border-b border-black/[0.08] shadow-[0_6px_28px_rgba(0,0,0,0.08)] py-2 sm:py-2.5'
-            : 'bg-white/90 backdrop-blur-xl backdrop-saturate-150 border-b border-black/[0.04] py-2.5 sm:py-3'
+            ? 'bg-white/98 md:bg-white/95 md:backdrop-blur-xl md:backdrop-saturate-150 border-b border-black/[0.08] shadow-[0_6px_28px_rgba(0,0,0,0.08)] py-2 sm:py-2.5'
+            : 'bg-white/98 md:bg-white/90 md:backdrop-blur-xl md:backdrop-saturate-150 border-b border-black/[0.04] py-2.5 sm:py-3'
           }`}
       >
 

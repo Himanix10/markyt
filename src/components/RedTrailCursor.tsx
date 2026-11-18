@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface ChainNode {
   x: number;
@@ -8,10 +8,17 @@ interface ChainNode {
 export const RedTrailCursor: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animFrameIdRef = useRef<number | null>(null);
+  const [isPointerFine, setIsPointerFine] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches) {
+      setIsPointerFine(true);
+    }
+  }, []);
 
   useEffect(() => {
     // Only initialize on desktop / devices with a mouse/trackpad pointer
-    if (typeof window === 'undefined' || !window.matchMedia('(pointer: fine)').matches) {
+    if (!isPointerFine) {
       return;
     }
 
@@ -243,13 +250,15 @@ export const RedTrailCursor: React.FC = () => {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, []);
+  }, [isPointerFine]);
+
+  if (!isPointerFine) return null;
 
   return (
     <canvas
       ref={canvasRef}
       id="red-trail-canvas"
-      className="fixed inset-0 pointer-events-none z-[9999] select-none"
+      className="hidden md:block fixed inset-0 pointer-events-none z-[9999] select-none"
       style={{ display: 'block' }}
       aria-hidden="true"
     />

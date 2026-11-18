@@ -70,10 +70,12 @@ export const TaglineHeroAnimation: React.FC = () => {
                 className={`flex-1 rounded-t-lg sm:rounded-t-xl ${
                   bar.isAccent
                     ? 'bg-gradient-to-t from-[#FF4518]/30 via-[#FF4518]/20 to-[#FF4518]/10 border-2 border-[#FF4518]/80 shadow-[0_-4px_24px_rgba(255,69,24,0.4)]'
-                    : 'bg-gradient-to-t from-white/35 via-white/20 to-white/10 backdrop-blur-[2px] border-t border-x border-white/30'
+                    : 'bg-gradient-to-t from-white/40 via-white/25 to-white/15 border-t border-x border-white/40'
                 }`}
                 style={{
                   originY: 1,
+                  transform: 'translateZ(0)',
+                  willChange: 'height, opacity',
                 }}
                 animate={{
                   height: [
@@ -131,7 +133,12 @@ export const TaglineHeroAnimation: React.FC = () => {
           {/* Ring 1 (Inner Radar Ring) */}
           <motion.div
             className="absolute rounded-full border-[1.5px] border-[#FF4518]/55 shadow-[0_0_12px_rgba(255,69,24,0.2)]"
-            style={{ width: 'clamp(220px, 32vw, 360px)', height: 'clamp(220px, 32vw, 360px)' }}
+            style={{ 
+              width: 'clamp(220px, 32vw, 360px)', 
+              height: 'clamp(220px, 32vw, 360px)',
+              transform: 'translateZ(0)',
+              willChange: 'transform, opacity',
+            }}
             animate={{
               scale: [0.93, 1.07, 0.93],
               opacity: [0.45, 0.75, 0.45],
@@ -146,7 +153,12 @@ export const TaglineHeroAnimation: React.FC = () => {
           {/* Ring 2 (Middle Radar Ring) */}
           <motion.div
             className="absolute rounded-full border-[1.5px] border-[#FF4518]/45 shadow-[0_0_14px_rgba(255,69,24,0.15)]"
-            style={{ width: 'clamp(420px, 58vw, 680px)', height: 'clamp(420px, 58vw, 680px)' }}
+            style={{ 
+              width: 'clamp(420px, 58vw, 680px)', 
+              height: 'clamp(420px, 58vw, 680px)',
+              transform: 'translateZ(0)',
+              willChange: 'transform, opacity',
+            }}
             animate={{
               scale: [0.95, 1.05, 0.95],
               opacity: [0.35, 0.60, 0.35],
@@ -162,7 +174,12 @@ export const TaglineHeroAnimation: React.FC = () => {
           {/* Ring 3 (Outer Radar Ring) */}
           <motion.div
             className="absolute rounded-full border-[1.5px] border-[#FF4518]/30 shadow-[0_0_16px_rgba(255,69,24,0.1)]"
-            style={{ width: 'clamp(680px, 86vw, 1060px)', height: 'clamp(680px, 86vw, 1060px)' }}
+            style={{ 
+              width: 'clamp(680px, 86vw, 1060px)', 
+              height: 'clamp(680px, 86vw, 1060px)',
+              transform: 'translateZ(0)',
+              willChange: 'transform, opacity',
+            }}
             animate={{
               scale: [0.97, 1.04, 0.97],
               opacity: [0.22, 0.45, 0.22],

@@ -26,21 +26,21 @@ export const ServicesSection: React.FC<ServicesSectionProps> = () => {
       {/* Anchor for backward-compatible #services links */}
       <div id="services" className="absolute -top-[54px] left-0 pointer-events-none" />
       {/* Dynamic Multi-Color Ambient Luxury Glow Blobs (Creative Section Welcome Wash) */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden -z-0">
+      <div className="hidden sm:block absolute inset-0 pointer-events-none overflow-hidden -z-0">
         {/* Top-Left Sunset Radiant Coral/Peach Glow */}
-        <div className="absolute -top-12 -left-16 w-[580px] h-[580px] rounded-full bg-gradient-to-br from-[#FF6B4A]/35 via-[#FFA07A]/28 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute -top-12 -left-16 w-[580px] h-[580px] rounded-full bg-gradient-to-br from-[#FF6B4A]/35 via-[#FFA07A]/28 to-transparent blur-3xl pointer-events-none transform-gpu" />
         
         {/* Top Center-Right Warm Golden Sunlight Glow */}
-        <div className="absolute -top-10 right-1/4 w-[480px] h-[480px] rounded-full bg-gradient-to-b from-[#FBBF24]/32 via-[#FCD34D]/20 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute -top-10 right-1/4 w-[480px] h-[480px] rounded-full bg-gradient-to-b from-[#FBBF24]/32 via-[#FCD34D]/20 to-transparent blur-3xl pointer-events-none transform-gpu" />
 
         {/* Right Tropical Emerald / Mint Glow */}
-        <div className="absolute top-1/4 -right-16 w-[580px] h-[580px] rounded-full bg-gradient-to-bl from-[#00D2B4]/32 via-[#2DD4BF]/24 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 -right-16 w-[580px] h-[580px] rounded-full bg-gradient-to-bl from-[#00D2B4]/32 via-[#2DD4BF]/24 to-transparent blur-3xl pointer-events-none transform-gpu" />
         
         {/* Bottom Center Creative Lavender / Violet Glow */}
-        <div className="absolute -bottom-16 left-1/4 w-[520px] h-[520px] rounded-full bg-gradient-to-tr from-[#A855F7]/25 via-[#EC4899]/20 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 left-1/4 w-[520px] h-[520px] rounded-full bg-gradient-to-tr from-[#A855F7]/25 via-[#EC4899]/20 to-transparent blur-3xl pointer-events-none transform-gpu" />
 
         {/* Bottom-Right Soft Rose Petal Glow */}
-        <div className="absolute -bottom-10 -right-10 w-[450px] h-[450px] rounded-full bg-gradient-to-tl from-[#FB7185]/24 via-[#FDA4AF]/18 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-10 -right-10 w-[450px] h-[450px] rounded-full bg-gradient-to-tl from-[#FB7185]/24 via-[#FDA4AF]/18 to-transparent blur-3xl pointer-events-none transform-gpu" />
 
         {/* Tactile Designer Radial Dot Grid Texture */}
         <div 

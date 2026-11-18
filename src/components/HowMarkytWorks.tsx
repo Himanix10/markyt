@@ -195,7 +195,7 @@ export const HowMarkytWorks: React.FC<HowMarkytWorksProps> = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.45, delay: idx * 0.08 }}
                   whileHover={{ y: -8, scale: 1.02 }}
-                  className="group relative p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white/75 hover:bg-white/95 backdrop-blur-xl backdrop-saturate-150 border border-white/90 hover:border-white shadow-[inset_0_1.5px_2px_rgba(255,255,255,1),0_8px_24px_rgba(0,0,0,0.05)] hover:shadow-[inset_0_1.5px_2px_rgba(255,255,255,1),0_16px_36px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer"
+                  className="group relative p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white/95 md:bg-white/75 hover:bg-white md:backdrop-blur-xl md:backdrop-saturate-150 border border-white/90 hover:border-white shadow-[inset_0_1.5px_2px_rgba(255,255,255,1),0_8px_24px_rgba(0,0,0,0.05)] hover:shadow-[inset_0_1.5px_2px_rgba(255,255,255,1),0_16px_36px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer"
                 >
                   {/* Top Liquid Colored Gradient Refraction */}
                   <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${cfg.activeGradient} opacity-85 group-hover:opacity-100 transition-opacity`} />
