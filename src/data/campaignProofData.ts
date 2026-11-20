@@ -7,7 +7,7 @@ export interface CampaignProofData {
     text: string;
     variant: 'emerald' | 'amber';
   };
-  status: 'Active' | 'Completed';
+  status: 'Active' | 'Completed' | 'Paused';
   results: number;
   resultsUnit: string;
   resultsSub?: string;
@@ -73,7 +73,7 @@ export const CAMPAIGN_PROOF_ROWS: CampaignProofData[] = [
   },
   {
     campaign: 'Therapist',
-    status: 'Active',
+    status: 'Paused',
     results: 13,
     resultsUnit: 'conversations',
     costPerResult: '₹126.64',

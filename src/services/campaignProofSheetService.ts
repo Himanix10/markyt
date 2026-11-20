@@ -1,7 +1,7 @@
 import { CampaignProofData, CAMPAIGN_PROOF_ROWS } from '../data/campaignProofData';
 
 export const STORAGE_KEY_CAMPAIGN_PROOF_URL = 'markyt_campaign_proof_sheet_url';
-export const DEFAULT_CAMPAIGN_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1JwWWs33PEisnF5F4t92HI3_Ew_BDtMrYoM1OBlYjGTI/export?format=csv';
+export const DEFAULT_CAMPAIGN_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1JwWWs33PEisnF5F4t92HI3_Ew_BDtMrYoM1OBlYjGTI/export?format=csv&gid=907241193';
 
 /**
  * Normalizes any Google Sheet URL (including /edit, /edit?usp=sharing, /edit#gid=0, etc.)
@@ -130,7 +130,9 @@ export const parseCsvToRows = (csvText: string): CampaignProofData[] => {
     }
 
     const statusRaw = getVal(['delivery', 'status'], 1).toLowerCase();
-    const status: 'Active' | 'Completed' = statusRaw.includes('complete') ? 'Completed' : 'Active';
+    const status: 'Active' | 'Completed' | 'Paused' = statusRaw.includes('pause') 
+      ? 'Paused' 
+      : (statusRaw.includes('complete') ? 'Completed' : 'Active');
 
     const resultsRaw = getVal(['results', 'result'], 2);
     const results = parseInt(resultsRaw.replace(/[^0-9]/g, ''), 10) || 0;
@@ -209,7 +211,9 @@ export const normalizeJsonRows = (data: any): CampaignProofData[] => {
     }
 
     const statusRaw = String(item.status || item.Status || item.delivery || item.Delivery || 'Active').trim().toLowerCase();
-    const status: 'Active' | 'Completed' = statusRaw.includes('complete') ? 'Completed' : 'Active';
+    const status: 'Active' | 'Completed' | 'Paused' = statusRaw.includes('pause')
+      ? 'Paused'
+      : (statusRaw.includes('complete') ? 'Completed' : 'Active');
 
     const results = Number(item.results ?? item.Results ?? 0) || 0;
     const rawUnit = String(item.resultsUnit || item.ResultsUnit || item.resultType || (rawCampaign.toLowerCase().includes('clothing') ? 'website purchases' : 'conversations')).trim();

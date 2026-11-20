@@ -3,18 +3,22 @@ import { motion } from 'motion/react';
 import { 
   Play, 
   BarChart2,
-  
+  ChevronDown,
 } from 'lucide-react';
 import { 
   CampaignProofData, 
   CAMPAIGN_PROOF_ROWS 
 } from '../data/campaignProofData';
 import { 
+  SocialMediaProofData, 
+  SOCIAL_MEDIA_PROOF_ROWS 
+} from '../data/socialMediaProofData';
+import { 
   fetchCampaignProofRows 
 } from '../services/campaignProofSheetService';
 
-export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4?v=new8';
-export const ABOUT_US_POSTER_PATH = '/videos/posters/about-us.jpg?v=new8';
+export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4?v=opt1';
+export const ABOUT_US_POSTER_PATH = '/videos/posters/about-us.jpg?v=opt1';
 
 interface InteractiveAdSimulatorProps {
   onOpenQuestionnaire?: () => void;
@@ -28,13 +32,40 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
+  const tableScrollRef = useRef<HTMLDivElement | null>(null);
+  const socialSectionRef = useRef<HTMLDivElement | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isVideoReady, setIsVideoReady] = useState<boolean>(false);
   const [isBuffering, setIsBuffering] = useState<boolean>(false);
+  const [showScrollHint, setShowScrollHint] = useState<boolean>(true);
 
   // Live Google Sheet sync state (automatically synced from sheet in background)
   const [proofRows, setProofRows] = useState<CampaignProofData[]>(CAMPAIGN_PROOF_ROWS);
+  const [socialMediaRows] = useState<SocialMediaProofData[]>(SOCIAL_MEDIA_PROOF_ROWS);
+
+  const handleTableScroll = () => {
+    if (!tableScrollRef.current) return;
+    const { scrollTop } = tableScrollRef.current;
+    if (scrollTop > 30) {
+      setShowScrollHint(false);
+    } else {
+      setShowScrollHint(true);
+    }
+  };
+
+  const scrollToSocialMedia = () => {
+    if (socialSectionRef.current) {
+      socialSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      setShowScrollHint(false);
+    } else if (tableScrollRef.current) {
+      tableScrollRef.current.scrollTo({
+        top: tableScrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+      setShowScrollHint(false);
+    }
+  };
 
   // Load and sync data from Google Sheet in background
   const loadSheetData = async () => {
@@ -237,67 +268,72 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
           {/* Left Column: Real Proof Table */}
           <div className="lg:col-span-7 xl:col-span-7 flex flex-col justify-center text-left">
             {/* Live Meta Ads Manager Proof Table */}
-            <div className="rounded-2xl border border-slate-900/10 bg-white/95 backdrop-blur-md overflow-hidden shadow-md sm:shadow-lg flex flex-col">
+            <div className="relative rounded-2xl sm:rounded-3xl border border-slate-900/10 bg-white/95 backdrop-blur-md overflow-hidden shadow-md sm:shadow-lg flex flex-col group/tablecard font-poppins">
 
-              {/* Scrollable Table Body with Sticky Header - Perfectly balanced with video player height */}
-              <div className="w-full max-h-[330px] sm:max-h-[420px] md:max-h-[460px] overflow-y-auto overscroll-contain">
+              {/* Card Header: Eyebrow + Subheadline */}
+              <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3.5 border-b border-slate-100/90 bg-white">
+                <div className="text-[9.5px] sm:text-[10.5px] font-poppins font-semibold tracking-widest text-slate-400 uppercase">
+                  Our Work In Numbers
+                </div>
+                <h4 className="text-[13px] sm:text-[15px] md:text-base font-poppins font-semibold text-slate-900 leading-snug tracking-tight mt-1">
+                  Performance marketing drives <span className="text-emerald-600 font-bold">measurable growth</span>, while social media <span className="text-indigo-600 font-bold">builds the brand</span> that sustains it.
+                </h4>
+              </div>
+
+              {/* Scrollable Table Body with Sticky Headers - Perfectly balanced with video player height */}
+              <div 
+                ref={tableScrollRef}
+                onScroll={handleTableScroll}
+                className="w-full max-h-[320px] sm:max-h-[390px] md:max-h-[420px] overflow-y-auto overscroll-contain visible-proof-scrollbar relative"
+              >
+                {/* 1. Performance Marketing Section Header */}
+                <div className="sticky top-0 z-20 px-4 sm:px-6 py-2 bg-[#F1F5FD] border-b border-slate-200/80 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="relative flex h-2 w-2 shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981] shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] font-poppins font-semibold uppercase tracking-wider text-slate-700">
+                      Performance Marketing
+                    </span>
+                  </div>
+                  <span className="text-[10px] sm:text-[11px] text-slate-400 font-poppins font-medium">
+                    {proofRows.length} campaigns
+                  </span>
+                </div>
+
                 <table className="w-full table-fixed text-left border-collapse">
-                  <thead className="sticky top-0 z-10 bg-slate-100/95 backdrop-blur-md shadow-xs">
-                    <tr className="border-b border-slate-200 text-[8.5px] sm:text-[10px] md:text-[11px] font-space font-bold uppercase tracking-wider text-slate-600">
-                      <th className="w-[36%] sm:w-[28%] py-2.5 sm:py-3 px-2 sm:px-3 text-left whitespace-nowrap bg-slate-100/95">Campaign</th>
-                      <th className="hidden sm:table-cell sm:w-[19%] py-2.5 sm:py-3 px-1 sm:px-2 text-center whitespace-nowrap bg-slate-100/95">Delivery</th>
-                      <th className="w-[17%] sm:w-[14%] py-2.5 sm:py-3 px-1 sm:px-2 text-right whitespace-nowrap bg-slate-100/95">Results</th>
-                      <th className="w-[22%] sm:w-[17%] py-2.5 sm:py-3 px-1 sm:px-2 text-right whitespace-nowrap bg-slate-100/95">
-                        <span className="hidden sm:inline">Cost / Result</span>
-                        <span className="sm:hidden">Cost/Res.</span>
-                      </th>
-                      <th className="w-[25%] sm:w-[22%] py-2.5 sm:py-3 px-1.5 sm:px-3 text-right whitespace-nowrap bg-slate-100/95">
-                        <span className="hidden sm:inline">Amount Spent</span>
-                        <span className="sm:hidden">Spent</span>
-                      </th>
+                  <thead className="bg-slate-50/50 border-b border-slate-100/80">
+                    <tr className="text-[9px] sm:text-[10px] font-poppins font-semibold uppercase tracking-wider text-slate-400">
+                      <th className="w-[35%] sm:w-[34%] py-2 px-3 sm:px-4 text-left whitespace-nowrap">Campaign</th>
+                      <th className="w-[27%] sm:w-[26%] py-2 px-1 sm:px-2 text-center whitespace-nowrap">Delivery</th>
+                      <th className="w-[18%] sm:w-[20%] py-2 px-1 sm:px-2 text-right whitespace-nowrap">Results</th>
+                      <th className="w-[20%] sm:w-[20%] py-2 px-2 sm:px-4 text-right whitespace-nowrap">Cost / Result</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody>
                     {proofRows.map((row, idx) => (
                       <tr 
                         key={idx} 
-                        className={`transition-colors duration-150 ${
-                          idx % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'
-                        } ${
-                          row.isPurchase 
-                            ? 'hover:bg-emerald-50/40' 
-                            : 'hover:bg-slate-100/60'
-                        }`}
+                        className="bg-white hover:bg-slate-50/50 transition-colors border-b border-slate-100/80"
                       >
-                        {/* 1. Campaign Name + Badge/Type (+ Delivery on mobile) */}
-                        <td className="py-2 sm:py-2.5 px-2 sm:px-3 align-middle overflow-hidden">
+                        {/* 1. Campaign Name + Badge/Type */}
+                        <td className="py-2.5 sm:py-3 px-3 sm:px-4 align-middle overflow-hidden">
                           <div className="flex flex-col gap-0.5">
-                            <div className="font-space font-bold text-slate-950 text-[10px] sm:text-xs md:text-[13px] leading-tight line-clamp-2">
+                            <div className="font-poppins font-semibold text-slate-950 text-xs sm:text-[13px] leading-tight line-clamp-2">
                               {row.campaign}
                             </div>
                             <div className="flex flex-wrap items-center gap-1 mt-0.5">
-                              {/* Mobile-only Delivery Status Badge */}
-                              <span className={`sm:hidden inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[7px] font-semibold border leading-none shrink-0 ${
-                                row.status === 'Active'
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
-                                  : 'bg-amber-50 text-amber-800 border-amber-300/80'
-                              }`}>
-                                <span className={`w-1 h-1 rounded-full shrink-0 ${
-                                  row.status === 'Active' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
-                                }`} />
-                                <span>{row.status}</span>
-                              </span>
-
                               {row.campaignType && (
-                                <span className="inline-block px-1 py-0.5 rounded text-[7px] sm:text-[8.5px] font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200/90 leading-none">
+                                <span className="inline-block px-1 py-0.5 rounded text-[7px] sm:text-[8px] font-mono font-medium bg-slate-100 text-slate-500 border border-slate-200/70 leading-none">
                                   {row.campaignType}
                                 </span>
                               )}
                               {row.badge && (
-                                <span className={`inline-block px-1 py-0.5 rounded text-[7px] sm:text-[8.5px] font-bold uppercase tracking-wider border leading-none ${
+                                <span className={`inline-block px-1 py-0.5 rounded text-[7px] sm:text-[8px] font-semibold uppercase tracking-wider border leading-none ${
                                   row.badge.variant === 'emerald'
-                                    ? 'bg-emerald-100/90 text-emerald-900 border-emerald-300/80'
-                                    : 'bg-amber-100 text-amber-800 border-amber-300/60'
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    : 'bg-amber-50 text-amber-700 border-amber-200'
                                 }`}>
                                   {row.badge.text}
                                 </span>
@@ -306,51 +342,117 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                           </div>
                         </td>
 
-                        {/* 2. Delivery Badge (Desktop/Tablet Only) */}
-                        <td className="hidden sm:table-cell py-2 sm:py-2.5 px-1 sm:px-1.5 text-center align-middle">
-                          {row.status === 'Active' ? (
-                            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-emerald-50 text-emerald-700 text-[8px] sm:text-[9px] md:text-[10px] font-semibold border border-emerald-200/80 shadow-2xs whitespace-nowrap">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                              <span>Active</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-50 text-amber-800 text-[8px] sm:text-[9px] md:text-[10px] font-semibold border border-amber-300/80 shadow-2xs whitespace-nowrap" title="Completed">
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                              <span>Completed</span>
-                            </span>
-                          )}
+                        {/* 2. Delivery Badge */}
+                        <td className="py-2.5 sm:py-3.5 px-1 sm:px-2 text-center align-middle">
+                          <div className="flex items-center justify-center">
+                            {row.status === 'Active' ? (
+                              <span className="inline-flex items-center justify-center gap-2 h-7 sm:h-[29px] px-3.5 sm:px-4 rounded-full bg-[#EDFAF3] text-[#047857] border border-[#A7F3D0] text-[11px] sm:text-xs font-poppins font-medium whitespace-nowrap shadow-2xs">
+                                <svg className="w-2 h-2 shrink-0 fill-[#10B981] overflow-visible" viewBox="0 0 12 12" aria-hidden="true">
+                                  <circle cx="6" cy="6" r="4" />
+                                </svg>
+                                <span className="leading-none relative top-[0.5px]">Active</span>
+                              </span>
+                            ) : row.status === 'Paused' ? (
+                              <span className="inline-flex items-center justify-center gap-2 h-7 sm:h-[29px] px-3.5 sm:px-4 rounded-full bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE] text-[11px] sm:text-xs font-poppins font-medium whitespace-nowrap shadow-2xs" title="Paused">
+                                <svg className="w-2 h-2 shrink-0 fill-[#3B82F6] overflow-visible" viewBox="0 0 12 12" aria-hidden="true">
+                                  <circle cx="6" cy="6" r="4" />
+                                </svg>
+                                <span className="leading-none relative top-[0.5px]">Paused</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center justify-center gap-2 h-7 sm:h-[29px] px-3.5 sm:px-4 rounded-full bg-[#FFF9E6] text-[#92400E] border border-[#FFDA55] text-[11px] sm:text-xs font-poppins font-medium whitespace-nowrap shadow-2xs" title="Completed">
+                                <svg className="w-2 h-2 shrink-0 fill-[#FE9A00] overflow-visible" viewBox="0 0 12 12" aria-hidden="true">
+                                  <circle cx="6" cy="6" r="4" />
+                                </svg>
+                                <span className="leading-none relative top-[0.5px]">Completed</span>
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         {/* 3. Results */}
-                        <td className="py-2 sm:py-2.5 px-1 sm:px-2 text-right align-middle overflow-hidden">
-                          <div className="font-mono tabular-nums font-bold text-slate-950 text-[10px] sm:text-xs md:text-[13px] leading-tight">
+                        <td className="py-2.5 sm:py-3 px-1 sm:px-2 text-right align-middle overflow-hidden">
+                          <div className="font-poppins font-bold text-slate-950 text-sm sm:text-[15px] leading-tight">
                             {row.results}
                           </div>
-                          <div className={`text-[7.5px] sm:text-[8.5px] md:text-[9.5px] leading-tight mt-0.5 truncate ${row.isPurchase ? 'text-emerald-700 font-semibold' : 'text-slate-500'}`}>
+                          <div className="text-[8.5px] sm:text-[9.5px] text-slate-400/90 font-poppins font-normal leading-tight mt-0.5 truncate">
                             {row.isPurchase ? 'purchases' : 'conv.'}
                           </div>
                         </td>
 
                         {/* 4. Cost per Result */}
-                        <td className="py-2 sm:py-2.5 px-1 sm:px-2 text-right align-middle overflow-hidden">
-                          <div className="font-mono tabular-nums font-bold text-emerald-700 text-[10px] sm:text-xs md:text-[13px] leading-tight">
+                        <td className="py-2.5 sm:py-3 px-2 sm:px-4 text-right align-middle overflow-hidden">
+                          <div className="font-poppins font-bold text-[#059669] text-xs sm:text-[13.5px] leading-tight">
                             {row.costPerResult}
                           </div>
-                          <div className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 leading-tight mt-0.5 truncate">
+                          <div className="text-[8.5px] sm:text-[9.5px] text-slate-400/90 font-poppins font-normal leading-tight mt-0.5 truncate">
                             {row.isPurchase ? 'per pur.' : 'per conv.'}
                           </div>
                         </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
-                        {/* 5. Amount Spent */}
-                        <td className="py-2 sm:py-2.5 px-1.5 sm:px-3 text-right align-middle overflow-hidden">
-                          <div className="font-mono tabular-nums font-bold text-slate-950 text-[10px] sm:text-xs md:text-[13px] leading-tight">
-                            {row.amountSpent}
+                {/* 2. Social Media Management Section Header */}
+                <div 
+                  ref={socialSectionRef}
+                  className="sticky top-0 z-20 px-4 sm:px-6 py-2 bg-[#F1F5FD] border-t border-b border-slate-200/80 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="relative flex h-2 w-2 shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-60" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6366F1] shadow-[0_0_8px_rgba(99,102,241,0.7)]" />
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] font-poppins font-semibold uppercase tracking-wider text-slate-700">
+                      Social Media Management
+                    </span>
+                  </div>
+                  <span className="text-[10px] sm:text-[11px] text-slate-400 font-poppins font-medium">
+                    {socialMediaRows.length} brands
+                  </span>
+                </div>
+
+                {/* Social Media Management Table */}
+                <table className="w-full table-fixed text-left border-collapse">
+                  <thead className="bg-slate-50/50 border-b border-slate-100/80">
+                    <tr className="text-[9px] sm:text-[10px] font-poppins font-semibold uppercase tracking-wider text-slate-400">
+                      <th className="w-[56%] sm:w-[56%] py-2 px-3 sm:px-4 text-left whitespace-nowrap">Brand</th>
+                      <th className="w-[22%] sm:w-[22%] py-2 px-1.5 sm:px-2 text-right whitespace-nowrap">Posts</th>
+                      <th className="w-[22%] sm:w-[22%] py-2 px-2 sm:px-4 text-right whitespace-nowrap">Reels</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {socialMediaRows.map((row, idx) => (
+                      <tr 
+                        key={idx} 
+                        className="bg-white hover:bg-slate-50/50 transition-colors border-b border-slate-100/80"
+                      >
+                        {/* Brand */}
+                        <td className="py-2.5 sm:py-3 px-3 sm:px-4 align-middle overflow-hidden">
+                          <div className="font-poppins font-semibold text-slate-950 text-xs sm:text-[13px] leading-snug">
+                            {row.brand}
                           </div>
-                          {row.budgetNote && (
-                            <div className="text-[7px] sm:text-[8px] md:text-[8.5px] text-slate-400 font-mono leading-tight mt-0.5 truncate">
-                              {row.budgetNote}
-                            </div>
-                          )}
+                        </td>
+
+                        {/* Posts */}
+                        <td className="py-2.5 sm:py-3 px-1.5 sm:px-2 text-right align-middle overflow-hidden">
+                          <div className="font-poppins font-bold text-slate-950 text-sm sm:text-[15px] leading-tight">
+                            {row.posts}
+                          </div>
+                          <div className="text-[8.5px] sm:text-[9.5px] text-slate-400/90 font-poppins font-normal leading-tight mt-0.5 truncate">
+                            {row.periodNote || 'this month*'}
+                          </div>
+                        </td>
+
+                        {/* Reels */}
+                        <td className="py-2.5 sm:py-3 px-2 sm:px-4 text-right align-middle overflow-hidden">
+                          <div className="font-poppins font-bold text-slate-950 text-sm sm:text-[15px] leading-tight">
+                            {row.reels}
+                          </div>
+                          <div className="text-[8.5px] sm:text-[9.5px] text-slate-400/90 font-poppins font-normal leading-tight mt-0.5 truncate">
+                            {row.periodNote || 'this month*'}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -358,14 +460,33 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                 </table>
               </div>
 
-              {/* Table Footer */}
-              <div className="px-2.5 sm:px-4 py-1.5 sm:py-2.5 bg-slate-100/70 border-t border-slate-200/80 text-[8px] sm:text-[9.5px] md:text-[10px] text-slate-500">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0" />
-                  <span>Real client sprint data from active Meta Ads Manager</span>
-                </div>
+              {/* Floating "Next: Social Media" Indicator (Matches user's exact mockup) */}
+              <div 
+                className={`absolute bottom-16 sm:bottom-18 left-1/2 -translate-x-1/2 z-30 pointer-events-auto transition-all duration-300 ${
+                  showScrollHint 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-3 pointer-events-none'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={scrollToSocialMedia}
+                  className="group inline-flex items-center gap-3 pl-4 pr-1.5 py-1.5 rounded-full bg-[#0F172A] hover:bg-slate-950 text-white text-xs sm:text-[13px] font-poppins font-semibold shadow-[0_12px_28px_-6px_rgba(15,23,42,0.45)] border border-white/10 hover:border-white/20 transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
+                >
+                  <span className="tracking-tight">Next: Social Media</span>
+                  <span className="w-6 h-6 rounded-full bg-[#6366F1] flex items-center justify-center shrink-0 group-hover:translate-y-0.5 transition-transform">
+                    <ChevronDown className="w-3.5 h-3.5 text-white" />
+                  </span>
+                </button>
+              </div>
 
-                <p className="mt-1 pt-1 border-t border-slate-200/60 text-[7px] sm:text-[8.5px] text-slate-400 leading-tight">
+              {/* Table Footer */}
+              <div className="px-4 sm:px-6 py-2.5 bg-slate-50/80 border-t border-slate-100 text-[8.5px] sm:text-[9.5px] text-slate-500 flex flex-col gap-1">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <BarChart2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="font-medium text-slate-600">Real client sprint data from active Meta Ads Manager</span>
+                </div>
+                <p className="text-[7.5px] sm:text-[8.5px] text-slate-400 leading-tight">
                   *Active live campaigns: conversation counts &amp; cost/convo fluctuate in real time and do not portray final end-of-campaign numbers.
                 </p>
               </div>
@@ -416,7 +537,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                     }}
                     playsInline
                     loop
-                    preload="none"
+                    preload="metadata"
                     onTimeUpdate={handleTimeUpdate}
                     onWaiting={() => setIsBuffering(true)}
                     onCanPlay={() => setIsBuffering(false)}
