@@ -452,14 +452,16 @@ export const CreativeProductionPage: React.FC<CreativeProductionPageProps> = () 
         <div className="max-w-6xl mx-auto relative z-10 pt-2 sm:pt-4">
           
           {/* Section Header */}
-          <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-8">
+          <div className="text-center max-w-2xl sm:max-w-3xl mx-auto mb-4 sm:mb-8">
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-slate-950 tracking-tight leading-tight mb-3">
               Ad <span className="font-editorial-italic font-normal italic text-[#FF3B14]">Creatives</span>
             </h2>
 
-            <p className="text-sm sm:text-base md:text-[17px] text-slate-700 leading-relaxed max-w-xl mx-auto font-normal">
-              Animations, product shoots, high-end creatives: brands usually pay ₹50,000 or more. We do it for a fraction of that, using a talented team and bunch of smart tools with AI rendering. Projects start at just ₹9,000<span className="text-[#FF3B14] font-bold">*</span>.
+            <p className="text-sm sm:text-base md:text-[17px] text-slate-700 leading-relaxed max-w-2xl sm:max-w-[700px] mx-auto font-normal [text-wrap:balance]">
+              Some of the creatives from our portfolio are right here.{' '}
+              <span className="hidden sm:inline"><br /></span>
+              Ads, product shoots, animations, all made by our team for brands like yours.
             </p>
           </div>
 

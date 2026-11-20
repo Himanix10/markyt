@@ -134,8 +134,11 @@ export const parseCsvToRows = (csvText: string): CampaignProofData[] => {
       ? 'Paused' 
       : (statusRaw.includes('complete') ? 'Completed' : 'Active');
 
-    const resultsRaw = getVal(['results', 'result'], 2);
-    const results = parseInt(resultsRaw.replace(/[^0-9]/g, ''), 10) || 0;
+    const resultsRaw = getVal(['results', 'result'], 2).trim();
+    const resultsClean = resultsRaw.replace(/[^0-9]/g, '');
+    const results = (resultsClean === '0' || resultsClean === '' || resultsRaw === '0' || resultsRaw === '-')
+      ? '-'
+      : (parseInt(resultsClean, 10) || '-');
 
     const rawUnit = getVal(['resulttype', 'unit', 'type'], 3) || 'conversations';
     const isPurchase = rawUnit.toLowerCase().includes('purchase') || rawCampaign.toLowerCase().includes('clothing');
@@ -143,8 +146,10 @@ export const parseCsvToRows = (csvText: string): CampaignProofData[] => {
     // Clean normalized unit strings to prevent ugly line wraps
     const resultsUnit = isPurchase ? 'website purchases' : 'conversations';
 
-    let costPerResult = getVal(['costresult', 'cost', 'cpr'], 4);
-    if (costPerResult && !costPerResult.startsWith('₹') && !costPerResult.startsWith('$')) {
+    let costPerResult = getVal(['costresult', 'cost', 'cpr'], 4).trim();
+    if (!costPerResult || costPerResult === '0' || costPerResult === '0.00' || costPerResult === '-' || costPerResult === '₹0' || costPerResult === '₹0.00') {
+      costPerResult = '₹-';
+    } else if (!costPerResult.startsWith('₹') && !costPerResult.startsWith('$')) {
       costPerResult = `₹${costPerResult}`;
     }
 
@@ -215,13 +220,20 @@ export const normalizeJsonRows = (data: any): CampaignProofData[] => {
       ? 'Paused'
       : (statusRaw.includes('complete') ? 'Completed' : 'Active');
 
-    const results = Number(item.results ?? item.Results ?? 0) || 0;
+    const rawResults = item.results ?? item.Results ?? '';
+    const resultsClean = String(rawResults).trim().replace(/[^0-9]/g, '');
+    const results = (resultsClean === '0' || resultsClean === '' || String(rawResults).trim() === '0' || String(rawResults).trim() === '-')
+      ? '-'
+      : (Number(rawResults) || '-');
+
     const rawUnit = String(item.resultsUnit || item.ResultsUnit || item.resultType || (rawCampaign.toLowerCase().includes('clothing') ? 'website purchases' : 'conversations')).trim();
     const isPurchase = Boolean(item.isPurchase) || rawUnit.toLowerCase().includes('purchase') || rawCampaign.toLowerCase().includes('clothing');
     const resultsUnit = isPurchase ? 'website purchases' : 'conversations';
 
-    let costPerResult = String(item.costPerResult || item.CostPerResult || item.cost || item.cpr || '₹0.00').trim();
-    if (costPerResult && !costPerResult.startsWith('₹') && !costPerResult.startsWith('$')) {
+    let costPerResult = String(item.costPerResult || item.CostPerResult || item.cost || item.cpr || '').trim();
+    if (!costPerResult || costPerResult === '0' || costPerResult === '0.00' || costPerResult === '-' || costPerResult === '₹0' || costPerResult === '₹0.00' || costPerResult === '₹-') {
+      costPerResult = '₹-';
+    } else if (!costPerResult.startsWith('₹') && !costPerResult.startsWith('$')) {
       costPerResult = `₹${costPerResult}`;
     }
 

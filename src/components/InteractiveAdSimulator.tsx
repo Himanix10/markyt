@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   Play, 
-  BarChart2,
   ChevronDown,
 } from 'lucide-react';
 import { 
@@ -68,6 +67,36 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
   };
 
   // Load and sync data from Google Sheet in background
+  // Helper: Format values so that when Google Sheet says 0, it renders '-' and never 0
+  const formatDisplayValue = (val: number | string | undefined | null) => {
+    if (val === undefined || val === null) return '-';
+    const str = String(val).trim();
+    if (str === '0' || str === '-' || str === '' || str === '0.00') return '-';
+    const num = Number(val);
+    if (!isNaN(num) && num === 0) return '-';
+    return typeof val === 'number' ? val.toLocaleString() : str;
+  };
+
+  const formatCostPerResult = (cpr: string | undefined | null) => {
+    if (!cpr) return '₹-';
+    const trimmed = cpr.trim();
+    const digitsOnly = trimmed.replace(/[^0-9]/g, '');
+    if (
+      trimmed === '0' ||
+      trimmed === '-' ||
+      trimmed === '₹-' ||
+      trimmed === '₹0' ||
+      trimmed === '₹0.00' ||
+      trimmed === '$0' ||
+      digitsOnly === '0' ||
+      digitsOnly === '000' ||
+      digitsOnly === ''
+    ) {
+      return '₹-';
+    }
+    return trimmed;
+  };
+
   const loadSheetData = async () => {
     try {
       const result = await fetchCampaignProofRows();
@@ -240,20 +269,8 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
           />
         </div>
 
-        {/* Header Row: Meta Ads Pill + Headline */}
+        {/* Header Row: Headline */}
         <div className="relative z-10 mb-3.5 sm:mb-6 flex flex-col gap-1.5 sm:gap-2.5">
-          <div className="flex items-center gap-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-slate-900/10 shadow-xs">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-              </span>
-              <span className="text-[10px] font-mono font-bold tracking-tight text-slate-800 uppercase">
-                Meta Ads Manager
-              </span>
-            </div>
-          </div>
-
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-slate-950 tracking-tight leading-[1.08]">
             Know{' '}
             <span className="font-editorial-italic font-normal text-[#FF3B14] underline decoration-slate-950/20 underline-offset-8">
@@ -297,9 +314,6 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                       Performance Marketing
                     </span>
                   </div>
-                  <span className="text-[10px] sm:text-[11px] text-slate-400 font-poppins font-medium">
-                    {proofRows.length} campaigns
-                  </span>
                 </div>
 
                 <table className="w-full table-fixed text-left border-collapse">
@@ -373,7 +387,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                         {/* 3. Results */}
                         <td className="py-2.5 sm:py-3 px-1 sm:px-2 text-right align-middle overflow-hidden">
                           <div className="font-poppins font-bold text-slate-950 text-sm sm:text-[15px] leading-tight">
-                            {row.results}
+                            {formatDisplayValue(row.results)}
                           </div>
                           <div className="text-[8.5px] sm:text-[9.5px] text-slate-400/90 font-poppins font-normal leading-tight mt-0.5 truncate">
                             {row.isPurchase ? 'purchases' : 'conv.'}
@@ -383,7 +397,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                         {/* 4. Cost per Result */}
                         <td className="py-2.5 sm:py-3 px-2 sm:px-4 text-right align-middle overflow-hidden">
                           <div className="font-poppins font-bold text-[#059669] text-xs sm:text-[13.5px] leading-tight">
-                            {row.costPerResult}
+                            {formatCostPerResult(row.costPerResult)}
                           </div>
                           <div className="text-[8.5px] sm:text-[9.5px] text-slate-400/90 font-poppins font-normal leading-tight mt-0.5 truncate">
                             {row.isPurchase ? 'per pur.' : 'per conv.'}
@@ -408,9 +422,6 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                       Social Media Management
                     </span>
                   </div>
-                  <span className="text-[10px] sm:text-[11px] text-slate-400 font-poppins font-medium">
-                    {socialMediaRows.length} brands
-                  </span>
                 </div>
 
                 {/* Social Media Management Table */}
@@ -438,7 +449,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                         {/* Posts */}
                         <td className="py-2.5 sm:py-3 px-1.5 sm:px-2 text-right align-middle overflow-hidden">
                           <div className="font-poppins font-bold text-slate-950 text-sm sm:text-[15px] leading-tight">
-                            {row.posts}
+                            {formatDisplayValue(row.posts)}
                           </div>
                           <div className="text-[8.5px] sm:text-[9.5px] text-slate-400/90 font-poppins font-normal leading-tight mt-0.5 truncate">
                             {row.periodNote || 'this month*'}
@@ -448,7 +459,7 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
                         {/* Reels */}
                         <td className="py-2.5 sm:py-3 px-2 sm:px-4 text-right align-middle overflow-hidden">
                           <div className="font-poppins font-bold text-slate-950 text-sm sm:text-[15px] leading-tight">
-                            {row.reels}
+                            {formatDisplayValue(row.reels)}
                           </div>
                           <div className="text-[8.5px] sm:text-[9.5px] text-slate-400/90 font-poppins font-normal leading-tight mt-0.5 truncate">
                             {row.periodNote || 'this month*'}
@@ -481,14 +492,8 @@ export const InteractiveAdSimulator: React.FC<InteractiveAdSimulatorProps> = ({
               </div>
 
               {/* Table Footer */}
-              <div className="px-4 sm:px-6 py-2.5 bg-slate-50/80 border-t border-slate-100 text-[8.5px] sm:text-[9.5px] text-slate-500 flex flex-col gap-1">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <BarChart2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="font-medium text-slate-600">Real client sprint data from active Meta Ads Manager</span>
-                </div>
-                <p className="text-[7.5px] sm:text-[8.5px] text-slate-400 leading-tight">
-                  *Active live campaigns: conversation counts &amp; cost/convo fluctuate in real time and do not portray final end-of-campaign numbers.
-                </p>
+              <div className="px-4 sm:px-6 py-2 bg-slate-50/80 border-t border-slate-100 text-[7.5px] sm:text-[8.5px] text-slate-400 leading-tight">
+                *Active live campaigns: conversation counts &amp; cost/convo fluctuate in real time and do not portray final end-of-campaign numbers. Cost per result also varies with product price, so a high-value item may show a higher cost per purchase, yet a single sale can cover the entire ad spend.
               </div>
             </div>
           </div>

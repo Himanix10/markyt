@@ -8,7 +8,7 @@ export interface CampaignProofData {
     variant: 'emerald' | 'amber';
   };
   status: 'Active' | 'Completed' | 'Paused';
-  results: number;
+  results: number | string;
   resultsUnit: string;
   resultsSub?: string;
   costPerResult: string;

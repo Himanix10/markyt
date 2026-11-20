@@ -64,8 +64,12 @@ export const SocialMediaMgmtSection: React.FC<SocialMediaMgmtSectionProps> = () 
               </span>.
             </h2>
 
-            <p className="text-sm sm:text-base md:text-lg text-slate-700 leading-relaxed max-w-xl mx-auto font-normal mb-4">
-              We make your posts and reels, and if you’d like, we’ll handle your social media too. We’re already looking after a luxury brand and a mocktail bomb brand. Management starts at ₹7,000 a month.
+            <p className="text-sm sm:text-base md:text-lg text-slate-700 leading-relaxed max-w-2xl mx-auto font-normal mb-4 [text-wrap:balance]">
+              We create your posts and reels, and can run your social media end to end.{' '}
+              <span className="hidden sm:inline"><br /></span>
+              We work with all kinds of brands, from luxury fashion to mocktails, to name a few.{' '}
+              <span className="hidden sm:inline"><br /></span>
+              Plans come in different tiers, starting at ₹7,000 a&nbsp;month.
             </p>
 
             {/* Live Proof Managed Account */}
