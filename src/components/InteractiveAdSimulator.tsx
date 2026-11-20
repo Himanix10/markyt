@@ -13,8 +13,8 @@ import {
   fetchCampaignProofRows 
 } from '../services/campaignProofSheetService';
 
-export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4?v=hd1080';
-export const ABOUT_US_POSTER_PATH = '/videos/posters/about-us.jpg?v=hd1080';
+export const ABOUT_US_VIDEO_PATH = '/videos/about-us.mp4?v=new8';
+export const ABOUT_US_POSTER_PATH = '/videos/posters/about-us.jpg?v=new8';
 
 interface InteractiveAdSimulatorProps {
   onOpenQuestionnaire?: () => void;
