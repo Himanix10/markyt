@@ -3,3 +3,5 @@ Allow: /
 
 User-agent: Googlebot-Image
 Allow: /
+
+Sitemap: https://www.markyt.co.in/sitemap.xml
